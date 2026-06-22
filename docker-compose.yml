@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+    image: agendamelo-tiktok:latest
+    container_name: agendamelo-tiktok
+    restart: unless-stopped
+    env_file:
+      - agendamelo-generator/.env
+    ports:
+      - "3011:3000"          # salud: curl http://127.0.0.1:3011
+    volumes:
+      # Datos persistentes (sobreviven a rebuilds del contenedor)
+      - ./data/agendamelo_ideas.csv:/app/agendamelo_ideas.csv
+      - ./data/dist:/app/agendamelo-generator/dist
+      # Sesión de Codex montada desde el host (ya autenticada con `codex login`)
+      - /home/srv/.codex:/root/.codex

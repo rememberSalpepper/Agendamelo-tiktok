@@ -1,0 +1,26 @@
+{
+  "name": "agendamelo-generator",
+  "version": "1.0.0",
+  "description": "Generador de contenido para TikTok de Agendamelo (mini-web + agenda online), con identidad por nicho.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "node src/lint.js",
+    "render": "node src/pipeline.js pending",
+    "render:all": "node src/pipeline.js all",
+    "render:one": "node src/pipeline.js one",
+    "generate": "node src/generate.js",
+    "expand": "node src/expand-descriptions.js",
+    "telegram": "node src/telegram.js",
+    "bot": "node src/bot.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "csv-parse": "^7.0.0",
+    "csv-stringify": "^6.8.0",
+    "playwright": "^1.61.0"
+  }
+}

@@ -1,0 +1,14 @@
+# No meter al contexto de build lo que se instala/genera/monta en runtime.
+**/node_modules
+agendamelo-generator/dist
+.git
+.gitignore
+
+# Secretos y datos (van por env_file y volúmenes, no dentro de la imagen)
+.env
+agendamelo-generator/.env
+agendamelo_ideas.csv
+*.backup*.csv
+data/
+
+.DS_Store

@@ -1,0 +1,29 @@
+name: Deploy al VPS
+
+# Cada push a main despliega solo al VPS (git pull + rebuild del contenedor).
+on:
+  push:
+    branches: [main]
+    paths-ignore:        # cambios solo de documentación/ejemplos no redepliegan
+      - '**.md'
+      - 'docs/**'
+      - '**.example.js'
+  workflow_dispatch:   # permite lanzarlo a mano desde la pestaña Actions
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Desplegar por SSH
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          HOST: ${{ secrets.VPS_HOST }}
+          USER: ${{ secrets.VPS_USER }}
+          PORT: ${{ secrets.VPS_PORT }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "$PORT" "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -i ~/.ssh/id_deploy -p "$PORT" "$USER@$HOST" \
+            'cd /home/srv/apps/agendamelo && git pull && docker compose up -d --build'

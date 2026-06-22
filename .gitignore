@@ -1,0 +1,21 @@
+# Secretos (token de Telegram, etc.) — NUNCA subir al repo
+.env
+agendamelo-generator/.env
+
+# Dependencias
+node_modules/
+agendamelo-generator/node_modules/
+
+# Imágenes generadas (se regeneran en cada máquina/VPS)
+agendamelo-generator/dist/*
+!agendamelo-generator/dist/.gitkeep
+
+# CSV vivo: lo maneja el programa en cada máquina (el VPS tiene el suyo).
+# La semilla agendamelo_ideas.seed.csv SÍ se versiona.
+/agendamelo_ideas.csv
+
+# Respaldos del CSV
+*.backup*.csv
+
+# Sistema
+.DS_Store
