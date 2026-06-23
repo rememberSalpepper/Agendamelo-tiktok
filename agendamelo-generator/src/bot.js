@@ -28,12 +28,35 @@ const AYUDA = [
   '🤖 *Comandos Agendamelo*',
   '/estado — resumen de ideas (pendientes/listas/enviadas)',
   '/generar [N] — genera N ideas nuevas con Codex (default 14)',
+  '/dia — el set del día: 3 posts variados (nicho/orientación/formato distintos)',
   '/enviar [N] — envía N posts listos (imagen + texto)',
   '/textos [N] — envía solo el texto (sin imagen), para revisar',
   '/siguiente — envía el próximo post',
   '/borrar <id> — elimina una idea (ej. /borrar AGENDA-IDEA-024)',
   '/ayuda — esta lista',
 ].join('\n');
+
+// Selecciona 3 posts listos (renderizado) maximizando variedad de nicho/orientación/formato.
+function pickDaily(rows, n = 3) {
+  const ready = rows.filter((r) => r.estado === 'renderizado');
+  const picks = [];
+  const usedNiche = new Set(), usedOri = new Set();
+  for (const r of ready) { // 1) nicho Y orientación distintos
+    if (picks.length >= n) break;
+    if (usedNiche.has(r.niche) || usedOri.has(r.orientacion)) continue;
+    picks.push(r); usedNiche.add(r.niche); usedOri.add(r.orientacion);
+  }
+  for (const r of ready) { // 2) al menos nicho distinto
+    if (picks.length >= n) break;
+    if (picks.includes(r) || usedNiche.has(r.niche)) continue;
+    picks.push(r); usedNiche.add(r.niche);
+  }
+  for (const r of ready) { // 3) rellenar con lo que haya
+    if (picks.length >= n) break;
+    if (!picks.includes(r)) picks.push(r);
+  }
+  return picks;
+}
 
 async function api(method, body) {
   const res = await fetch(`${API}/${method}`, {
@@ -99,6 +122,20 @@ async function handle(chat, text) {
       } finally { busy = false; }
       return;
     }
+    case '/dia': {
+      if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera.');
+      const picks = pickDaily(readRows(), 3);
+      if (picks.length === 0) return reply(chat, 'No hay posts listos (estado renderizado). Usa /generar.');
+      busy = true;
+      await reply(chat, `📅 *Set del día* (${picks.length})\n${picks.map((p) => `• ${p.niche} · ${p.orientacion} · ${p.formato}`).join('\n')}`);
+      try {
+        for (const p of picks) {
+          const e = await runScript(['src/telegram.js', 'one', p.id], { TELEGRAM_CHAT_ID: String(chat) });
+          if (e.code !== 0) { await reply(chat, `❌ ${tail(e.err || e.out)}`); break; }
+        }
+      } finally { busy = false; }
+      return;
+    }
     case '/enviar': {
       if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera.');
       busy = true;
@@ -149,6 +186,7 @@ async function main() {
   await api('setMyCommands', { commands: [
     { command: 'estado', description: 'Resumen de ideas (pendientes/listas/enviadas)' },
     { command: 'generar', description: 'Genera N ideas nuevas con Codex (default 14)' },
+    { command: 'dia', description: 'El set del dia: 3 posts variados' },
     { command: 'enviar', description: 'Envia N posts listos (imagen + texto)' },
     { command: 'textos', description: 'Envia solo el texto (sin imagen), para revisar' },
     { command: 'siguiente', description: 'Envia el proximo post' },

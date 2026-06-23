@@ -8,6 +8,7 @@ import { NICHES, NICHE_KEYS } from './niches.js';
 export const ICONS = ['calendar', 'repeat', 'clock', 'bell', 'phone', 'globe', 'search', 'users', 'target', 'sparkles', 'shield', 'star', 'tag', 'chat', 'check'];
 export const TIPOS = ['checklist', 'base_3_cards', 'mito_realidad', 'piramide', 'proceso', 'stat', 'feature', 'comparacion'];
 export const ORIENTACIONES = ['educativo', 'plataforma', 'venta'];
+export const FORMATOS = ['imagen', 'carrusel'];
 export const NICHOS = NICHE_KEYS;
 
 // Chuleta de voz/jerga por rubro -> que hooks y descripciones hablen el idioma del negocio.
@@ -15,8 +16,9 @@ const nicheCheat = NICHE_KEYS
   .map((k) => `   - ${k} (${NICHES[k].label}): jerga: ${NICHES[k].jerga}. dolores: ${NICHES[k].dolor}. recurrente: ${NICHES[k].recurrente}.`)
   .join('\n');
 
-export function buildPrompt({ n, orientacionMix, templateMix, avoid }) {
+export function buildPrompt({ n, orientacionMix, formatoMix, templateMix, avoid }) {
   const oriLines = Object.entries(orientacionMix).map(([k, v]) => `   - ${k}: ${v}`).join('\n');
+  const fmtLines = Object.entries(formatoMix).map(([k, v]) => `   - ${k}: ${v}`).join('\n');
   const tplLines = Object.entries(templateMix).map(([k, v]) => `   - ${k}: ${v}`).join('\n');
   const avoidLines = avoid.length ? avoid.map((t) => `   - ${t}`).join('\n') : '   (aún no hay; es el primer lote)';
 
@@ -64,14 +66,25 @@ Posicionamiento corto: "pasa de atender por WhatsApp y anotar a mano, a un siste
 Reparto de orientaciones para este lote (apégate lo más posible):
 ${oriLines}
 
+# FORMATO (campo "formato"): imagen | carrusel
+- imagen: un solo post (1 imagen). Usa una de las 8 plantillas (campo tipo_plantilla).
+- carrusel: 3 a 4 láminas para un tema MÁS DENSO/educativo. tipo_plantilla = "carrusel". Estructura
+  OBLIGATORIA en imagen_json.slides (en orden): 1 "portada" (gancho) -> 1 o 2 "punto" (una idea por
+  lámina, con valor) -> 1 "cierre" (recap + CTA). Ideal 3 láminas, máximo 4. SIEMPRE termina en
+  "cierre" con su cta. Texto cortísimo por lámina (se leen en segundos).
+Reparto de formatos para este lote:
+${fmtLines}
+
 # Reglas duras (obligatorias)
 - Español NEUTRO/CHILENO. PROHIBIDO el voseo argentino ("hacés, tenés, mirá, mandame, escribime").
   Usa "tú": haces, tienes, mira, mándame, escríbeme. Acentos y signos (¿ ¡) SIEMPRE correctos.
 - Cada idea pertenece a UN nicho (campo "niche") y DEBE usar su jerga y su dolor real (abajo).
-  Rota entre los nichos a lo largo del lote; equilibra venta y educativo DENTRO de cada nicho.
+  Rota nicho, formato, orientación Y plantilla a lo largo del lote (no dos iguales seguidas).
 - En los rubros de sesiones recurrentes (psicopedagogos, psicologos, kinesiologos, profesores)
   aprovecha el ángulo de CITAS RECURRENTES y recordatorios: es su mayor dolor.
-- NO repitas ni te parezcas a los temas ya publicados (lista más abajo). Ángulos frescos.
+- ANTI-REPETICIÓN: cada idea trae un "tema" (etiqueta corta del ángulo, ej. "no-shows",
+  "aparecer-en-google", "citas-recurrentes", "mostrar-trabajos"). NO repitas un tema ya usado en
+  este lote ni en los publicados (lista más abajo); busca ángulos realmente distintos.
 
 # HOOKS — esto define si el video funciona o muere (máxima exigencia)
 El hook es el titular de la imagen y lo que detiene el scroll en menos de 1 segundo. Reglas:
@@ -105,12 +118,15 @@ PROHIBIDO (hooks débiles que NO debes usar):
 # Campos por idea
 - niche: uno de [${NICHE_KEYS.join(', ')}].
 - orientacion: una de [${ORIENTACIONES.join(', ')}] (según el reparto de arriba).
-- tipo_plantilla: una de [${TIPOS.join(', ')}], la que mejor calce. Sugerencias de calce:
+- formato: "imagen" o "carrusel" (según el reparto). Si "carrusel", tipo_plantilla = "carrusel".
+- tipo_plantilla: si formato=imagen, una de [${TIPOS.join(', ')}], la que mejor calce. Sugerencias:
   educativo -> stat, checklist, proceso, mito_realidad, piramide; plataforma -> feature,
-  base_3_cards, proceso; venta -> comparacion, checklist, mito_realidad.
-  Reparto aproximado de plantillas (apégate lo posible, varía):
+  base_3_cards, proceso; venta -> comparacion, checklist, mito_realidad. Si formato=carrusel -> "carrusel".
+  Reparto aproximado de plantillas para las de formato imagen (apégate lo posible, varía):
 ${tplLines}
 - titulo: título interno breve (sin asteriscos), distinto a todos los ya publicados.
+- tema: etiqueta corta del ángulo en kebab-case (ej. "no-shows", "aparecer-en-google",
+  "citas-recurrentes", "mostrar-trabajos"). Sirve para no repetir ángulos. Debe ser ÚNICO en el lote.
 - hook: ver sección HOOKS. Fuerte, con *énfasis*, sin voseo.
 - subtitle: refuerza el hook sin repetirlo; agrega contexto o el "por qué importa".
 - descripcion: MUY LARGA (230 a 350 palabras), 2 o 3 párrafos, español con acentos. DEBE ENSEÑAR:
@@ -142,7 +158,13 @@ ${tplLines}
       negocio en el mock), rows (2-3 ítems cortos de la UI; el último simula la hora/acción elegida,
       ej "Hoy 16:30"), button (texto del botón, ej "Reservar hora"), note (qué funcionalidad muestra).
     * comparacion: antes (3-4 frases del "sin Agendamelo"), despues (3-4 del "con Agendamelo"), cierre.
-  Los campos que NO aplican van en null.
+    * carrusel: slides (3-4 láminas, en orden). Cada slide es {tipo, ...}:
+        - {tipo:"portada", hook (gancho fuerte con *énfasis*), subtitle, badge?}  (lámina 1)
+        - {tipo:"punto", title (3-5 palabras), text (1-2 frases con valor), icon}  (1 o 2 láminas)
+          icon ∈ [${ICONS.join(', ')}].
+        - {tipo:"cierre", title (frase de cierre, puede llevar *énfasis*), text, cta {title, sub}}  (última)
+      El resto de campos comunes (items, cards, figure, etc.) van en null cuando formato=carrusel.
+  Los campos que NO aplican van en null (incluido "slides" en las de formato imagen).
   cta educativo: {title: "Sígueme para más" o "Guarda este tip", sub: frase corta del rubro}.
   cta plataforma: {title: "Míralo en agendamelo.cl", sub: "Link en bio"}.
   cta venta: {title: "Crea tu mini-web" / "Arma tu agenda online" / "Pruébalo gratis*",

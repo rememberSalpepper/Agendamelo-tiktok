@@ -12,6 +12,10 @@ en `src/niches.js` (6 rubros) y se inyecta solo en el render.
 (muestra una funcionalidad de la app) y `venta` (por qué Agendamelo es la solución). El lote se
 reparte ~40/30/30 para no ser solo comercial.
 
+**2 formatos** (campo `formato`): `imagen` (1 lámina, una de las 8 plantillas) y `carrusel` (3-4
+láminas: portada → punto → cierre con CTA), ~60/40. Estrategia completa en
+[`docs/LINEA-EDITORIAL.md`](docs/LINEA-EDITORIAL.md); pendientes en [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
 ## Flujo
 
 ```
@@ -34,6 +38,9 @@ npm run render:one AGENDA-IDEA-008   # una sola
 npm run telegram      # envía las 'renderizado' por Telegram
 npm run bot           # bot de comandos + salud en :3000
 ```
+
+Comandos del bot: `/generar [N]`, **`/dia`** (set de 3 posts variados del día), `/enviar [N]`,
+`/textos [N]`, `/siguiente`, `/estado`, `/borrar <id>`. Los carruseles se envían como álbum.
 
 ## Capa de marca / nicho (lo único editable por estética)
 
@@ -63,10 +70,12 @@ impactante) · `feature` (mockup del sitio/app) · `comparacion` (sin/con Agenda
 
 ## Columnas del CSV
 
-`id, estado, niche, orientacion, tipo_plantilla, titulo, hook, descripcion, hashtags,
-fecha_creacion, fecha_realizado, imagen_url, imagen_json, notas_plantilla`
+`id, estado, niche, orientacion, formato, tipo_plantilla, titulo, tema, hook, descripcion,
+hashtags, fecha_creacion, fecha_realizado, imagen_url, imagen_json, notas_plantilla`
 
 - `hook`: titular de la imagen; el `*texto*` entre asteriscos se resalta en el acento del nicho.
-- `imagen_json`: contenido estructurado de la imagen (lo lee el render).
+- `imagen_json`: contenido estructurado (imagen simple, o `slides` para carrusel).
 - `niche`: define el color, ícono y voz del post.
 - `orientacion`: `educativo` | `plataforma` | `venta`.
+- `formato`: `imagen` | `carrusel` (carrusel → `tipo_plantilla = carrusel`, `imagen_url` = lista de PNGs).
+- `tema`: etiqueta corta del ángulo (anti-repetición).

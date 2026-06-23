@@ -48,12 +48,25 @@ async function tg(method, body, isForm = false) {
 }
 
 async function sendPost(row, idx, total) {
-  const buf = readFileSync(join(ROOT, row.imagen_url));
-  const form = new FormData();
-  form.append('chat_id', CHAT);
-  form.append('caption', `📌 ${idx}/${total}`); // índice mínimo para mantener orden
-  form.append('photo', new Blob([buf], { type: 'image/png' }), `${row.id}.png`);
-  await tg('sendPhoto', form, true);                                   // 1) imagen + número
+  const paths = (row.imagen_url || '').split(',').map((p) => p.trim()).filter(Boolean);
+  if (paths.length > 1) {
+    // Carrusel -> álbum (sendMediaGroup, 2-10 fotos). El caption del álbum es el índice.
+    const form = new FormData();
+    form.append('chat_id', CHAT);
+    const media = paths.map((p, i) => {
+      const name = p.split('/').pop();
+      form.append(name, new Blob([readFileSync(join(ROOT, p))], { type: 'image/png' }), name);
+      return { type: 'photo', media: `attach://${name}`, ...(i === 0 ? { caption: `📌 ${idx}/${total}` } : {}) };
+    });
+    form.append('media', JSON.stringify(media));
+    await tg('sendMediaGroup', form, true);                            // 1) álbum de slides
+  } else {
+    const form = new FormData();
+    form.append('chat_id', CHAT);
+    form.append('caption', `📌 ${idx}/${total}`);                       // índice mínimo para mantener orden
+    form.append('photo', new Blob([readFileSync(join(ROOT, paths[0]))], { type: 'image/png' }), `${row.id}.png`);
+    await tg('sendPhoto', form, true);                                  // 1) imagen + número
+  }
   await sleep(300);
   const titulo = (row.hook || row.titulo).replace(/\*(.+?)\*/g, '$1'); // 2) título catchy = hook
   await tg('sendMessage', { chat_id: CHAT, text: titulo });

@@ -15,7 +15,7 @@ import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { buildPrompt, TIPOS, ICONS, NICHOS, ORIENTACIONES } from './prompt.js';
+import { buildPrompt, TIPOS, ICONS, NICHOS, ORIENTACIONES, FORMATOS } from './prompt.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
@@ -30,12 +30,17 @@ function distributeOrientacion(n) {
   const educativo = Math.max(0, n - plataforma - venta);
   return { educativo, plataforma, venta };
 }
-// Plantillas: round-robin sobre los 8 tipos para que haya variedad.
+// Plantillas: round-robin sobre los 8 tipos para que haya variedad (solo aplica a formato imagen).
 function distributeTemplates(n) {
   const order = ['feature', 'stat', 'comparacion', 'checklist', 'base_3_cards', 'proceso', 'mito_realidad', 'piramide'];
   const d = Object.fromEntries(order.map((t) => [t, 0]));
   for (let i = 0; i < n; i++) d[order[i % order.length]]++;
   return d;
+}
+// Formato: ~60% imagen simple, ~40% carrusel (temas más densos).
+function distributeFormato(n) {
+  const carrusel = Math.round(n * 0.4);
+  return { imagen: Math.max(0, n - carrusel), carrusel };
 }
 
 // ---------- Schema de salida (compatible con structured outputs) ----------
@@ -48,20 +53,22 @@ const schema = {
       type: 'array',
       items: {
         type: 'object', additionalProperties: false,
-        required: ['niche', 'tipo_plantilla', 'titulo', 'hook', 'descripcion', 'hashtags', 'orientacion', 'imagen_json'],
+        required: ['niche', 'orientacion', 'formato', 'tipo_plantilla', 'titulo', 'tema', 'hook', 'descripcion', 'hashtags', 'imagen_json'],
         properties: {
           niche: { type: 'string', enum: NICHOS },
-          tipo_plantilla: { type: 'string', enum: TIPOS },
+          orientacion: { type: 'string', enum: ORIENTACIONES },
+          formato: { type: 'string', enum: FORMATOS },
+          tipo_plantilla: { type: 'string', enum: [...TIPOS, 'carrusel'] },
           titulo: { type: 'string' },
+          tema: { type: 'string' },
           hook: { type: 'string' },
           descripcion: { type: 'string' },
           hashtags: { type: 'array', items: { type: 'string' }, minItems: 5, maxItems: 5 },
-          orientacion: { type: 'string', enum: ORIENTACIONES },
           imagen_json: {
             type: 'object', additionalProperties: false,
             required: ['badge', 'subtitle', 'items', 'cards', 'mito', 'realidad', 'pyramid', 'steps',
               'figure', 'figure_caption', 'points', 'screen_slug', 'screen_title', 'rows', 'button',
-              'antes', 'despues', 'note', 'cierre', 'cta'],
+              'antes', 'despues', 'slides', 'note', 'cierre', 'cta'],
             properties: {
               badge: { type: 'string' },
               subtitle: { type: 'string' },
@@ -82,6 +89,19 @@ const schema = {
               screen_slug: S(), screen_title: S(), rows: arr({ type: 'string' }), button: S(),
               // comparacion
               antes: arr({ type: 'string' }), despues: arr({ type: 'string' }),
+              // carrusel (3-4 slides: portada -> punto -> cierre)
+              slides: arr({
+                type: 'object', additionalProperties: false,
+                required: ['tipo', 'title', 'text', 'hook', 'subtitle', 'icon', 'badge', 'cta'],
+                properties: {
+                  tipo: { type: 'string', enum: ['portada', 'punto', 'cierre'] },
+                  title: S(), text: S(), hook: S(), subtitle: S(), icon: S(), badge: S(),
+                  cta: {
+                    type: ['object', 'null'], additionalProperties: false, required: ['title', 'sub'],
+                    properties: { title: { type: 'string' }, sub: { type: 'string' } },
+                  },
+                },
+              }),
               cta: {
                 type: 'object', additionalProperties: false, required: ['title', 'sub'],
                 properties: { title: { type: 'string' }, sub: { type: 'string' } },
@@ -125,6 +145,8 @@ const REQ = {
   stat: (c) => c.figure && c.figure_caption,
   feature: (c) => c.screen_title && Array.isArray(c.rows) && c.rows.length >= 2 && c.button,
   comparacion: (c) => Array.isArray(c.antes) && c.antes.length >= 2 && Array.isArray(c.despues) && c.despues.length >= 2,
+  carrusel: (c) => Array.isArray(c.slides) && c.slides.length >= 3 && c.slides.length <= 4
+    && c.slides[0].tipo === 'portada' && c.slides.at(-1).tipo === 'cierre' && c.slides.at(-1).cta,
 };
 function cleanContent(c) { // quita los null para que el render reciba solo lo que aplica
   const o = {};
@@ -144,19 +166,21 @@ function fixHashtags(tags) {
 }
 
 // Columnas del CSV (define el orden; se usa cuando el CSV está vacío = solo header).
-const HEADER = ['id', 'estado', 'niche', 'orientacion', 'tipo_plantilla', 'titulo', 'hook', 'descripcion',
-  'hashtags', 'fecha_creacion', 'fecha_realizado', 'imagen_url', 'imagen_json', 'notas_plantilla'];
+const HEADER = ['id', 'estado', 'niche', 'orientacion', 'formato', 'tipo_plantilla', 'titulo', 'tema', 'hook',
+  'descripcion', 'hashtags', 'fecha_creacion', 'fecha_realizado', 'imagen_url', 'imagen_json', 'notas_plantilla'];
 
 // ---------- Main ----------
 function main() {
   const rows = parse(readFileSync(CSV), { columns: true, skip_empty_lines: true, relax_quotes: true });
   const header = rows.length ? Object.keys(rows[0]) : HEADER;
-  const avoid = rows.map((r) => r.titulo).filter(Boolean);
+  // Anti-repetición: evita por "titulo — tema" de TODAS las filas (semántico, no solo el título).
+  const avoid = rows.map((r) => [r.titulo, r.tema].filter(Boolean).join(' — ')).filter(Boolean);
   const maxNum = rows.length ? Math.max(...rows.map((r) => parseInt(String(r.id).replace(/\D/g, ''), 10) || 0)) : 0;
 
   const prompt = buildPrompt({
     n: N,
     orientacionMix: distributeOrientacion(N),
+    formatoMix: distributeFormato(N),
     templateMix: distributeTemplates(N),
     avoid,
   });
@@ -168,8 +192,10 @@ function main() {
   let num = maxNum;
   for (const idea of ideas) {
     const c = idea.imagen_json || {};
-    if (!REQ[idea.tipo_plantilla] || !REQ[idea.tipo_plantilla](c)) {
-      console.warn(`  ✗ descartada (${idea.tipo_plantilla}): imagen_json incompleto -> ${idea.titulo}`);
+    const formato = FORMATOS.includes(idea.formato) ? idea.formato : 'imagen';
+    const tipo = formato === 'carrusel' ? 'carrusel' : idea.tipo_plantilla;
+    if (!REQ[tipo] || !REQ[tipo](c)) {
+      console.warn(`  ✗ descartada (${formato}/${tipo}): contenido incompleto -> ${idea.titulo}`);
       continue;
     }
     if (!NICHOS.includes(idea.niche)) {
@@ -181,12 +207,12 @@ function main() {
     const id = `AGENDA-IDEA-${String(num).padStart(3, '0')}`;
     const row = Object.fromEntries(header.map((k) => [k, '']));
     Object.assign(row, {
-      id, estado: 'pendiente', niche: idea.niche, orientacion, tipo_plantilla: idea.tipo_plantilla,
-      titulo: idea.titulo, hook: idea.hook, descripcion: idea.descripcion, hashtags: fixHashtags(idea.hashtags),
-      fecha_creacion: today, imagen_json: JSON.stringify(cleanContent(c)),
+      id, estado: 'pendiente', niche: idea.niche, orientacion, formato, tipo_plantilla: tipo,
+      titulo: idea.titulo, tema: idea.tema || '', hook: idea.hook, descripcion: idea.descripcion,
+      hashtags: fixHashtags(idea.hashtags), fecha_creacion: today, imagen_json: JSON.stringify(cleanContent(c)),
     });
     newRows.push(row);
-    console.log(`  ✓ ${id}  (${idea.niche}/${orientacion}/${idea.tipo_plantilla})  ${idea.hook}`);
+    console.log(`  ✓ ${id}  (${idea.niche}/${orientacion}/${formato}/${tipo})  ${idea.hook}`);
   }
 
   if (newRows.length === 0) { console.error('No se agregó ninguna idea válida.'); process.exit(1); }

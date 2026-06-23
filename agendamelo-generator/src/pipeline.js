@@ -12,7 +12,7 @@ import { stringify } from 'csv-stringify/sync';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { renderToPng, openBrowser } from './render.js';
+import { renderToPng, renderCarousel, openBrowser } from './render.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -25,6 +25,18 @@ function rowToData(row) {
   const num = parseInt(String(row.id).replace(/\D/g, ''), 10) || 1;
   const bg = content.bg || ((num - 1) % 4) + 1;
   return { tipo: row.tipo_plantilla, niche: row.niche, hook: row.hook, ...content, bg };
+}
+
+// Renderiza una fila (imagen o carrusel) y devuelve imagen_url (ruta o lista separada por comas).
+async function renderRow(row, browser) {
+  const data = rowToData(row);
+  if (row.formato === 'carrusel') {
+    const paths = await renderCarousel(data, join(ROOT, 'dist', row.id), browser);
+    return paths.map((p) => `dist/${p.split('/').pop()}`).join(',');
+  }
+  const rel = `dist/${row.id}.png`;
+  await renderToPng(data, join(ROOT, rel), browser);
+  return rel;
 }
 
 async function main() {
@@ -43,13 +55,12 @@ async function main() {
   let done = 0;
   try {
     for (const row of targets) {
-      const rel = `dist/${row.id}.png`;
-      const out = join(ROOT, rel);
-      await renderToPng(rowToData(row), out, browser);
+      const url = await renderRow(row, browser);
       if (row.estado !== 'enviado') row.estado = 'renderizado'; // no degradar lo ya enviado
-      row.imagen_url = rel;
+      row.imagen_url = url;
       done++;
-      console.log(`  ✓ ${row.id}  (${row.tipo_plantilla})  -> ${rel}`);
+      const tag = row.formato === 'carrusel' ? `carrusel x${url.split(',').length}` : row.tipo_plantilla;
+      console.log(`  ✓ ${row.id}  (${row.formato || 'imagen'}/${tag})`);
     }
   } finally {
     await browser.close();
