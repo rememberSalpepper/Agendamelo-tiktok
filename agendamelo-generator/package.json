@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "node src/lint.js",
+    "revisar": "node src/review.js",
     "render": "node src/pipeline.js pending",
     "render:all": "node src/pipeline.js all",
     "render:one": "node src/pipeline.js one",

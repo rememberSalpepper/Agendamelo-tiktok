@@ -31,6 +31,7 @@ const AYUDA = [
   '/generar [N] — genera N ideas nuevas con Codex (default 14) y las renderiza',
   '',
   '*Revisar*',
+  '/revisar — revisión integral (sistema, CSV, ideas, imágenes)',
   '/estado — resumen (pendientes/listas/enviadas/publicadas)',
   '/cola — lista de posts listos por publicar',
   '/reporte — variedad por nicho/orientación/formato',
@@ -226,6 +227,16 @@ async function handle(chat, text) {
       return replyText(chat, cola());
     case '/reporte':
       return replyText(chat, reporte());
+    case '/revisar': {
+      if (busy) return reply(chat, '⏳ Ocupado, espera.');
+      busy = true;
+      await reply(chat, '🔎 Revisando proyecto...');
+      try {
+        const e = await runScript(['src/review.js']);
+        await reply(chat, (e.out || e.err || 'Sin salida.').slice(-3800));
+      } finally { busy = false; }
+      return;
+    }
     case '/ver': {
       if (!arg) return reply(chat, 'Uso: /ver AGENDA-IDEA-024');
       if (busy) return reply(chat, '⏳ Ocupado, espera.');
@@ -266,6 +277,7 @@ async function main() {
   // Registra el menú de comandos (lo que aparece al teclear "/") al arrancar.
   await api('setMyCommands', { commands: [
     { command: 'generar', description: 'Genera N ideas nuevas con Codex (default 14)' },
+    { command: 'revisar', description: 'Revision integral (sistema, CSV, ideas, imagenes)' },
     { command: 'dia', description: 'El set del dia: 3 posts variados' },
     { command: 'cola', description: 'Lista de posts listos por publicar' },
     { command: 'reporte', description: 'Variedad por nicho/orientacion/formato' },
