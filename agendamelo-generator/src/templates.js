@@ -1,12 +1,11 @@
 // Constructores de plantillas Agendamelo.
 // Cada función recibe `data` y devuelve el HTML del bloque central (.body).
 // Marca, titular (hook), badge, CTA y footer son compartidos (ver render.js).
-// Los colores salen de las variables de ACENTO del nicho (--accent/--accent-2), así las 5
+// Los colores salen de las variables de ACENTO del nicho (--accent/--accent-2), así las
 // plantillas se recolorean solas por rubro sin tocar este archivo.
 
 // ---------- Íconos (SVG inline, trazo en currentColor) ----------
 const P = {
-  // genéricos (cards de contenido)
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a3 3 0 0 1 5.6 1.4c0 2-3 2.3-3 3.6"/><path d="M12 17.5h.01"/>',
@@ -17,23 +16,21 @@ const P = {
   sparkles: '<path d="M12 3l1.8 4.9L18.7 9l-4.9 1.8L12 16l-1.8-5.2L5.3 9l4.9-1.1z"/><path d="M18.5 14l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
   shield: '<path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="M9 12l2.2 2.2L15 10.4"/>',
   calendar: '<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M4 9h16"/><path d="M8 3v4M16 3v4"/>',
+  repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>',
   bell: '<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
   phone: '<rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18.5h2"/>',
+  star: '<path d="M12 3l2.7 5.5 6 .9-4.3 4.2 1 6L12 17.8 6.6 19.6l1-6L3.3 9.4l6-.9z"/>',
+  tag: '<path d="M3 12l8.5-8.5a2 2 0 0 1 1.4-.6H20a1 1 0 0 1 1 1v6.7a2 2 0 0 1-.6 1.4L12 21z"/><circle cx="16.5" cy="7.5" r="1.3"/>',
   check: '<path d="M5 12.5l4.2 4.2L19 7"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   // íconos de NICHO (para el badge por rubro)
   scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.5 15.5"/><path d="M14.5 14.5L20 20"/><path d="M8.5 8.5L12 12"/>',
   sparkle: '<path d="M12 3l1.9 5.3L19 10l-5.1 1.7L12 17l-1.9-5.3L5 10l5.1-1.7z"/>',
-  tooth: '<path d="M12 5.4c-2-2-5-2.4-6.5-.9C4 6 4 9 5 13c.6 2.4 1 5.6 2.5 5.6 1.4 0 1.3-2.6 2-4.1.4-.9 1.6-.9 2 0 .7 1.5.6 4.1 2 4.1 1.5 0 1.9-3.2 2.5-5.6 1-4 1-7-.5-8.5-1.5-1.5-4.5-1.1-6.5.9z"/>',
   brain: '<path d="M9.5 4A3 3 0 0 0 6.6 7 3 3 0 0 0 5 12.5 3 3 0 0 0 8 17a2.4 2.4 0 0 0 4-.5V5.6A2.4 2.4 0 0 0 9.5 4z"/><path d="M14.5 4A3 3 0 0 1 17.4 7 3 3 0 0 1 19 12.5 3 3 0 0 1 16 17a2.4 2.4 0 0 1-4-.5"/>',
-  leaf: '<path d="M11 20A7 7 0 0 1 4 13C4 8 8 4 20 4c0 11-6 16-9 16z"/><path d="M11 20c0-5 2.5-9.5 7-12.5"/>',
+  lightbulb: '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.8.8 1.3 1.5 1.5 2.5h5c.2-1 .7-1.7 1.5-2.5A6 6 0 0 0 12 3z"/>',
   activity: '<path d="M3 12h4l3 8 4-16 3 8h4"/>',
-  pen: '<path d="M4 20l4-1L19 8a2.1 2.1 0 0 0-3-3L5 16z"/><path d="M14 6l4 4"/>',
-  paw: '<circle cx="8" cy="9" r="1.7"/><circle cx="16" cy="9" r="1.7"/><circle cx="5.4" cy="13" r="1.5"/><circle cx="18.6" cy="13" r="1.5"/><path d="M12 13c-2.5 0-4.5 2-4.5 4 0 1.6 1.5 2.2 4.5 2.2s4.5-.6 4.5-2.2c0-2-2-4-4.5-4z"/>',
   book: '<path d="M12 6C10 4.6 7 4.1 4 4.6V19c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V4.6C17 4.1 14 4.6 12 6z"/><path d="M12 6v14.5"/>',
-  wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.9 7.1 20l5.4-5.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.3-.6-.6-2.3z"/>',
-  heart: '<path d="M12 20s-7-4.4-9.2-9C1.4 7.7 3.2 4.7 6.4 5 8.2 5.2 9.3 6.2 12 8.6 14.7 6.2 15.8 5.2 17.6 5c3.2-.3 5 2.7 3.2 6-2.2 4.6-8.8 9-8.8 9z"/>',
 };
 export function svg(name, size = 44) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none"
@@ -156,5 +153,105 @@ export function proceso(data) {
   <div class="proc">${steps}</div>${data.cierre ? `<div style="margin-top:18px">${closer(data.cierre)}</div>` : ''}`;
 }
 
+// ---------- STAT (número impactante; ideal para hooks/educativo) ----------
+export function stat(data) {
+  const points = (data.points || []).slice(0, 3).map((p) => `
+    <div class="st-row"><span class="st-dot">${svg('check', 24)}</span><span>${esc(p)}</span></div>`).join('');
+  return `<style>
+    .st { display: flex; flex-direction: column; align-items: center; }
+    .st-fig { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 220px; line-height: 0.92;
+      letter-spacing: -6px; background: var(--grad-accent); -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; }
+    .st-cap { font-size: 36px; font-weight: 600; color: var(--ink); text-align: center; margin-top: 8px;
+      line-height: 1.18; max-width: 80%; }
+    .st-card { width: 100%; margin-top: 30px; background: var(--card); border: 1px solid var(--line);
+      border-radius: 26px; box-shadow: var(--shadow-sm); padding: 14px 28px; }
+    .st-row { display: flex; align-items: center; gap: 18px; padding: 16px 2px; font-size: 31px;
+      font-weight: 500; color: var(--ink); }
+    .st-row + .st-row { border-top: 1px solid var(--line); }
+    .st-dot { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%; color: #fff;
+      background: var(--grad-accent); display: grid; place-items: center; }
+  </style>
+  <div class="st">
+    <div class="st-fig">${esc(data.figure)}</div>
+    ${data.figure_caption ? `<div class="st-cap">${esc(data.figure_caption)}</div>` : ''}
+    ${points ? `<div class="st-card">${points}</div>` : ''}
+  </div>${data.note ? `<div style="margin-top:18px">${closer(data.note)}</div>` : ''}`;
+}
+
+// ---------- FEATURE (mockup del sitio/app; muestra la plataforma) ----------
+export function feature(data) {
+  const rows = (data.rows || []).slice(0, 3);
+  const list = rows.map((r, i) => {
+    const hot = i === rows.length - 1; // el último simula el horario/acción elegida
+    return `<div class="fe-row${hot ? ' hot' : ''}">
+      <span class="fe-rtx">${esc(r)}</span>
+      <span class="fe-chip">${hot ? svg('check', 22) : svg('clock', 22)}</span>
+    </div>`;
+  }).join('');
+  return `<style>
+    .fe { display: flex; flex-direction: column; gap: 22px; }
+    .fe-card { background: var(--card); border: 1px solid var(--line); border-radius: 30px;
+      box-shadow: var(--shadow); overflow: hidden; }
+    .fe-bar { display: flex; align-items: center; gap: 10px; padding: 18px 24px; background: var(--cream-2);
+      border-bottom: 1px solid var(--line); }
+    .fe-dot { width: 14px; height: 14px; border-radius: 50%; background: #D8D2C6; }
+    .fe-url { margin-left: 14px; flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 999px;
+      padding: 8px 20px; font-size: 23px; color: var(--body-2); font-weight: 500; }
+    .fe-body { padding: 26px 28px; }
+    .fe-head { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+    .fe-logo { width: 64px; height: 64px; border-radius: 18px; background: var(--grad-accent); flex: 0 0 auto; }
+    .fe-name { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 700; font-size: 38px; color: var(--ink); }
+    .fe-row { display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      border: 1px solid var(--line); border-radius: 18px; padding: 20px 24px; margin-bottom: 14px; }
+    .fe-row.hot { border-color: var(--accent); background: var(--accent-soft); }
+    .fe-rtx { font-size: 31px; font-weight: 600; color: var(--ink); }
+    .fe-chip { flex: 0 0 auto; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+      color: var(--accent); background: #fff; border: 1px solid var(--line); }
+    .fe-row.hot .fe-chip { color: #fff; background: var(--grad-accent); border: none; }
+    .fe-btn { margin-top: 8px; background: var(--grad-accent); color: #fff; text-align: center;
+      font-family: 'Bricolage Grotesque',sans-serif; font-weight: 700; font-size: 34px;
+      border-radius: 18px; padding: 22px; box-shadow: 0 12px 26px var(--accent-soft); }
+  </style>
+  <div class="fe">
+    <div class="fe-card">
+      <div class="fe-bar"><span class="fe-dot"></span><span class="fe-dot"></span><span class="fe-dot"></span>
+        <span class="fe-url">agendamelo.cl/${esc(data.screen_slug || 'tu-negocio')}</span></div>
+      <div class="fe-body">
+        <div class="fe-head"><div class="fe-logo"></div><div class="fe-name">${esc(data.screen_title)}</div></div>
+        ${list}
+        <div class="fe-btn">${esc(data.button || 'Reservar hora')}</div>
+      </div>
+    </div>
+  </div>${data.note ? closer(data.note) : ''}`;
+}
+
+// ---------- COMPARACIÓN (Sin vs Con Agendamelo; ideal para venta) ----------
+export function comparacion(data) {
+  const antes = (data.antes || []).slice(0, 4).map((t) => `
+    <div class="cp-row"><span class="cp-ic bad">${svg('x', 20)}</span><span>${esc(t)}</span></div>`).join('');
+  const despues = (data.despues || []).slice(0, 4).map((t) => `
+    <div class="cp-row"><span class="cp-ic good">${svg('check', 20)}</span><span>${esc(t)}</span></div>`).join('');
+  return `<style>
+    .cp { display: flex; gap: 20px; }
+    .cp .col { flex: 1; border-radius: 26px; padding: 22px 20px; border: 1px solid; }
+    .cp .sin { background: #FBF1F1; border-color: #F4D6D6; }
+    .cp .con { background: var(--accent-soft); border-color: var(--line); }
+    .cp .hd { display: inline-flex; align-items: center; gap: 8px; font-family: 'Bricolage Grotesque',sans-serif;
+      font-weight: 700; font-size: 25px; padding: 8px 18px; border-radius: 999px; margin-bottom: 16px; color: #fff; }
+    .cp .sin .hd { background: #B91C1C; }
+    .cp .con .hd { background: var(--grad-accent); }
+    .cp-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 2px; font-size: 28px;
+      font-weight: 500; color: var(--ink); line-height: 1.2; }
+    .cp-ic { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: #fff; margin-top: 1px; }
+    .cp-ic.bad { background: #DC2626; }
+    .cp-ic.good { background: var(--accent); }
+  </style>
+  <div class="cp">
+    <div class="col sin"><span class="hd">${svg('x', 18)} Sin Agendamelo</span>${antes}</div>
+    <div class="col con"><span class="hd">${svg('check', 18)} Con Agendamelo</span>${despues}</div>
+  </div>${data.cierre ? closer(data.cierre) : ''}`;
+}
+
 export const icons = { chatIcon };
-export const templates = { checklist, base_3_cards, mito_realidad, piramide, proceso };
+export const templates = { checklist, base_3_cards, mito_realidad, piramide, proceso, stat, feature, comparacion };

@@ -6,7 +6,11 @@ Las ideas (texto) las crea Codex CLI con salida JSON garantizada.
 
 **Identidad por nicho:** misma marca Agendamelo en todos los posts (logo, fuentes, layout, crema),
 pero cada rubro trae su **color de acento**, su **ícono** y su **voz/dolor** propios. Todo eso vive
-en `src/niches.js` (12 rubros) y se inyecta solo en el render.
+en `src/niches.js` (6 rubros) y se inyecta solo en el render.
+
+**3 orientaciones de contenido** (campo `orientacion`): `educativo` (enseña, suave), `plataforma`
+(muestra una funcionalidad de la app) y `venta` (por qué Agendamelo es la solución). El lote se
+reparte ~40/30/30 para no ser solo comercial.
 
 ## Flujo
 
@@ -50,18 +54,19 @@ npm run bot           # bot de comandos + salud en :3000
 
 ## Plantillas (`tipo_plantilla`)
 
-`checklist` · `base_3_cards` · `mito_realidad` · `piramide` · `proceso`
+`checklist` · `base_3_cards` · `mito_realidad` · `piramide` · `proceso` · `stat` (número
+impactante) · `feature` (mockup del sitio/app) · `comparacion` (sin/con Agendamelo)
 
 ## Nichos (`niche`)
 
-`barberias` · `peluquerias` · `manicure` · `estetica` · `dentistas` · `psicologos` ·
-`nutricionistas` · `kinesiologos` · `tatuadores` · `veterinarias` · `clases` · `mecanicos`
+`barberias` · `manicure` · `psicopedagogos` · `psicologos` · `kinesiologos` · `profesores`
 
 ## Columnas del CSV
 
-`id, estado, niche, tipo_plantilla, titulo, hook, descripcion, hashtags, fecha_creacion,
-fecha_realizado, imagen_url, imagen_json, notas_plantilla`
+`id, estado, niche, orientacion, tipo_plantilla, titulo, hook, descripcion, hashtags,
+fecha_creacion, fecha_realizado, imagen_url, imagen_json, notas_plantilla`
 
 - `hook`: titular de la imagen; el `*texto*` entre asteriscos se resalta en el acento del nicho.
 - `imagen_json`: contenido estructurado de la imagen (lo lee el render).
 - `niche`: define el color, ícono y voz del post.
+- `orientacion`: `educativo` | `plataforma` | `venta`.
