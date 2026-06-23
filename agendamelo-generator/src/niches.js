@@ -1,65 +1,56 @@
-// Identidad por rubro (nicho) de Agendamelo — v2 (6 nichos enfocados).
+// Identidad por rubro (nicho) de Agendamelo — v3 (4 nichos activos de la línea editorial).
 // FUENTE ÚNICA de la "capa de nicho": color de acento, ícono, etiqueta y voz/jerga.
 // El render usa `accent`/`accent2`/`soft` para recolorear toda la imagen, e `icon` para el badge.
-// El prompt usa `jerga`, `dolor` y `recurrente` para hablar el idioma real de cada rubro.
+// El prompt usa `jerga`, `dolor`, `recurrente`, `voz` y `datos` para hablar el idioma real del rubro.
 //
-// 4 de los 6 rubros son de SESIONES RECURRENTES (psicología, psicopedagogía, kinesiología,
-// clases): ahí las citas recurrentes y los recordatorios son el ángulo más fuerte.
+// Spine que une los 4: "agenda lo que se repite — clientes que vuelven".
+// Reparto objetivo por lote: ~30% manicuristas, ~25% psicopedagogas, ~25% profesores-paes,
+// ~20% fonoaudiologas. (Manicure aporta reach; las otras tres, conversión de alto LTV.)
 
 export const NICHES = {
-  barberias: {
-    label: 'Barberías',
-    accent: '#B45309', accent2: '#F97316', soft: '#FDF1E4',
-    icon: 'scissors', badge: 'Para tu barbería',
-    jerga: 'fade, degradado, corte clásico, afeitado a navaja, perfilado de barba, combo corte+barba',
-    dolor: 'sillas vacías, clientes que no llegan, agendar cortes por WhatsApp/DM, horas muertas',
-    recurrente: 'el cliente fiel que vuelve cada 2-3 semanas: deja su próxima hora agendada sola',
-    hashtags: ['#barberia', '#barberiachile', '#barbershop', '#cortedepelo', '#fade', '#barbero'],
-  },
-  manicure: {
-    label: 'Manicure',
+  manicuristas: {
+    label: 'Manicuristas',
     accent: '#DB2777', accent2: '#F472B6', soft: '#FCE9F2',
     icon: 'sparkle', badge: 'Para tu salón de uñas',
-    jerga: 'esmaltado semipermanente, kapping, soft gel, acrílicas, nail art, diseños, retiro, mantención',
-    dolor: 'clientas que no llegan, agendar por DM de Instagram, mostrar tus diseños, citas que chocan',
-    recurrente: 'la mantención cada 3-4 semanas: agenda la serie de citas de una vez',
-    hashtags: ['#manicure', '#unaschile', '#nailart', '#manicurista', '#esmaltadosemipermanente', '#unas'],
+    jerga: 'clienta, esmaltado, semipermanente, soft gel, kapping, acrílico, diseño, set de uñas, manicure/pedicure, retoque/mantención, nail art',
+    dolor: 'tu Instagram se ve poco profesional + pierdes clientas coordinando por WhatsApp + explicar precios por DM una y otra vez',
+    recurrente: 'deja agendada la próxima mantención al terminar: tu clienta vuelve sola cada 3-4 semanas',
+    voz: 'la más jugada y chilena de las cuatro (po, cachái, te juro, bacán, brígido); voseo chileno (tenís/podís/cachái) ok en hooks; emojis liberales 💅 ✨ 🌸',
+    datos: 'manicure clásica $8.000–$12.000; semipermanente $12.000–$18.000; pedicure $12.000–$16.000 (fuente: precios de mercado en Chile)',
+    hashtags: ['#manicurechile', '#nailtechchile', '#unaschile', '#semipermanente', '#manicurista', '#emprendedoraschile'],
   },
-  psicopedagogos: {
-    label: 'Psicopedagogía',
-    accent: '#0284C7', accent2: '#38BDF8', soft: '#E4F2FC',
+  psicopedagogas: {
+    label: 'Psicopedagogas',
+    accent: '#D97706', accent2: '#F59E0B', soft: '#FDF3E2',
     icon: 'lightbulb', badge: 'Para tu consulta',
-    jerga: 'evaluación, sesiones de apoyo, reforzamiento, informe, estrategias, apoyo escolar, NEE',
-    dolor: 'coordinar con apoderados, recordar sesiones semanales, agenda de varios niños, sesiones que se caen',
-    recurrente: 'el plan de apoyo es semanal: deja agendadas todas las sesiones del mes con cada familia',
-    hashtags: ['#psicopedagogia', '#psicopedagoga', '#apoyoescolar', '#aprendizaje', '#educacionchile', '#nee'],
+    jerga: 'apoderado, sesión, evaluación/diagnóstico psicopedagógico, plan de tratamiento, dificultades de aprendizaje, derivación, entrevista',
+    dolor: 'contestar mensajes de apoderados a cualquier hora para cuadrar la sesión del jueves + coordinar de cero cada semana + precios escondidos',
+    recurrente: 'bloquea la hora del paciente por 3 meses y deja de coordinar de cero cada semana',
+    voz: 'cálida, respetuosa, de colega; slang mínimo; sobria en temas de niños',
+    datos: 'sesión semanal de 45 min $20.000–$50.000; evaluación inicial $40.000–$90.000; online 10–15% más económica (fuente: precios de mercado en Chile)',
+    hashtags: ['#psicopedagogia', '#psicopedagogachile', '#educacionchile', '#apoderados', '#dificultadesdeaprendizaje', '#emprendimientochile'],
   },
-  psicologos: {
-    label: 'Psicología',
-    accent: '#7C3AED', accent2: '#8B5CF6', soft: '#F0EAFD',
-    icon: 'brain', badge: 'Para tu consulta',
-    jerga: 'sesión, primera consulta, proceso terapéutico, online o presencial, ficha, encuadre',
-    dolor: 'sesiones que se caen a última hora, coordinar horarios, recordatorios, pacientes recurrentes',
-    recurrente: 'la terapia es semanal: agenda el mismo bloque por varias semanas y deja que el sistema recuerde',
-    hashtags: ['#psicologia', '#psicologochile', '#saludmental', '#terapia', '#psicologoonline', '#psicologa'],
-  },
-  kinesiologos: {
-    label: 'Kinesiología',
-    accent: '#0D9488', accent2: '#14B8A6', soft: '#E2F6F3',
-    icon: 'activity', badge: 'Para tu consulta kine',
-    jerga: 'sesión, evaluación, rehabilitación, plan de ejercicios, control, terapia manual',
-    dolor: 'series de sesiones que se interrumpen, pacientes que abandonan, recordar la próxima hora',
-    recurrente: 'la rehabilitación es una serie: agenda las 8-10 sesiones juntas para que el paciente no abandone',
-    hashtags: ['#kinesiologia', '#kinesiologochile', '#rehabilitacion', '#kine', '#terapiafisica', '#kinesiologo'],
-  },
-  profesores: {
-    label: 'Clases particulares',
-    accent: '#4338CA', accent2: '#6366F1', soft: '#E8E9FB',
+  'profesores-paes': {
+    label: 'Profes particulares',
+    accent: '#2563EB', accent2: '#3B82F6', soft: '#E6EEFD',
     icon: 'book', badge: 'Para tus clases',
-    jerga: 'clase particular, reforzamiento, cupos, prueba/PAES, online o presencial, materia',
-    dolor: 'coordinar horarios con apoderados, clases que se cancelan, llenar cupos, cobrar a tiempo',
-    recurrente: 'las clases son semanales: agenda el horario fijo del semestre y evita el caos del WhatsApp',
-    hashtags: ['#clasesparticulares', '#profesorparticular', '#reforzamiento', '#preuniversitario', '#clasesonline', '#paes'],
+    jerga: 'alumno, materia/asignatura, PAES, preuniversitario, refuerzo, online/presencial, clase recurrente',
+    dolor: 'armar el horario en una libreta + alumnos que preguntan "¿también haces física?" + coordinar de cero cada semana + clases perdidas por olvido',
+    recurrente: 'tus alumnos fijos quedan con su hora del lunes y dejas de coordinar todo de cero cada semana',
+    voz: 'cercano y motivador; slang con moderación; usa el peak PAES como gatillo de urgencia',
+    datos: 'clase particular $10.000–$35.000/60 min; matemáticas y PAES $15.000–$30.000; online 10–15% más económica (fuente: precios de mercado en Chile)',
+    hashtags: ['#paes', '#clasesparticulares', '#profeparticular', '#preuniversitario', '#educacionchile', '#emprendimientochile'],
+  },
+  fonoaudiologas: {
+    label: 'Fonoaudiólogas',
+    accent: '#0D9488', accent2: '#14B8A6', soft: '#E2F6F3',
+    icon: 'activity', badge: 'Para tu consulta',
+    jerga: 'paciente, tratamiento, terapia de lenguaje, evaluación fonoaudiológica, derivación, apoderado, sesión semanal',
+    dolor: 'apoderados que piden la hora por WhatsApp y se confunden con el horario + WhatsApps a las 11 de la noche para reagendar',
+    recurrente: 'tus pacientes con tratamiento semanal protegidos en bloque te devuelven una hora cada lunes — 4 horas al mes',
+    voz: 'cálida y profesional; slang mínimo; suma las derivaciones que llegan desde Google',
+    datos: 'tratamiento de 45 min $20.000–$40.000; evaluación inicial $30.000–$60.000; online 10–15% más económica (fuente: precios de mercado en Chile)',
+    hashtags: ['#fonoaudiologia', '#fonoaudiologachile', '#terapiadelenguaje', '#saludchile', '#emprendimientochile', '#sesionesrecurrentes'],
   },
 };
 
@@ -69,7 +60,7 @@ export const NICHE_KEYS = Object.keys(NICHES);
 export function getNiche(key) {
   return NICHES[key] || {
     label: 'Agendamelo', accent: '#EA580C', accent2: '#F59E0B', soft: '#FDF0E7',
-    icon: 'sparkle', badge: 'Para tu negocio', jerga: '', dolor: '', recurrente: '',
+    icon: 'sparkle', badge: 'Para tu negocio', jerga: '', dolor: '', recurrente: '', voz: '', datos: '',
     hashtags: ['#agendaonline', '#reservasonline', '#paginaweb', '#emprendimientochile'],
   };
 }

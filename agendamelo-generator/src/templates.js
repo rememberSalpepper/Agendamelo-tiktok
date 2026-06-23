@@ -164,6 +164,8 @@ export function stat(data) {
       -webkit-text-fill-color: transparent; }
     .st-cap { font-size: 36px; font-weight: 600; color: var(--ink); text-align: center; margin-top: 8px;
       line-height: 1.18; max-width: 80%; }
+    .st-src { font-size: 22px; font-weight: 500; color: var(--body-2); text-align: center; margin-top: 12px;
+      font-style: italic; }
     .st-card { width: 100%; margin-top: 30px; background: var(--card); border: 1px solid var(--line);
       border-radius: 26px; box-shadow: var(--shadow-sm); padding: 14px 28px; }
     .st-row { display: flex; align-items: center; gap: 18px; padding: 16px 2px; font-size: 31px;
@@ -175,6 +177,7 @@ export function stat(data) {
   <div class="st">
     <div class="st-fig">${esc(data.figure)}</div>
     ${data.figure_caption ? `<div class="st-cap">${esc(data.figure_caption)}</div>` : ''}
+    ${data.source ? `<div class="st-src">Fuente: ${esc(data.source)}</div>` : ''}
     ${points ? `<div class="st-card">${points}</div>` : ''}
   </div>${data.note ? `<div style="margin-top:18px">${closer(data.note)}</div>` : ''}`;
 }
@@ -226,8 +229,8 @@ export function feature(data) {
   </div>${data.note ? closer(data.note) : ''}`;
 }
 
-// ---------- COMPARACIÓN (Sin vs Con Agendamelo; ideal para venta) ----------
-export function comparacion(data) {
+// ---------- ANTES / DESPUÉS (caos -> orden; la fórmula más persuasiva, ideal para venta) ----------
+export function antes_despues(data) {
   const antes = (data.antes || []).slice(0, 4).map((t) => `
     <div class="cp-row"><span class="cp-ic bad">${svg('x', 20)}</span><span>${esc(t)}</span></div>`).join('');
   const despues = (data.despues || []).slice(0, 4).map((t) => `
@@ -248,10 +251,12 @@ export function comparacion(data) {
     .cp-ic.good { background: var(--accent); }
   </style>
   <div class="cp">
-    <div class="col sin"><span class="hd">${svg('x', 18)} Sin Agendamelo</span>${antes}</div>
+    <div class="col sin"><span class="hd">${svg('x', 18)} Antes</span>${antes}</div>
     <div class="col con"><span class="hd">${svg('check', 18)} Con Agendamelo</span>${despues}</div>
   </div>${data.cierre ? closer(data.cierre) : ''}`;
 }
 
 export const icons = { chatIcon };
-export const templates = { checklist, base_3_cards, mito_realidad, piramide, proceso, stat, feature, comparacion };
+// Las 5 plantillas activas de la línea editorial. Se conservan base_3_cards/piramide/proceso
+// definidas arriba por compatibilidad, pero ya no se generan ni se ofrecen al LLM.
+export const templates = { stat, mito_realidad, checklist, antes_despues, feature, base_3_cards, piramide, proceso };

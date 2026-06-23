@@ -31,9 +31,9 @@ function distributeOrientacion(n) {
   const educativo = Math.max(0, n - plataforma - venta);
   return { educativo, plataforma, venta };
 }
-// Plantillas: round-robin sobre los 8 tipos para que haya variedad (solo aplica a formato imagen).
+// Plantillas: round-robin sobre las 5 plantillas de la línea editorial (solo aplica a formato imagen).
 function distributeTemplates(n) {
-  const order = ['feature', 'stat', 'comparacion', 'checklist', 'base_3_cards', 'proceso', 'mito_realidad', 'piramide'];
+  const order = ['antes_despues', 'stat', 'feature', 'checklist', 'mito_realidad'];
   const d = Object.fromEntries(order.map((t) => [t, 0]));
   for (let i = 0; i < n; i++) d[order[i % order.length]]++;
   return d;
@@ -42,6 +42,14 @@ function distributeTemplates(n) {
 function distributeFormato(n) {
   const carrusel = Math.round(n * 0.4);
   return { imagen: Math.max(0, n - carrusel), carrusel };
+}
+// Nichos: ~30% manicuristas, ~25% psicopedagogas, ~25% profesores-paes, ~20% fonoaudiologas.
+function distributeNiche(n) {
+  const manicuristas = Math.round(n * 0.30);
+  const psicopedagogas = Math.round(n * 0.25);
+  const profesores = Math.round(n * 0.25);
+  const fono = Math.max(0, n - manicuristas - psicopedagogas - profesores);
+  return { manicuristas, psicopedagogas, 'profesores-paes': profesores, fonoaudiologas: fono };
 }
 
 // ---------- Schema de salida (compatible con structured outputs) ----------
@@ -67,28 +75,19 @@ const schema = {
           hashtags: { type: 'array', items: { type: 'string' }, minItems: 5, maxItems: 5 },
           imagen_json: {
             type: 'object', additionalProperties: false,
-            required: ['badge', 'subtitle', 'items', 'cards', 'mito', 'realidad', 'pyramid', 'steps',
-              'figure', 'figure_caption', 'points', 'screen_slug', 'screen_title', 'rows', 'button',
+            required: ['badge', 'subtitle', 'items', 'mito', 'realidad',
+              'figure', 'figure_caption', 'source', 'points', 'screen_slug', 'screen_title', 'rows', 'button',
               'antes', 'despues', 'slides', 'note', 'cierre', 'cta'],
             properties: {
               badge: { type: 'string' },
               subtitle: { type: 'string' },
               items: arr({ type: 'string' }),
-              cards: arr({
-                type: 'object', additionalProperties: false, required: ['icon', 'title', 'text'],
-                properties: { icon: { type: 'string', enum: ICONS }, title: { type: 'string' }, text: { type: 'string' } },
-              }),
               mito: S(), realidad: S(), note: S(), cierre: S(),
-              pyramid: {
-                type: ['object', 'null'], additionalProperties: false, required: ['top', 'mid', 'base'],
-                properties: { top: { type: 'string' }, mid: { type: 'string' }, base: { type: 'string' } },
-              },
-              steps: arr({ type: 'string' }),
-              // stat
-              figure: S(), figure_caption: S(), points: arr({ type: 'string' }),
+              // stat (figure + caption + fuente OBLIGATORIA)
+              figure: S(), figure_caption: S(), source: S(), points: arr({ type: 'string' }),
               // feature (mockup del sitio)
               screen_slug: S(), screen_title: S(), rows: arr({ type: 'string' }), button: S(),
-              // comparacion
+              // antes_despues
               antes: arr({ type: 'string' }), despues: arr({ type: 'string' }),
               // carrusel (3-4 slides: portada -> punto -> cierre)
               slides: arr({
@@ -139,14 +138,11 @@ function callCodex(prompt) {
 
 // ---------- Validación / normalización ----------
 const REQ = {
-  checklist: (c) => Array.isArray(c.items) && c.items.length >= 3,
-  base_3_cards: (c) => Array.isArray(c.cards) && c.cards.length === 3,
+  stat: (c) => c.figure && c.figure_caption && c.source, // la fuente es obligatoria (integridad de datos)
   mito_realidad: (c) => c.mito && c.realidad,
-  piramide: (c) => c.pyramid && c.pyramid.top && c.pyramid.base,
-  proceso: (c) => Array.isArray(c.steps) && c.steps.length >= 3,
-  stat: (c) => c.figure && c.figure_caption,
+  checklist: (c) => Array.isArray(c.items) && c.items.length >= 3,
+  antes_despues: (c) => Array.isArray(c.antes) && c.antes.length >= 2 && Array.isArray(c.despues) && c.despues.length >= 2,
   feature: (c) => c.screen_title && Array.isArray(c.rows) && c.rows.length >= 2 && c.button,
-  comparacion: (c) => Array.isArray(c.antes) && c.antes.length >= 2 && Array.isArray(c.despues) && c.despues.length >= 2,
   carrusel: (c) => Array.isArray(c.slides) && c.slides.length >= 3 && c.slides.length <= 4
     && c.slides[0].tipo === 'portada' && c.slides.at(-1).tipo === 'cierre' && c.slides.at(-1).cta,
 };
@@ -200,6 +196,7 @@ function main() {
 
   const prompt = buildPrompt({
     n: N,
+    nicheMix: distributeNiche(N),
     orientacionMix: distributeOrientacion(N),
     formatoMix: distributeFormato(N),
     templateMix: distributeTemplates(N),

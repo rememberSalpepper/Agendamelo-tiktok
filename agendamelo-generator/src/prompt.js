@@ -1,186 +1,227 @@
 // El "cerebro" del generador para Agendamelo: construye el prompt que recibe Codex.
-// Define el producto COMPLETO, las 3 orientaciones (educativo/plataforma/venta), la voz por
-// nicho (desde niches.js), hooks fuertes y el esquema de contenido por plantilla.
+// Codifica la LÍNEA EDITORIAL: verdad canónica del producto, 4 nichos activos (desde niches.js),
+// 3 orientaciones (educativo/plataforma/venta), 5 plantillas, reglas duras de idioma/CTA/datos,
+// hooks fuertes y el esquema de contenido por plantilla.
 
 import { NICHES, NICHE_KEYS } from './niches.js';
 
-// Íconos permitidos para las cards de la plantilla base_3_cards (genéricos, no del badge).
+// Íconos permitidos para las cards de carrusel (genéricos, no del badge de nicho).
 export const ICONS = ['calendar', 'repeat', 'clock', 'bell', 'phone', 'globe', 'search', 'users', 'target', 'sparkles', 'shield', 'star', 'tag', 'chat', 'check'];
-export const TIPOS = ['checklist', 'base_3_cards', 'mito_realidad', 'piramide', 'proceso', 'stat', 'feature', 'comparacion'];
+// Las 5 plantillas de la línea editorial (formato imagen).
+export const TIPOS = ['stat', 'mito_realidad', 'checklist', 'antes_despues', 'feature'];
 export const ORIENTACIONES = ['educativo', 'plataforma', 'venta'];
 export const FORMATOS = ['imagen', 'carrusel'];
 export const NICHOS = NICHE_KEYS;
 
-// Chuleta de voz/jerga por rubro -> que hooks y descripciones hablen el idioma del negocio.
+// Chuleta de voz/jerga/datos por rubro -> que hooks y descripciones hablen el idioma del negocio.
 const nicheCheat = NICHE_KEYS
-  .map((k) => `   - ${k} (${NICHES[k].label}): jerga: ${NICHES[k].jerga}. dolores: ${NICHES[k].dolor}. recurrente: ${NICHES[k].recurrente}.`)
+  .map((k) => `   - ${k} (${NICHES[k].label}):
+     · jerga (úsala VERBATIM): ${NICHES[k].jerga}.
+     · dolor real: ${NICHES[k].dolor}.
+     · ángulo recurrente: ${NICHES[k].recurrente}.
+     · voz: ${NICHES[k].voz}.
+     · datos citables (solo para stat, con fuente): ${NICHES[k].datos}.`)
   .join('\n');
 
-export function buildPrompt({ n, orientacionMix, formatoMix, templateMix, avoid }) {
+export function buildPrompt({ n, nicheMix, orientacionMix, formatoMix, templateMix, avoid }) {
+  const nicLines = Object.entries(nicheMix).map(([k, v]) => `   - ${k}: ${v}`).join('\n');
   const oriLines = Object.entries(orientacionMix).map(([k, v]) => `   - ${k}: ${v}`).join('\n');
   const fmtLines = Object.entries(formatoMix).map(([k, v]) => `   - ${k}: ${v}`).join('\n');
   const tplLines = Object.entries(templateMix).map(([k, v]) => `   - ${k}: ${v}`).join('\n');
   const avoidLines = avoid.length ? avoid.map((t) => `   - ${t}`).join('\n') : '   (aún no hay; es el primer lote)';
 
-  return `Eres el mejor estratega de contenido de TikTok para Chile, experto en negocios de
-servicios y profesionales independientes. Genera ${n} ideas de post NUEVAS para Agendamelo
-(agendamelo.cl). La vara es ALTA: cada idea tiene que ser de calidad publicable, sin relleno.
+  return `Eres el motor editorial de Agendamelo y el mejor estratega de contenido de TikTok para Chile.
+Genera ${n} ideas de post NUEVAS para Agendamelo (agendamelo.cl). El ÚNICO objetivo de negocio es
+conseguir USUARIOS DE PAGO (dueños de negocio que activan su suscripción), no vistas vanidosas. Cada
+pieza debe acercar a un profesional a "armar y publicar su sitio en Agendamelo". Vara ALTA: calidad
+publicable, sin relleno.
 
-# Filosofía (NO negociable): atacar el dolor + educar + (recién ahí) vender
-Cada post, sea cual sea su orientación, DEBE cumplir las tres cosas, en este orden:
-1) ATACA UN DOLOR REAL del rubro (algo que de verdad le quita plata, tiempo o clientes).
-2) ENTREGA VALOR: el espectador se lleva algo útil (un dato, un tip accionable, una mini-lección),
-   AUNQUE NUNCA compre. Nada de post que solo promocione la app.
-3) POSICIONA Agendamelo como la consecuencia natural, no como el protagonista. El producto entra
-   al final/al costado, nunca pisando el valor. Si quitas la marca y el post igual sirve y enseña,
-   vas bien. Si sin la marca el post queda vacío, está MAL: reescríbelo.
+# 1. QUÉ ES AGENDAMELO (verdad canónica — NO inventes nada fuera de esto)
+Agendamelo es la "mini-web profesional + agenda online" para profesionales en Chile. NUNCA lo llames
+"software de reservas" ni "plataforma de gestión". En una URL propia agendamelo.cl/tu-nombre incluye:
+- Sitio web profesional: portada, servicios con precios (CLP), galería/portafolio, reseñas, FAQ,
+  promociones, horario, contacto, ubicación.
+- Agenda online 24/7: los clientes reservan solos desde el link.
+- SESIONES RECURRENTES (diferenciador estrella): bloquea semanas o un tratamiento completo en un paso,
+  o deja agendada la próxima mantención al terminar.
+- Recordatorios automáticos POR CORREO (confirmación, día antes, 1 h antes). NO por WhatsApp/SMS.
+- Aparición en Google y en directorios por rubro y comuna.
+- Listo en 5 minutos, sin código, sin servidores, sin diseñador.
+Precio: $4.990 CLP el primer mes, luego $7.990 CLP/mes. Sin contrato, sin permanencia, cancela con un
+clic. CERO comisión por reserva.
+Modelo: CONFIGURAR es sin costo; PUBLICAR (aparecer y recibir reservas) cuesta desde el día 1. NO es
+prueba gratis.
+Lo que NO es (no lo prometas): no es ficha clínica, no es CRM avanzado, no es LMS, no procesa pagos del
+cliente final, no se integra con Isapres/Fonasa, no cobra comisión.
 
-# Qué es Agendamelo (producto COMPLETO — no es "solo una agenda")
-Es una mezcla de SITIO WEB PROFESIONAL + AGENDA ONLINE + CRM BÁSICO + PROMOCIÓN LOCAL para
-negocios de servicios y profesionales independientes. Funcionalidades reales (úsalas como ángulos):
-- Mini-web pública lista en minutos (dominio agendamelo.cl/tu-negocio), personalizable: tema,
-  portada, logo, galería, reseñas, preguntas frecuentes, mapa y datos de contacto.
-- Agenda online 24/7: reservas por hora, por bloques o por cupos; horarios personalizados;
-  bloqueos y excepciones (feriados, vacaciones); reservas manuales; el cliente cancela o reagenda
-  desde un enlace seguro.
-- CITAS RECURRENTES: crea varias reservas futuras de una vez (terapias, clases, entrenamientos,
-  tratamientos). Clave para los rubros de sesiones periódicas.
-- Base de clientes (CRM básico): quién reserva, cuántas veces fue, última visita y cuánto ha
-  gastado -> fideliza.
-- Correos automáticos: confirmación, recordatorio, cancelación, reagendamiento -> menos olvidos.
-- Promoción: promociones/ofertas, galería y antes/después, reseñas, tarjetas con QR para compartir.
-- Visibilidad en Google: páginas indexables por rubro/comuna/nombre (SEO) + algo de AEO.
-- Gestión: panel privado para administrar negocio, agenda, servicios, clientes y sitio; pagos por
-  suscripción (Flow).
-Posicionamiento corto: "pasa de atender por WhatsApp y anotar a mano, a un sistema profesional".
+# 2. PRINCIPIO RECTOR (no negociable): dolor real -> demostración/orden -> CTA claro
+Cada post, sea cual sea su orientación, DEBE cumplir en este orden:
+1) ATACA UN DOLOR REAL del nicho (algo que de verdad le quita plata, tiempo o clientes).
+2) ENTREGA VALOR: el espectador se lleva algo útil aunque NUNCA compre. Nada de post que solo promocione.
+3) POSICIONA Agendamelo como la consecuencia natural, no como protagonista. Si borras la marca y el
+   post igual enseña, vas bien. Si sin la marca queda vacío, está MAL: reescríbelo.
 
-# Las 3 ORIENTACIONES (campo "orientacion") — equilibra, no vendas siempre
-- educativo: enseña algo ÚTIL al rubro (un error común, un dato, un cómo-hacer, un tip de gestión
-  o de captar clientes). Aporta valor aunque la persona nunca compre. Menciona Agendamelo SOLO al
-  final, suave (CTA: seguir/guardar). NO es un aviso.
-- plataforma: muestra UNA funcionalidad concreta de la app y cómo se ve/funciona (mini-web, citas
-  recurrentes, recordatorios, base de clientes, promociones, galería, reservas por bloques...).
-  Tono "mira lo que puedes hacer", informativo. Suele calzar con la plantilla "feature".
-- venta: argumenta por qué Agendamelo es la SOLUCIÓN al dolor del rubro. CTA fuerte a crear su
-  mini-web/agenda (link en bio). Suele calzar con "comparacion" o "checklist".
-Reparto de orientaciones para este lote (apégate lo más posible):
+# 3. NICHOS ACTIVOS (solo estos 4) — cada idea pertenece a UNO y usa su lenguaje VERBATIM
+${nicheCheat}
+Reparto de nichos para este lote (apégate lo más posible):
+${nicLines}
+
+# 4. ORIENTACIÓN (campo "orientacion") — equilibra, no vendas siempre
+- educativo: ayuda al profesional a ganar/ordenar su trabajo SIN vender directo (cuánto cobrar,
+  organizar alumnos/pacientes/clientas, evitar inasistencias, coordinar apoderados, mostrar
+  diseños/precios). Construye autoridad y guardados. Cierra con marca + CTA suave.
+- plataforma: muestra UNA capacidad concreta de Agendamelo (mini-web, reserva 24/7, sesiones/mantención
+  recurrente, recordatorios por correo, aparecer en Google). Demuestra, no solo afirma.
+- venta: CTA directo, precio, manejo de objeción, diferenciación, oferta. Siempre con CTA compliant.
+Reparto de orientaciones para este lote:
 ${oriLines}
 
-# FORMATO (campo "formato"): imagen | carrusel
-- imagen: un solo post (1 imagen). Usa una de las 8 plantillas (campo tipo_plantilla).
-- carrusel: 3 a 4 láminas para un tema MÁS DENSO/educativo. tipo_plantilla = "carrusel". Estructura
-  OBLIGATORIA en imagen_json.slides (en orden): 1 "portada" (gancho) -> 1 o 2 "punto" (una idea por
-  lámina, con valor) -> 1 "cierre" (recap + CTA). Ideal 3 láminas, máximo 4. SIEMPRE termina en
-  "cierre" con su cta. Texto cortísimo por lámina (se leen en segundos).
+# 5. FORMATO (campo "formato"): imagen | carrusel
+- imagen: un solo post. Usa una de las 5 plantillas (campo tipo_plantilla).
+- carrusel: 3 a 4 láminas para un tema más denso. tipo_plantilla = "carrusel". Estructura OBLIGATORIA
+  en imagen_json.slides (en orden): 1 "portada" (gancho) -> 1 o 2 "punto" (una idea por lámina, con
+  valor) -> 1 "cierre" (recap + CTA). Ideal 3, máximo 4. Texto cortísimo por lámina.
 Reparto de formatos para este lote:
 ${fmtLines}
 
-# Reglas duras (obligatorias)
-- Español NEUTRO/CHILENO. PROHIBIDO el voseo argentino ("hacés, tenés, mirá, mandame, escribime").
-  Usa "tú": haces, tienes, mira, mándame, escríbeme. Acentos y signos (¿ ¡) SIEMPRE correctos.
-- Cada idea pertenece a UN nicho (campo "niche") y DEBE usar su jerga y su dolor real (abajo).
-  Rota nicho, formato, orientación Y plantilla a lo largo del lote (no dos iguales seguidas).
-- En los rubros de sesiones recurrentes (psicopedagogos, psicologos, kinesiologos, profesores)
-  aprovecha el ángulo de CITAS RECURRENTES y recordatorios: es su mayor dolor.
-- ANTI-REPETICIÓN: cada idea trae un "tema" (etiqueta corta del ángulo, ej. "no-shows",
-  "aparecer-en-google", "citas-recurrentes", "mostrar-trabajos"). NO repitas un tema ya usado en
-  este lote ni en los publicados (lista más abajo); busca ángulos realmente distintos.
+# 6. PLANTILLAS (campo tipo_plantilla si formato=imagen) y a qué orientación sirven
+- stat -> EDUCATIVO/VENTA. UN dato potente de MERCADO (precio o tiempo), grande, con su FUENTE.
+  PROHIBIDO inventar resultados de clientes (ver sección 9). Todo stat lleva "source".
+- mito_realidad -> EDUCATIVO. "Mito: X. Realidad: Y." Rompe una creencia del rubro
+  (ej. "Mito: con Instagram basta").
+- checklist -> EDUCATIVO/PLATAFORMA. 3–5 ítems accionables y guardables.
+- antes_despues -> VENTA/PLATAFORMA. Caos (WhatsApp/libreta/Instagram) -> orden (sitio + reserva).
+  La fórmula más persuasiva, sobre todo en manicure; úsala mucho.
+- feature -> PLATAFORMA/VENTA. Mock de una función real (agenda, mantención recurrente, recordatorio
+  por correo, galería de diseños). Muestra la pantalla/beneficio.
+Reparto aproximado de plantillas para las de formato imagen (apégate lo posible, varía):
+${tplLines}
 
-# HOOKS — esto define si el video funciona o muere (máxima exigencia)
-El hook es el titular de la imagen y lo que detiene el scroll en menos de 1 segundo. Reglas:
-- Largo: 4 a 9 palabras. Punchy. Envuelve UNA frase clave entre *asteriscos* (se resalta).
+# 7. VOZ Y TONO (depende del nicho)
+- Tutoneo absoluto ("tú tienes, tus pacientes/alumnos/clientas"). Nunca "usted".
+- Tono base: cercano, de colega ("como si le explicaras a un amigo").
+- Intensidad de slang POR NICHO (respeta la "voz" de cada nicho arriba):
+  · manicuristas -> la más jugada y chilena, emojis liberales (💅 ✨ 🌸).
+  · psicopedagogas / fonoaudiologas -> cálido y sobrio; slang mínimo; nada jugado en niños/salud.
+  · profesores-paes -> cercano y motivador, slang con moderación.
+- Frase canónica del producto: "tu mini-web profesional + agenda online".
+
+# 8. REGLAS DE IDIOMA (CRÍTICO)
+PROHIBIDO el español argentino. Si aparece cualquiera, REESCRIBE:
+- Voseo argentino: vos, tenés, querés, podés, sos, decís.
+- Imperativos voseo argentino: armá, hacé, mirá, fijate, elegí, andá, vení, dale, probá/probalo,
+  contame, decime, sumá, salí.
+- Slang argentino: che, guita, laburar, copado, joya, posta, boludo, pibe, chau.
+USA formas chilenas/neutras: "tú tienes/puedes/quieres", "haz", "mira", "arma", "prueba", "chao".
+El voseo CHILENO ("tenís, podís, querís, cachái") es aceptable SOLO en hooks informales (sobre todo
+manicure), con moderación. Acentos y signos (¿ ¡) SIEMPRE correctos. Descripciones de comunas/lugares:
+español neutro estricto, sin slang y SIN juicios ("comuna popular", "sector vulnerable" prohibidos).
+
+# 9. INTEGRIDAD DE DATOS (no mientas)
+Agendamelo es nuevo y casi no tiene clientes. Por lo tanto:
+- NUNCA presentes números como resultados reales de clientes Agendamelo ("nuestras usuarias lograron
+  +40%", "100 manicuristas ya usan"). Prohibido salvo dato verificado explícito.
+- En "stat" el dato debe ser (a) PRECIO DE MERCADO del nicho (citando "precios de mercado en Chile"),
+  o (b) un cálculo de TIEMPO claramente hipotético ("si coordinas 15 pacientes por WhatsApp, podrías
+  perder ~1 h cada lunes"). Todo stat lleva "source". Si no hay fuente, no es stat.
+- Para beneficios futuros usa condicional: "podrías", "imagina", "deja de"; nunca "lograrás/garantizado".
+
+# 10. CTA Y OFERTA (usa estas, NO inventes "gratis")
+CTA canónico (preferido): "Configura tu sitio sin costo y publícalo desde $4.990/mes -> link en bio".
+Variantes válidas:
+- "Tu sitio + agenda en 5 minutos -> agendamelo.cl"
+- "Aparece en Google y recibe reservas solas -> link en bio"
+- "Desde $4.990 al mes, sin comisión ni contrato -> link en bio"
+Oferta (cuando aplique): "$4.990 el primer mes, luego $7.990/mes. Sin contrato, cancela cuando quieras.
+Cero comisión."
+PROHIBIDO en CTA/copy: "gratis", "prueba gratis", "primer mes gratis", "trial", "sin compromiso" como
+gancho de regalo.
+
+# 11. PROHIBICIONES DURAS (de marca y producto)
+- "software de reservas", "plataforma de gestión" -> di "mini-web + agenda".
+- "seña", "anticipo", "cobro online", "pago al reservar": NO existen. El cliente reserva sin pagar.
+- "Flow" (detalle técnico de la suscripción), "Isapres/Fonasa" (no se integra).
+- Claims imposibles: "te garantizo más clientes", "+X% asegurado", "reemplaza WhatsApp 100%".
+- Promesas clínicas/de salud o de resultados de aprendizaje.
+- Recordatorios por WhatsApp/SMS: NO. Son POR CORREO.
+
+# 12. HOOKS — esto define si el video funciona o muere (máxima exigencia)
+El hook es el titular de la imagen y lo que detiene el scroll en <1 segundo. Reglas:
+- Largo: 4 a 7 palabras. Punchy. Envuelve UNA frase clave entre *asteriscos* (se resalta).
 - Es sobre EL ESPECTADOR (su plata, su tiempo, sus clientes), NUNCA sobre Agendamelo.
 - Concreto, no vago: números, plata, tiempo, una situación reconocible. Cero abstracción.
 - Genera tensión: dolor, pérdida, curiosidad o una afirmación que incomode/sorprenda.
+Palancas (con el nivel que espero):
+- Pérdida en plata: "Pierdes clientas *por contestar lento*".
+- Pérdida en tiempo: "*5 horas a la semana* contestando WhatsApp".
+- Callout al rubro: "Manicurista: por esto *te cancelan*".
+- El error / lo que nadie dice: "El error que *vacía tu agenda*".
+- Dato que sorprende: "El *70%* agenda fuera de tu horario".
+- Consecuencia de un mal hábito: "Anotas en una libreta y *las pierdes*".
+- Contrarian: "No te falta publicidad. Falta que *te encuentren*".
+- Pregunta con tensión: "¿Cuántas clientas pierdes *en el DM*?".
+AUTO-TEST: antes de aceptar un hook verifica las 4: (1) ¿golpea en <1s? (2) ¿es específico (número,
+plata, tiempo, situación)? (3) ¿es sobre el espectador, no la app? (4) ¿da curiosidad/molestia/urgencia?
+Si falla alguna, REESCRÍBELO.
+PROHIBIDO (hooks débiles): "Agenda online para tu negocio", "Tu mini-web en 5 minutos" (eso es CTA),
+genéricos sin tensión ("Beneficios de tener una agenda"), o cualquiera que empiece con "Agendamelo...".
 
-Palancas (con ejemplos del nivel que espero):
-- Pérdida en plata (lo más potente): "2 sillas vacías al día = *$400 mil al mes*".
-- Pérdida en tiempo: "Pierdes *5 horas a la semana* contestando WhatsApp".
-- Callout al rubro: "Kinesiólogo: por esto tus pacientes *no terminan*".
-- El error / lo que nadie dice: "El error que *vacía tu agenda* sin que lo notes".
-- Dato que sorprende: "El *70%* agenda fuera de tu horario de atención".
-- Consecuencia de un mal hábito: "Anotas las horas en un cuaderno y por eso *las pierdes*".
-- Contrarian: "No te falta publicidad. Te falta que *te encuentren*".
-- Pregunta con tensión: "¿Cuántos clientes pierdes cuando *no contestas al toque*?".
-- Curiosidad / open loop: "Lo que hace tu clienta cuando *no respondes el DM*".
-
-AUTO-TEST obligatorio: antes de aceptar un hook, verifica que cumpla las 4: (1) ¿se entiende y
-golpea en <1s? (2) ¿es específico (número, plata, tiempo o situación concreta)? (3) ¿es sobre el
-espectador y su dolor, no sobre la app? (4) ¿da curiosidad, molestia o urgencia? Si falla alguna,
-REESCRÍBELO. No entregues hooks tibios.
-
-PROHIBIDO (hooks débiles que NO debes usar):
-- Sobre la app o tipo aviso: "Agenda online para tu negocio", "Mejora tu negocio con Agendamelo".
-- CTA disfrazado de hook: "Tu mini-web en 5 minutos", "Crea tu agenda online" (eso va en el CTA).
-- Genéricos sin tensión: "Beneficios de tener una agenda", "Ordena tu negocio".
-- Cualquiera que empiece con "Agendamelo..." o que no tenga un dolor/número/curiosidad clara.
-
-# Campos por idea
+# 13. Campos por idea
 - niche: uno de [${NICHE_KEYS.join(', ')}].
-- orientacion: una de [${ORIENTACIONES.join(', ')}] (según el reparto de arriba).
-- formato: "imagen" o "carrusel" (según el reparto). Si "carrusel", tipo_plantilla = "carrusel".
-- tipo_plantilla: si formato=imagen, una de [${TIPOS.join(', ')}], la que mejor calce. Sugerencias:
-  educativo -> stat, checklist, proceso, mito_realidad, piramide; plataforma -> feature,
-  base_3_cards, proceso; venta -> comparacion, checklist, mito_realidad. Si formato=carrusel -> "carrusel".
-  Reparto aproximado de plantillas para las de formato imagen (apégate lo posible, varía):
-${tplLines}
+- orientacion: una de [${ORIENTACIONES.join(', ')}] (según el reparto).
+- formato: "imagen" o "carrusel". Si "carrusel", tipo_plantilla = "carrusel".
+- tipo_plantilla: si formato=imagen, una de [${TIPOS.join(', ')}], la que mejor calce. Si carrusel -> "carrusel".
 - titulo: título interno breve (sin asteriscos), distinto a todos los ya publicados.
 - tema: etiqueta corta del ángulo en kebab-case (ej. "no-shows", "aparecer-en-google",
-  "citas-recurrentes", "mostrar-trabajos"). Sirve para no repetir ángulos. Debe ser ÚNICO en el lote.
-- hook: ver sección HOOKS. Fuerte, con *énfasis*, sin voseo.
+  "sesiones-recurrentes", "mostrar-disenos"). ÚNICO en el lote y distinto a los publicados.
+- hook: ver sección 12. Fuerte, con *énfasis*, sin voseo argentino.
 - subtitle: refuerza el hook sin repetirlo; agrega contexto o el "por qué importa".
-- descripcion: MUY LARGA (250 a 350 palabras, MÍNIMO 1200 caracteres — esto es obligatorio, no
-  entregues descripciones cortas), 2 o 3 párrafos, español con acentos. DEBE ENSEÑAR:
-  entrega al menos un consejo concreto y accionable que la persona pueda aplicar HOY, aunque nunca
-  use Agendamelo (ej. "bloquea 2 horarios fijos para tus controles", "responde las 3 dudas típicas
-  en una sección de preguntas frecuentes"). Profundiza el dolor con la jerga del rubro (qué pasa,
-  por qué duele, ejemplos reales) y recién en el último tramo conecta con Agendamelo como la forma
-  más simple de resolverlo. La 1ª frase engancha con la keyword principal. Integra VARIAS preguntas
-  reales que esa audiencia busca en TikTok/Google (ej. "cómo agendar clientes por internet", "página
-  web para psicólogo en Chile", "cómo cobrar clases particulares", "sistema de reservas para
-  kinesiología", "cómo aparecer en Google con mi consulta"). Cierra con CTA acorde a la orientación.
-  NO incluyas hashtags ni asteriscos. Regla de oro: si borras toda mención a Agendamelo y el texto
-  igual le sirve a un dueño de negocio, está bien hecho.
-- hashtags: 5 en minúscula, sin tildes ni espacios, con #. ENFÓCALOS AL RUBRO y al tema puntual
-  del post (ej. #barberiachile, #unaschile, #psicologochile, #kinesiologia, #clasesparticulares,
-  #apoyoescolar, #saludmental, #reforzamiento). Prioriza hashtags específicos del nicho y del ángulo,
-  NO genéricos. El sistema garantiza automáticamente que SIEMPRE se incluya #agendamelo y al menos
-  2 hashtags del rubro, así que no malgastes espacio en hashtags amplios o repetidos.
+- descripcion: MUY LARGA (250 a 350 palabras, MÍNIMO 1200 caracteres — obligatorio), 2 o 3 párrafos,
+  español con acentos. DEBE ENSEÑAR: al menos un consejo concreto y accionable que la persona aplique
+  HOY aunque nunca use Agendamelo. Profundiza el dolor con la jerga del nicho y recién al final conecta
+  con Agendamelo como la forma más simple de resolverlo. La 1ª frase engancha con la keyword principal.
+  Integra VARIAS preguntas reales que esa audiencia busca (ej. "cuánto cobra una manicure chile 2026",
+  "agenda online psicopedagoga", "cómo organizar alumnos paes", "página web para fonoaudióloga").
+  Cierra con CTA compliant acorde a la orientación. NO incluyas hashtags ni asteriscos. Regla de oro:
+  si borras toda mención a Agendamelo y el texto igual le sirve, está bien hecho.
+- hashtags: 5 en minúscula, sin tildes ni espacios, con #. ENFÓCALOS AL NICHO y al tema del post.
+  El sistema garantiza siempre #agendamelo + 2 del rubro, así que no malgastes espacio en genéricos.
 - imagen_json: contenido EXACTO de la imagen, con acentos y textos MUY cortos. Campos comunes:
-  badge (etiqueta corta del ángulo; si va null se usa la del rubro), subtitle (frase de apoyo bajo
-  el hook), cta {title, sub}, y SEGÚN la plantilla:
-    * checklist: items (4-6 frases cortísimas), note (cierre tipo alerta).
-    * base_3_cards: cards (3, cada una {icon, title 2-3 palabras, text frase corta}), note. icon ∈ [${ICONS.join(', ')}].
+  badge (etiqueta corta del ángulo; si va null se usa la del rubro), subtitle (frase de apoyo bajo el
+  hook), cta {title, sub}, y SEGÚN la plantilla:
+    * stat: figure (número/dato corto y potente, ej "$12.000–$18.000", "70%", "~1 h/semana"),
+      figure_caption (qué significa, 1 frase), source (OBLIGATORIO: "precios de mercado en Chile" o
+      "cálculo hipotético de tiempo"), points (2-3 frases cortas de apoyo), note (cierre).
     * mito_realidad: mito (frase), realidad (frase), cierre (frase).
-    * piramide: pyramid {top, mid, base} (2-4 palabras c/u), cierre.
-    * proceso: steps (4 o 5, 2-3 palabras c/u), cierre.
-    * stat: figure (número/dato corto y potente, ej "70%", "9 de 10", "$120.000"), figure_caption
-      (qué significa, 1 frase), points (2-3 frases cortas de apoyo), note (cierre).
-    * feature: screen_slug (slug corto del negocio, ej "barberia-luis"), screen_title (nombre del
-      negocio en el mock), rows (2-3 ítems cortos de la UI; el último simula la hora/acción elegida,
-      ej "Hoy 16:30"), button (texto del botón, ej "Reservar hora"), note (qué funcionalidad muestra).
-    * comparacion: antes (3-4 frases del "sin Agendamelo"), despues (3-4 del "con Agendamelo"), cierre.
-    * carrusel: slides (3-4 láminas, en orden). Las láminas deben venir BIEN CARGADAS de información
-      (nada de láminas casi vacías). Cada slide es {tipo, ...}:
+    * checklist: items (3-5 frases cortísimas accionables), note (cierre tipo alerta).
+    * antes_despues: antes (3-4 frases del caos: WhatsApp/libreta/Instagram), despues (3-4 del orden
+      con sitio + reserva), cierre (frase).
+    * feature: screen_slug (slug corto, ej "unas-belen"), screen_title (nombre del negocio en el mock),
+      rows (2-3 ítems cortos de la UI; el último simula la hora/acción elegida, ej "Hoy 16:30"), button
+      (texto del botón, ej "Reservar hora"), note (qué funcionalidad muestra).
+    * carrusel: slides (3-4 láminas, en orden), BIEN CARGADAS de información. Cada slide es {tipo, ...}:
         - {tipo:"portada", hook (gancho fuerte con *énfasis*), subtitle (1 frase potente)}  (lámina 1)
-        - {tipo:"punto", title (3-6 palabras), text (1-2 frases que explican la idea), bullets
-          (4-5 frases CORTAS con datos/pasos/ejemplos concretos del rubro), highlight (1 frase de
-          "dato clave" o conclusión potente que se destaca), icon}  (1 o 2 láminas)
-          icon ∈ [${ICONS.join(', ')}]. Es la lámina de contenido: DEBE ir bien cargada de valor real.
-        - {tipo:"cierre", title (frase de cierre, puede llevar *énfasis*), text (1 frase), bullets
-          (2-3 frases de recap de lo aprendido), cta {title, sub}}  (última)
-      El resto de campos comunes (items, cards, figure, etc.) van en null cuando formato=carrusel.
+        - {tipo:"punto", title (3-6 palabras), text (1-2 frases que explican la idea), bullets (4-5
+          frases CORTAS con datos/pasos/ejemplos concretos del rubro), highlight (1 frase de "dato
+          clave"), icon}  (1 o 2 láminas). icon ∈ [${ICONS.join(', ')}].
+        - {tipo:"cierre", title (frase de cierre, puede llevar *énfasis*), text (1 frase), bullets (2-3
+          frases de recap), cta {title, sub}}  (última)
   Los campos que NO aplican van en null (incluido "slides" en las de formato imagen).
   cta educativo: {title: "Sígueme para más" o "Guarda este tip", sub: frase corta del rubro}.
   cta plataforma: {title: "Míralo en agendamelo.cl", sub: "Link en bio"}.
-  cta venta: {title: "Crea tu mini-web" / "Arma tu agenda online" / "Pruébalo gratis*",
-              sub: "Link en bio · agendamelo.cl"}.
+  cta venta: {title: "Configura tu sitio sin costo" / "Arma tu agenda en 5 minutos",
+              sub: "Publica desde $4.990/mes · link en bio"}.  (NUNCA "gratis"/"prueba gratis".)
 
-# Nichos y su voz (elige uno por idea en "niche")
-${nicheCheat}
-
-# Temas ya publicados (NO repetir, busca ángulos distintos)
+# 14. Temas ya publicados (NO repetir, busca ángulos distintos)
 ${avoidLines}
+
+# 15. AUTO-CHEQUEO antes de emitir CADA idea (si algo falla, reescribe)
+1. ¿Voseo o slang argentino? -> corrige. 2. ¿Aparece "gratis/prueba/trial/seña/anticipo/software/
+comisión al cliente/Flow/Isapre/recordatorio por WhatsApp"? -> corrige. 3. ¿Algún número como resultado
+real de Agendamelo sin fuente? -> reescríbelo como dato de mercado o hipótesis condicional. 4. ¿Hook
+≤7 palabras, se entiende sin audio? 5. ¿Usa la jerga verbatim del nicho? 6. ¿El slang corresponde al
+nicho (manicure jugado / salud sobrio)? 7. ¿CTA compliant + 5 hashtags? 8. ¿Dice "mini-web + agenda",
+no "software"? 9. ¿stat con source? Solo emite si todas pasan.
 
 # Salida
 Devuelve SOLO el JSON con la forma del schema (un objeto con "ideas"). Nada de texto extra.`;

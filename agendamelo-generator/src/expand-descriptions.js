@@ -42,30 +42,34 @@ function callCodex(prompt) {
 function promptFor(batch) {
   const blocks = batch.map((r) => {
     const c = JSON.parse(r.imagen_json);
-    const puntos = [c.subtitle, ...(c.items || []), ...(c.steps || []),
-      ...(c.cards || []).map((x) => `${x.title}: ${x.text}`),
+    const puntos = [c.subtitle, ...(c.items || []),
+      c.figure && `Dato: ${c.figure}${c.figure_caption ? ` (${c.figure_caption})` : ''}${c.source ? ` — fuente: ${c.source}` : ''}`,
       c.mito && `Mito: ${c.mito}`, c.realidad && `Realidad: ${c.realidad}`,
-      c.pyramid && Object.values(c.pyramid).join(' / '), c.note, c.cierre].filter(Boolean).join(' | ');
+      ...(c.antes || []).map((x) => `Antes: ${x}`), ...(c.despues || []).map((x) => `Después: ${x}`),
+      c.note, c.cierre].filter(Boolean).join(' | ');
     return `ID: ${r.id}\nTipo: ${r.tipo_plantilla} | Orientación: ${/venta|auditor|dm|pack/i.test(r.imagen_json) ? 'mixta' : 'educativa'}\nHook: ${strip(r.hook)}\nTítulo: ${r.titulo}\nLo que muestra la imagen: ${puntos}`;
   }).join('\n\n---\n\n');
 
-  return `Eres redactor SEO de Agendamelo (agendamelo.cl): mini-web profesional + agenda online
-24/7 para negocios de servicios en Chile, con visibilidad en Google, galería/reseñas, recordatorios
-e historial de clientes. Reescribe la DESCRIPCIÓN de cada post para TikTok. Devuelve {id, descripcion}.
+  return `Eres redactor SEO de Agendamelo (agendamelo.cl): "mini-web profesional + agenda online"
+para profesionales en Chile (manicuristas, psicopedagogas, profesores particulares/PAES,
+fonoaudiólogas), con sitio web propio, reservas 24/7, SESIONES RECURRENTES, recordatorios POR CORREO,
+galería/reseñas y aparición en Google. NUNCA lo llames "software de reservas" ni "plataforma de
+gestión". Reescribe la DESCRIPCIÓN de cada post para TikTok. Devuelve {id, descripcion}.
 
 Reglas de cada descripción:
 - MUY LARGA: entre 230 y 350 palabras, en 2 o 3 párrafos. Con mucho contenido de valor.
 - Profundiza el tema de la imagen (usa lo que muestra) con la jerga y el dolor del rubro del post:
-  explica qué pasa, por qué duele y cómo lo resuelve Agendamelo (mini-web, reservas, aparecer en
-  Google, galería/reseñas, recordatorios, orden/historial). Aporta más de lo que dice la imagen.
-- Español neutro/chileno, acentos correctos, PROHIBIDO el voseo ("hacés/mandame/mirá").
+  explica qué pasa, por qué duele y cómo lo resuelve Agendamelo (mini-web, reservas 24/7, sesiones
+  recurrentes, recordatorios por correo, aparecer en Google, galería/reseñas). Aporta más que la imagen.
+- Español neutro/chileno, acentos correctos, PROHIBIDO el voseo argentino ("hacés/mandame/mirá").
 - SEO dentro y fuera de TikTok: integra keywords y sinónimos de forma natural e incluye VARIAS
-  preguntas reales que la gente escribe (ej. "cómo agendar clientes por internet", "página web
-  para barbería en Chile", "cómo aparecer en Google con mi negocio", "sistema de reservas para...").
+  preguntas reales que la gente escribe (ej. "cuánto cobra una manicure chile 2026", "agenda online
+  psicopedagoga", "cómo organizar alumnos paes", "página web para fonoaudióloga en Chile").
 - Primera frase enganchadora con la keyword principal.
-- Termina SIEMPRE con un CTA al final: si es educativo invita a guardar/seguir; si es de venta
-  invita a crear su mini-web/agenda en agendamelo.cl (link en bio).
-- NO incluyas hashtags ni asteriscos.
+- Termina SIEMPRE con un CTA al final: si es educativo invita a guardar/seguir; si es de venta invita
+  a configurar su sitio sin costo y publicarlo desde $4.990/mes en agendamelo.cl (link en bio).
+- PROHIBIDO: "gratis/prueba gratis/trial", "seña/anticipo/cobro online", "comisión", "Flow",
+  "Isapres/Fonasa", recordatorios por WhatsApp/SMS (son por correo). NO incluyas hashtags ni asteriscos.
 
 Posts:
 

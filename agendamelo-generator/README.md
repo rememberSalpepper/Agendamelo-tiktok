@@ -6,13 +6,14 @@ Las ideas (texto) las crea Codex CLI con salida JSON garantizada.
 
 **Identidad por nicho:** misma marca Agendamelo en todos los posts (logo, fuentes, layout, crema),
 pero cada rubro trae su **color de acento**, su **ícono** y su **voz/dolor** propios. Todo eso vive
-en `src/niches.js` (6 rubros) y se inyecta solo en el render.
+en `src/niches.js` (4 nichos: manicuristas, psicopedagogas, profesores-paes, fonoaudiologas) y se
+inyecta solo en el render.
 
 **3 orientaciones de contenido** (campo `orientacion`): `educativo` (enseña, suave), `plataforma`
 (muestra una funcionalidad de la app) y `venta` (por qué Agendamelo es la solución). El lote se
 reparte ~40/30/30 para no ser solo comercial.
 
-**2 formatos** (campo `formato`): `imagen` (1 lámina, una de las 8 plantillas) y `carrusel` (3-4
+**2 formatos** (campo `formato`): `imagen` (1 lámina, una de las 5 plantillas) y `carrusel` (3-4
 láminas: portada → punto → cierre con CTA), ~60/40. Estrategia completa en
 [`docs/LINEA-EDITORIAL.md`](docs/LINEA-EDITORIAL.md); pendientes en [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
@@ -67,12 +68,12 @@ Los carruseles se envían como álbum. Flujo de publicación: ver `docs/LINEA-ED
 
 ## Plantillas (`tipo_plantilla`)
 
-`checklist` · `base_3_cards` · `mito_realidad` · `piramide` · `proceso` · `stat` (número
-impactante) · `feature` (mockup del sitio/app) · `comparacion` (sin/con Agendamelo)
+`stat` (dato de mercado, con fuente) · `mito_realidad` · `checklist` · `antes_despues` (caos → orden)
+· `feature` (mockup del sitio/app). En carrusel: `carrusel`.
 
 ## Nichos (`niche`)
 
-`barberias` · `manicure` · `psicopedagogos` · `psicologos` · `kinesiologos` · `profesores`
+`manicuristas` · `psicopedagogas` · `profesores-paes` · `fonoaudiologas`
 
 ## Columnas del CSV
 

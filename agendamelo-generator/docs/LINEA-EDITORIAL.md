@@ -1,102 +1,119 @@
 # Línea editorial y publicitaria — Agendamelo TikTok
 
 Guía maestra de contenido. La obedece el generador (`src/prompt.js`) y sirve de referencia para el
-usuario y para futuros agentes. Objetivo de negocio: **atraer dueños de negocios de servicios y
-profesionales independientes en Chile**, construir audiencia con valor real y convertir a Agendamelo
-(mini-web + agenda + CRM + promoción local). Cadencia objetivo: **3 publicaciones al día**.
+usuario y para futuros agentes. **Objetivo único de negocio: conseguir USUARIOS DE PAGO** (dueños de
+negocio que activan su suscripción), no vistas vanidosas. Cada pieza debe acercar a un profesional a
+"armar y publicar su sitio en Agendamelo". Cadencia objetivo: **3 publicaciones al día**.
 
 ## Principio rector (no negociable)
 Cada post: **ataca un dolor real → entrega valor (enseña algo aplicable hoy) → recién ahí posiciona
 Agendamelo**. Regla de oro: si borras la marca y el post igual le sirve a un dueño de negocio, está
 bien hecho. Nada de publicidad pura.
 
-## Posicionamiento del producto
-No es "solo una agenda". Es **sitio web profesional + agenda online + CRM básico + promoción local**:
-mini-web pública, reservas 24/7 (por hora/bloques/cupos), **citas recurrentes**, recordatorios y
-correos automáticos, base de clientes, promociones, galería y antes/después, reseñas, visibilidad en
-Google (SEO + algo de AEO), QR, panel privado y pagos (Flow). Sin contratos ni comisión. $4.990 primer
-mes / $7.990 mes. Setup en 5 minutos.
+## Posicionamiento del producto (verdad canónica)
+Es la **"mini-web profesional + agenda online"** para profesionales en Chile. **NUNCA** "software de
+reservas" ni "plataforma de gestión". En una URL propia `agendamelo.cl/tu-nombre`:
+- Sitio web profesional: portada, servicios con precios (CLP), galería/portafolio, reseñas, FAQ,
+  promociones, horario, contacto, ubicación.
+- Agenda online 24/7 (los clientes reservan solos desde el link).
+- **Sesiones recurrentes** (diferenciador estrella): bloquea semanas/tratamiento completo en un paso, o
+  deja agendada la próxima mantención al terminar.
+- **Recordatorios automáticos POR CORREO** (confirmación, día antes, 1 h antes). No por WhatsApp/SMS.
+- Aparición en Google y en directorios por rubro y comuna.
+- Listo en 5 minutos, sin código.
 
-## Audiencia y nichos (6, v1)
-Barberías, Manicure, Psicopedagogía, Psicología, Kinesiología, Profesores particulares.
-4 de 6 son de **sesiones recurrentes** (psico, psicopedago, kine, profes) → ahí las **citas
-recurrentes** y los recordatorios son el ángulo más fuerte. Cada nicho tiene color, ícono y voz
-propios (`src/niches.js`); se habla con su jerga real.
+Precio: **$4.990 primer mes / $7.990 mes**. Sin contrato, sin permanencia, cancela con un clic. **Cero
+comisión**. Modelo: CONFIGURAR es sin costo; PUBLICAR cuesta desde el día 1 (**no es prueba gratis**).
+**No es:** ficha clínica, CRM avanzado, LMS; no procesa pagos del cliente final; no se integra con
+Isapres/Fonasa; no cobra comisión.
 
-## Los 6 flancos (pilares) — atacar en paralelo
-| Pilar | De qué habla | Orientación típica |
+## Audiencia y nichos (4 activos)
+Spine que los une: **"agenda lo que se repite — clientes que vuelven"**. Cada nicho tiene color, ícono
+y voz/jerga propios (`src/niches.js`); se habla con su jerga VERBATIM.
+
+| Nicho (clave) | Acento | Voz | Doble dolor / ángulo |
+|---|---|---|---|
+| **manicuristas** | rosado | la más jugada y chilena (po, cachái), emojis 💅✨ | Instagram poco profesional + perder clientas por WhatsApp; "deja agendada la próxima mantención". |
+| **psicopedagogas** | ámbar | cálida y sobria, slang mínimo | contestar a apoderados a cualquier hora + coordinar de cero; "bloquea la hora 3 meses". |
+| **profesores-paes** | azul | cercano y motivador | horario en libreta + alumnos que preguntan otras materias; usa el peak PAES como urgencia. |
+| **fonoaudiologas** | verde/teal | cálida y profesional | apoderados que se confunden + WhatsApps de noche; "una hora cada lunes" + derivaciones desde Google. |
+
+**Reparto por lote:** ~30% manicuristas, ~25% psicopedagogas, ~25% profesores-paes, ~20%
+fonoaudiologas. (Manicure aporta reach; las otras tres, conversión de alto LTV.)
+
+## Orientaciones de contenido (campo `orientacion`, mezcla 40/30/30)
+- **educativo (~40%)**: ayuda al profesional sin vender directo (cuánto cobrar, organizar, evitar
+  inasistencias). Construye autoridad y guardados. CTA suave.
+- **plataforma (~30%)**: muestra una capacidad concreta (mini-web, reserva 24/7, sesiones recurrentes,
+  recordatorios por correo, aparecer en Google). Demuestra, no solo afirma.
+- **venta (~30%)**: CTA directo, precio, objeción, diferenciación, oferta. Siempre CTA compliant.
+
+## Plantillas (5) y a qué orientación sirven
+| Plantilla | Orientación | Qué hace |
 |---|---|---|
-| 1. Dolor / agitación | No-shows, caos de WhatsApp, horas muertas, cuaderno, doble reserva | educativo / venta |
-| 2. Gestión & fidelización | Ordenar la agenda, base de clientes/CRM, recordatorios, cobrar a tiempo | educativo |
-| 3. Captación / ser encontrado | Aparecer en Google, mini-web, reseñas, galería, QR | educativo / plataforma |
-| 4. Producto en acción | Citas recurrentes, reservas por bloque, promociones, panel | plataforma |
-| 5. Prueba & contraste | Antes/después, sin/con Agendamelo, casos | venta |
-| 6. Oferta | 5 minutos, sin comisión, $4.990, prueba | venta |
-
-## Orientaciones de contenido (campo `orientacion`)
-- **educativo (~40%)**: enseña; la marca aparece suave al final. CTA: seguir / guardar.
-- **plataforma (~30%)**: muestra una funcionalidad concreta y cómo se ve. CTA: "míralo en agendamelo.cl".
-- **venta (~30%)**: argumenta por qué Agendamelo resuelve el dolor. CTA fuerte: crear mini-web / probar.
+| `stat` | educativo/venta | UN dato de MERCADO (precio o tiempo) grande, **con su `source`**. Nunca resultados de clientes. |
+| `mito_realidad` | educativo | "Mito: X. Realidad: Y." Rompe una creencia del rubro. |
+| `checklist` | educativo/plataforma | 3–5 ítems accionables y guardables. |
+| `antes_despues` | venta/plataforma | Caos (WhatsApp/libreta/Instagram) → orden (sitio + reserva). La más persuasiva. |
+| `feature` | plataforma/venta | Mock de una función real (agenda, mantención recurrente, recordatorio, galería). |
 
 ## Formatos (campo `formato`)
-- **imagen (~60%)**: 1 lámina, una de las 8 plantillas. Idea concentrada, hook potente.
-- **carrusel (~40%)**: 3-4 láminas para temas densos. Estructura: **portada (gancho) → 1-2 punto
-  (una idea por lámina) → cierre (recap + CTA)**. Máx 4, ideal 3. Siempre termina en CTA.
+- **imagen (~60%)**: 1 lámina, una de las 5 plantillas. Idea concentrada, hook potente.
+- **carrusel (~40%)**: 3-4 láminas. **portada (gancho) → 1-2 punto (una idea por lámina) → cierre
+  (recap + CTA)**. Máx 4, ideal 3. Siempre termina en CTA.
 
 ## Ritmo diario (3 posts) — comando `/dia` arma el set
 | Franja | Rol | Orientación | Formato sugerido |
 |---|---|---|---|
 | Mañana | Aporta valor, capta | educativo | imagen o carrusel |
 | Mediodía | Muestra el producto | plataforma | carrusel o feature |
-| Tarde/noche | Convierte | venta | imagen (comparacion / mito_realidad) |
-Reglas: **nunca el mismo nicho ni la misma plantilla dos veces el mismo día**. `/dia` selecciona 3
-posts `renderizado` maximizando variedad de nicho/orientación/formato.
+| Tarde/noche | Convierte | venta | imagen (antes_despues / mito_realidad) |
+Reglas: **nunca el mismo nicho ni la misma plantilla dos veces el mismo día**.
 
 ## Rotación
-- **Nichos:** los 6 a lo largo de la semana (~3-4 posts/nicho/semana, repartidos).
-- **Plantillas:** las 8 (imagen) + carrusel; varía, no repitas seguido.
+- **Nichos:** los 4 a lo largo de la semana, respetando el reparto 30/25/25/20.
+- **Plantillas:** las 5 (imagen) + carrusel; varía, no repitas seguido.
 - **Anti-repetición de temas:** cada post lleva un `tema` (kebab-case, ej. `no-shows`,
-  `aparecer-en-google`, `citas-recurrentes`). El generador recibe la lista de `titulo — tema`
-  publicados y NO repite ángulos.
+  `aparecer-en-google`, `sesiones-recurrentes`). El generador NO repite ángulos.
 
 ## Hooks (la regla más importante)
-4-9 palabras, sobre el espectador (su plata/tiempo/clientes), concreto y con tensión. Debe pasar el
-auto-test: golpea en <1s, es específico, no es sobre la app, da curiosidad/urgencia.
-Palancas: pérdida en plata/tiempo · callout al rubro · "el error que…" · dato que sorprende ·
-consecuencia de un mal hábito · contrarian · pregunta con tensión · open loop.
-Prohibidos: avisos ("Agenda online para tu negocio"), CTA disfrazado ("Tu mini-web en 5 minutos"),
-genéricos sin tensión, cualquiera que empiece con "Agendamelo…".
-Banco de ejemplos: ver `src/prompt.js` (sección HOOKS).
+4-7 palabras, sobre el espectador (su plata/tiempo/clientes), concreto y con tensión. Auto-test:
+golpea en <1s, es específico, no es sobre la app, da curiosidad/urgencia. Prohibidos: avisos, CTA
+disfrazado, genéricos sin tensión, cualquiera que empiece con "Agendamelo…". Banco: ver `src/prompt.js`.
 
-## Estrategia de CTA
+## Idioma (regla dura)
+Español neutro/chileno **sin voseo argentino** (nada de "tenés/hacé/mirá/dale"). El **voseo chileno**
+("tenís/podís/cachái") es aceptable SOLO en hooks informales (sobre todo manicure), con moderación.
+Acentos y signos siempre correctos. Descripciones de comunas: neutro estricto, sin juicios.
+
+## Integridad de datos (no mentir)
+Agendamelo es nuevo: **NUNCA** presentes números como resultados reales de clientes. En `stat` el dato
+es (a) precio de mercado del nicho (con `source` = "precios de mercado en Chile") o (b) un cálculo de
+tiempo claramente hipotético. Beneficios futuros en condicional ("podrías", "deja de").
+
+## Estrategia de CTA (sin "gratis")
+CTA canónico: **"Configura tu sitio sin costo y publícalo desde $4.990/mes → link en bio"**.
+Variantes: "Tu sitio + agenda en 5 minutos → agendamelo.cl" · "Aparece en Google y recibe reservas
+solas → link en bio" · "Desde $4.990 al mes, sin comisión ni contrato → link en bio".
 - educativo → "Sígueme para más" / "Guarda este tip".
 - plataforma → "Míralo en agendamelo.cl · Link en bio".
-- venta → "Crea tu mini-web" / "Arma tu agenda online" / "Pruébalo gratis" · Link en bio · agendamelo.cl.
+- venta → "Configura tu sitio sin costo" / "Arma tu agenda en 5 minutos · Publica desde $4.990/mes".
+**PROHIBIDO:** "gratis", "prueba gratis", "primer mes gratis", "trial", "sin compromiso".
 
 ## Caption (lo que va en TikTok) y hashtags
-- Caption parte con 👇×4 (empuja el texto para no tapar la imagen) + descripción larga (230-350
-  palabras, con valor + preguntas reales de búsqueda) + 5 hashtags.
-- 5 hashtags exactos, **siempre `#agendamelo`**: 1 amplio + 2-3 de rubro/tema + 1 local/intención.
-
-## Reglas de marca (fijas)
-Español neutro/chileno **sin voseo**; márgenes seguros 230/430; render 2x; íconos SVG; acento por
-nicho; logo y fuentes self-hosted. Diseño impecable y consistente en TODO post.
+- Caption parte con 👇×4 + descripción larga (230-350 palabras, con valor + preguntas reales de
+  búsqueda) + 5 hashtags.
+- 5 hashtags exactos, **siempre `#agendamelo`** + 2-3 de rubro/tema (el sistema garantiza el del nicho).
 
 ## Cómo publicar (operación diaria)
-TikTok no tiene API de subida en este stack, así que la publicación es **manual** (rápida). Flujo:
-1. **Semanal:** `/generar 21` (≈ una semana de contenido). Quedan listos (renderizado).
-2. **Diario:** `/dia` → recibes 3 posts variados en Telegram (imagen o álbum de carrusel) + el título
-   y el caption listos para copiar.
-3. **Sube a TikTok** (app o tiktok.com/upload): foto única o **carrusel** (sube las 3-4 láminas en
-   orden), pega el caption (descripción + 5 hashtags), **agrega un audio en tendencia** (TikTok premia
-   el sonido incluso en fotos) y publica. Reparte los 3 en el día (mañana/mediodía/tarde).
-   *Tip:* en el editor web de TikTok puedes **programar** los 3 posts a horas fijas y dejarlos agendados.
-4. (Opcional) `/publicado <id>` para llevar registro de lo que está en vivo.
+TikTok no tiene API de subida en este stack → publicación **manual**. Flujo:
+1. **Semanal:** `/generar 21` (≈ una semana). Quedan `renderizado`.
+2. **Diario:** `/dia` → 3 posts variados en Telegram + título y caption listos.
+3. **Sube a TikTok**: foto única o carrusel (láminas en orden), pega el caption, **agrega audio en
+   tendencia** y publica. Reparte los 3 en el día.
 
-Comandos: `/generar` · `/dia` · `/cola` · `/reporte` · `/estado` · `/ver <id>` · `/textos` ·
-`/siguiente` · `/enviar` · `/rehacer <id>` · `/publicado <id>` · `/borrar <id>`.
-Estados: pendiente → renderizado → enviado (lo tienes para subir) → publicado (en vivo).
+Estados: `pendiente → renderizado → enviado`.
 
-## KPIs a mirar (para iterar la línea)
-Retención/watch time, **guardados** y **compartidos** (señal de valor), comentarios, visitas al
-perfil y **clics al link en bio**. Si un pilar/nicho/plantilla rinde, súbele el peso en el reparto.
+## KPIs a mirar
+Retención/watch time, **guardados** y **compartidos**, comentarios, visitas al perfil y **clics al
+link en bio**. Si un nicho/plantilla rinde, súbele el peso en el reparto.
