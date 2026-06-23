@@ -40,8 +40,13 @@ const assetsOk = assets.every((a) => existsSync(join(ROOT, a)));
 log(`${assetsOk ? '✓' : '✗'} Assets de marca (logo + fuentes) ${assetsOk ? 'presentes' : 'faltan'}`);
 if (!assetsOk) problems.push('Faltan assets de marca (logo/fuentes).');
 
-const envOk = existsSync(join(ROOT, '.env'));
-log(`${envOk ? '✓' : '⚠️'} .env ${envOk ? 'presente' : 'no creado (necesario para el bot/Telegram)'}`);
+// Las credenciales pueden venir de .env (local) o inyectadas por docker-compose (VPS):
+// validamos las variables reales, no solo el archivo.
+const envVarsOk = !!(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
+const envFileOk = existsSync(join(ROOT, '.env'));
+const credOk = envVarsOk || envFileOk;
+log(`${credOk ? '✓' : '⚠️'} Credenciales Telegram ${envVarsOk ? 'cargadas en el entorno' : envFileOk ? 'en .env (sin cargar aún)' : 'faltan (crea .env o pásalas por docker-compose)'}`);
+if (!credOk) problems.push('Faltan TELEGRAM_BOT_TOKEN/CHAT_ID: el bot no podrá enviar.');
 
 // ---------- 2) CSV ----------
 log('\n*2) CSV (integridad)*');
