@@ -75,7 +75,9 @@ async function api(method, body) {
   const res = await fetch(`${API}/${method}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
   });
-  return res.json();
+  const json = await res.json();
+  if (!json.ok) console.error(`[telegram] ${method} falló: ${json.error_code} ${json.description}`);
+  return json;
 }
 async function reply(chat, text) {
   if (TEST) { console.log(`[BOT→${chat}]\n${text}\n`); return; }
@@ -223,7 +225,8 @@ async function handle(chat, text) {
       await reply(chat, '🔎 Revisando proyecto...');
       try {
         const e = await runScript(['src/review.js']);
-        await reply(chat, (e.out || e.err || 'Sin salida.').slice(-3800));
+        // Texto plano: el reporte trae contenido del CSV (hooks/temas/ids) que rompe el parseo Markdown de Telegram.
+        await replyText(chat, (e.out || e.err || 'Sin salida.').slice(-3800));
       } finally { busy = false; }
       return;
     }
