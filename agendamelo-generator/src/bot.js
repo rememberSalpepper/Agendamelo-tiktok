@@ -45,7 +45,6 @@ const AYUDA = [
   '',
   '*Gestionar*',
   '/rehacer <id> — vuelve a renderizar un post',
-  '/publicado <id> — márcalo como publicado en TikTok',
   '/borrar <id> — elimina una idea',
   '/ayuda — esta lista',
 ].join('\n');
@@ -102,15 +101,15 @@ const tail = (s, n = 300) => (s || '').trim().split('\n').slice(-3).join('\n').s
 
 function estado() {
   const rows = readRows();
-  const c = { pendiente: 0, renderizado: 0, enviado: 0, publicado: 0, otro: 0 };
+  const c = { pendiente: 0, renderizado: 0, enviado: 0, otro: 0 };
   for (const r of rows) (c[r.estado] !== undefined ? c[r.estado]++ : c.otro++);
   return `📊 *Estado Agendamelo*\nTotal: ${rows.length}\n• Pendientes (sin imagen): ${c.pendiente}`
-    + `\n• Listas: ${c.renderizado}\n• Enviadas (por subir): ${c.enviado}\n• Publicadas: ${c.publicado}`;
+    + `\n• Listas: ${c.renderizado}\n• Enviadas: ${c.enviado}`;
 }
 
 const strip = (s) => (s || '').replace(/\*(.+?)\*/g, '$1');
 
-// Cola de publicación: lo que está listo o entregado pero aún no publicado.
+// Cola: lo que está listo (renderizado) o ya entregado (enviado).
 function cola() {
   const rows = readRows().filter((r) => r.estado === 'renderizado' || r.estado === 'enviado');
   if (!rows.length) return 'No hay posts en cola. Usa /generar para crear más.';
@@ -121,24 +120,15 @@ function cola() {
   return `🗂️ Cola de publicación (${rows.length})  🟢 lista · 📤 enviada\n\n${lines.join('\n')}`;
 }
 
-// Reporte de variedad sobre lo que aún no se publica (para asegurar cobertura por nicho/orientación/formato).
+// Reporte de variedad (para asegurar cobertura por nicho/orientación/formato).
 function reporte() {
-  const active = readRows().filter((r) => r.estado !== 'publicado');
+  const active = readRows();
   if (!active.length) return 'Nada en preparación. Usa /generar.';
   const by = (k) => Object.entries(active.reduce((m, r) => ((m[r[k]] = (m[r[k]] || 0) + 1), m), {}))
     .sort((a, b) => b[1] - a[1]).map(([v, n]) => `${v}: ${n}`).join(' · ');
   return `📈 Reporte (sin publicar: ${active.length})\nNicho — ${by('niche')}\nOrientación — ${by('orientacion')}\nFormato — ${by('formato')}`;
 }
 
-// Marca un post como publicado en TikTok (registro de lo que está en vivo).
-function publicado(id) {
-  const rows = readRows();
-  const r = rows.find((x) => x.id === id);
-  if (!r) return `No encontré ${id}.`;
-  r.estado = 'publicado';
-  writeFileSync(CSV, stringify(rows, { header: true, columns: Object.keys(rows[0]) }));
-  return `✅ ${id} marcado como publicado en TikTok.`;
-}
 
 function borrar(id) {
   const rows = readRows();
@@ -259,9 +249,6 @@ async function handle(chat, text) {
       } finally { busy = false; }
       return;
     }
-    case '/publicado':
-      if (!arg) return reply(chat, 'Uso: /publicado AGENDA-IDEA-024');
-      return reply(chat, publicado(arg));
     case '/borrar':
       if (!arg) return reply(chat, 'Uso: /borrar AGENDA-IDEA-024');
       return reply(chat, borrar(arg));
@@ -287,7 +274,6 @@ async function main() {
     { command: 'siguiente', description: 'Envia el proximo post' },
     { command: 'enviar', description: 'Envia N posts listos' },
     { command: 'rehacer', description: 'Vuelve a renderizar un post' },
-    { command: 'publicado', description: 'Marca un post como publicado en TikTok' },
     { command: 'borrar', description: 'Elimina una idea por id' },
     { command: 'ayuda', description: 'Lista de comandos' },
   ] }).catch(() => {});
@@ -296,7 +282,7 @@ async function main() {
   const PORT = process.env.PORT || 3000;
   createServer((req, res) => {
     const rows = (() => { try { return readRows(); } catch { return []; } })();
-    const c = { total: rows.length, pendiente: 0, renderizado: 0, enviado: 0, publicado: 0 };
+    const c = { total: rows.length, pendiente: 0, renderizado: 0, enviado: 0 };
     for (const r of rows) if (c[r.estado] !== undefined) c[r.estado]++;
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ ok: true, servicio: 'agendamelo-bot', ...c }));

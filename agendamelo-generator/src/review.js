@@ -76,7 +76,7 @@ if (dupTemas.length) problems.push(`Temas repetidos: ${dupTemas.length} (revisa 
 
 // ---------- 3) IDEAS (variedad) ----------
 log('\n*3) Ideas (variedad)*');
-const activos = rows.filter((r) => r.estado !== 'publicado');
+const activos = rows;
 log(`• Estado — ${fmt(tally(rows, 'estado'))}`);
 log(`• Nicho — ${fmt(tally(activos, 'niche'))}`);
 log(`• Orientación — ${fmt(tally(activos, 'orientacion'))}`);
@@ -100,7 +100,7 @@ let sinRender = 0, incompletos = 0;
 for (const r of rows) {
   const files = (r.imagen_url || '').split(',').map((p) => p.trim()).filter(Boolean);
   files.forEach((f) => referenced.add(f.split('/').pop()));
-  const debeTener = r.estado === 'renderizado' || r.estado === 'enviado' || r.estado === 'publicado';
+  const debeTener = r.estado === 'renderizado' || r.estado === 'enviado';
   if (debeTener) {
     if (!files.length) { sinRender++; if (sinRender <= 5) log(`  ✗ ${r.id}: estado ${r.estado} pero sin imagen_url`); continue; }
     const faltan = files.filter((f) => !existsSync(join(ROOT, f)));
