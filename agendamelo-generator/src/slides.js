@@ -38,17 +38,22 @@ const SLIDE_CSS = `
   font-weight: 700; font-size: 31px; color: #fff; background: var(--grad-accent);
   padding: 16px 36px; border-radius: 999px; box-shadow: 0 12px 26px var(--accent-soft); }
 
-/* PUNTO (denso: encabezado + texto + viñetas), centrado para llenar la lámina) */
-.pt-main { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 30px; }
-.pt-top { display: flex; align-items: center; gap: 26px; }
-.pt-index { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 118px; line-height: 0.8;
+/* PUNTO (denso: encabezado + texto + viñetas + dato clave), llena la lámina de arriba a abajo */
+.pt-main { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 26px; }
+.pt-top { display: flex; align-items: center; gap: 24px; }
+.pt-index { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 110px; line-height: 0.8;
   letter-spacing: -4px; background: var(--grad-accent); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.pt-icon { flex: 0 0 auto; width: 110px; height: 110px; border-radius: 28px; background: var(--grad-accent);
+.pt-icon { flex: 0 0 auto; width: 100px; height: 100px; border-radius: 26px; background: var(--grad-accent);
   color: #fff; display: grid; place-items: center; box-shadow: 0 14px 30px var(--accent-soft); }
-.pt-title { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 66px; line-height: 1.04;
+.pt-title { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 62px; line-height: 1.03;
   letter-spacing: -1.4px; color: var(--ink); }
-.pt-text { font-size: 41px; line-height: 1.4; color: var(--body); font-weight: 400; }
-.pt-list { margin-top: 8px; }
+.pt-text { font-size: 39px; line-height: 1.38; color: var(--body); font-weight: 400; }
+.pt-list { margin-top: 4px; }
+.pt-hl { display: flex; align-items: center; gap: 18px; background: var(--accent-soft);
+  border: 1px solid var(--line); border-radius: 22px; padding: 24px 28px; margin-top: 6px; }
+.pt-hl .ic { flex: 0 0 auto; width: 54px; height: 54px; border-radius: 15px; color: #fff;
+  background: var(--grad-accent); display: grid; place-items: center; }
+.pt-hl span { font-size: 35px; font-weight: 700; color: var(--ink); line-height: 1.25; }
 
 /* CIERRE (recap + CTA) */
 .cl-main { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 26px; }
@@ -87,16 +92,19 @@ function portada(slide, niche) {
 }
 
 function punto(slide, niche, n) {
-  const bullets = bulletList(slide.bullets, 4);
+  const bullets = bulletList(slide.bullets, 5);
+  const highlight = slide.highlight
+    ? `<div class="pt-hl"><span class="ic">${svg('target', 30)}</span><span>${esc(slide.highlight)}</span></div>` : '';
   return `${brandHeaderHtml(true)}
     <div class="pt-main">
       <div class="pt-top">
         ${n ? `<div class="pt-index">${n}</div>` : ''}
-        <div class="pt-icon">${svg(slide.icon || niche.icon, 56)}</div>
+        <div class="pt-icon">${svg(slide.icon || niche.icon, 54)}</div>
       </div>
       ${slide.title ? `<h2 class="pt-title">${esc(slide.title)}</h2>` : ''}
       ${slide.text ? `<p class="pt-text">${esc(slide.text)}</p>` : ''}
       ${bullets ? `<div class="pt-list s-list">${bullets}</div>` : ''}
+      ${highlight}
     </div>`;
 }
 

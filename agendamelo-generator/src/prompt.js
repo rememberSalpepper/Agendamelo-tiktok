@@ -162,8 +162,9 @@ ${tplLines}
       (nada de láminas casi vacías). Cada slide es {tipo, ...}:
         - {tipo:"portada", hook (gancho fuerte con *énfasis*), subtitle (1 frase potente)}  (lámina 1)
         - {tipo:"punto", title (3-6 palabras), text (1-2 frases que explican la idea), bullets
-          (3-4 frases CORTAS con datos/pasos/ejemplos concretos del rubro), icon}  (1 o 2 láminas)
-          icon ∈ [${ICONS.join(', ')}]. Esta es la lámina de contenido: llénala de valor real.
+          (4-5 frases CORTAS con datos/pasos/ejemplos concretos del rubro), highlight (1 frase de
+          "dato clave" o conclusión potente que se destaca), icon}  (1 o 2 láminas)
+          icon ∈ [${ICONS.join(', ')}]. Es la lámina de contenido: DEBE ir bien cargada de valor real.
         - {tipo:"cierre", title (frase de cierre, puede llevar *énfasis*), text (1 frase), bullets
           (2-3 frases de recap de lo aprendido), cta {title, sub}}  (última)
       El resto de campos comunes (items, cards, figure, etc.) van en null cuando formato=carrusel.
