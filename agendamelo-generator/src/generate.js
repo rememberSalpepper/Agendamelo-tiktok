@@ -20,7 +20,7 @@ import { buildPrompt, TIPOS, ICONS, NICHOS, ORIENTACIONES, FORMATOS } from './pr
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
 const today = new Date().toISOString().slice(0, 10);
-const N = parseInt(process.argv[2], 10) || 14;
+const N = parseInt(process.argv[2], 10) || 7;
 
 // ---------- Repartos balanceados (orientación y plantilla) ----------
 // Orientaciones: ~40% educativo, ~30% plataforma, ~30% venta.

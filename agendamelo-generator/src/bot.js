@@ -28,7 +28,7 @@ const AYUDA = [
   '🤖 *Comandos Agendamelo*',
   '',
   '*Crear*',
-  '/generar [N] — genera N ideas nuevas con Codex (default 14) y las renderiza',
+  '/generar [N] — genera N ideas nuevas con Codex (default 7) y las renderiza',
   '',
   '*Revisar*',
   '/revisar — revisión integral (sistema, CSV, ideas, imágenes)',
@@ -154,15 +154,16 @@ async function handle(chat, text) {
       return reply(chat, estado());
     case '/generar': {
       if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera a que termine.');
-      const n = parseInt(arg, 10) || 14;
+      const n = parseInt(arg, 10) || 7;
       busy = true;
       await reply(chat, `🧠 Generando ${n} ideas con Codex... (1-3 min)`);
       try {
         const g = await runScript(['src/generate.js', String(n)]);
-        if (g.code !== 0) return reply(chat, `❌ Error al generar:\n${tail(g.err || g.out)}`);
+        if (g.code !== 0) return replyText(chat, `❌ Error al generar:\n${tail(g.err || g.out)}`);
+        await reply(chat, `✍️ ${n} ideas generadas. Renderizando imágenes... (puede tardar)`);
         await runScript(['src/lint.js']);
         const r = await runScript(['src/pipeline.js', 'pending']);
-        if (r.code !== 0) return reply(chat, `❌ Error al renderizar:\n${tail(r.err || r.out)}`);
+        if (r.code !== 0) return replyText(chat, `❌ Error al renderizar:\n${tail(r.err || r.out)}`);
         await reply(chat, `✅ Listas ${n} ideas nuevas. Usa /enviar para recibirlas.`);
       } finally { busy = false; }
       return;
@@ -176,7 +177,7 @@ async function handle(chat, text) {
       try {
         for (const p of picks) {
           const e = await runScript(['src/telegram.js', 'one', p.id], { TELEGRAM_CHAT_ID: String(chat) });
-          if (e.code !== 0) { await reply(chat, `❌ ${tail(e.err || e.out)}`); break; }
+          if (e.code !== 0) { await replyText(chat, `❌ ${tail(e.err || e.out)}`); break; }
         }
       } finally { busy = false; }
       return;
@@ -187,7 +188,7 @@ async function handle(chat, text) {
       await reply(chat, '📤 Enviando...');
       try {
         const e = await runScript(['src/telegram.js', arg || ''], { TELEGRAM_CHAT_ID: String(chat) });
-        if (e.code !== 0) return reply(chat, `❌ Error al enviar:\n${tail(e.err || e.out)}`);
+        if (e.code !== 0) return replyText(chat, `❌ Error al enviar:\n${tail(e.err || e.out)}`);
       } finally { busy = false; }
       return;
     }
@@ -196,7 +197,7 @@ async function handle(chat, text) {
       busy = true;
       try {
         const e = await runScript(['src/telegram.js', '1'], { TELEGRAM_CHAT_ID: String(chat) });
-        if (e.code !== 0) return reply(chat, `❌ ${tail(e.err || e.out)}`);
+        if (e.code !== 0) return replyText(chat, `❌ ${tail(e.err || e.out)}`);
       } finally { busy = false; }
       return;
     }
@@ -236,7 +237,7 @@ async function handle(chat, text) {
       busy = true;
       try {
         const e = await runScript(['src/telegram.js', 'ver', arg], { TELEGRAM_CHAT_ID: String(chat) });
-        if (e.code !== 0) return reply(chat, `❌ ${tail(e.err || e.out)}`);
+        if (e.code !== 0) return replyText(chat, `❌ ${tail(e.err || e.out)}`);
       } finally { busy = false; }
       return;
     }
@@ -247,7 +248,7 @@ async function handle(chat, text) {
       await reply(chat, `🎨 Re-renderizando ${arg}...`);
       try {
         const e = await runScript(['src/pipeline.js', 'one', arg]);
-        if (e.code !== 0) return reply(chat, `❌ ${tail(e.err || e.out)}`);
+        if (e.code !== 0) return replyText(chat, `❌ ${tail(e.err || e.out)}`);
         await reply(chat, `✅ ${arg} re-renderizado. Usa /ver ${arg} para revisarlo.`);
       } finally { busy = false; }
       return;
@@ -266,7 +267,7 @@ async function main() {
 
   // Registra el menú de comandos (lo que aparece al teclear "/") al arrancar.
   await api('setMyCommands', { commands: [
-    { command: 'generar', description: 'Genera N ideas nuevas con Codex (default 14)' },
+    { command: 'generar', description: 'Genera N ideas nuevas con Codex (default 7)' },
     { command: 'revisar', description: 'Revision integral (sistema, CSV, ideas, imagenes)' },
     { command: 'dia', description: 'El set del dia: 3 posts variados' },
     { command: 'cola', description: 'Lista de posts listos por publicar' },
