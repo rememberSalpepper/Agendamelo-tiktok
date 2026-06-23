@@ -92,10 +92,11 @@ const schema = {
               // carrusel (3-4 slides: portada -> punto -> cierre)
               slides: arr({
                 type: 'object', additionalProperties: false,
-                required: ['tipo', 'title', 'text', 'hook', 'subtitle', 'icon', 'badge', 'cta'],
+                required: ['tipo', 'title', 'text', 'bullets', 'hook', 'subtitle', 'icon', 'badge', 'cta'],
                 properties: {
                   tipo: { type: 'string', enum: ['portada', 'punto', 'cierre'] },
-                  title: S(), text: S(), hook: S(), subtitle: S(), icon: S(), badge: S(),
+                  title: S(), text: S(), bullets: arr({ type: 'string' }),
+                  hook: S(), subtitle: S(), icon: S(), badge: S(),
                   cta: {
                     type: ['object', 'null'], additionalProperties: false, required: ['title', 'sub'],
                     properties: { title: { type: 'string' }, sub: { type: 'string' } },

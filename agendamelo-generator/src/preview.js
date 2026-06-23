@@ -62,9 +62,12 @@ const carousel = {
   niche: 'kinesiologos', bg: 4,
   slides: [
     { tipo: 'portada', hook: 'Por esto tus pacientes *no terminan* la terapia', subtitle: 'Y cómo lograr que completen su recuperación.' },
-    { tipo: 'punto', icon: 'repeat', title: 'El problema no es la 1ª sesión', text: 'Es la 4ª, la 6ª, la que se olvida. Sin sistema, la serie se corta.' },
-    { tipo: 'punto', icon: 'bell', title: 'Agéndalas todas de una vez', text: 'Con citas recurrentes dejas las 8 sesiones y el paciente recibe recordatorio.' },
-    { tipo: 'cierre', title: 'Menos ausencias, *más altas*', text: 'Tu agenda kine ordenada en un solo lugar.', cta: venta('Crea tu agenda online') },
+    { tipo: 'punto', icon: 'repeat', title: 'El problema no es la 1ª sesión', text: 'Es la 4ª, la 6ª, la que se olvida.',
+      bullets: ['Sin sistema, la serie se corta', '1 de cada 3 pacientes abandona', 'Cada hueco es un box vacío', 'La rehabilitación no funciona a medias'] },
+    { tipo: 'punto', icon: 'bell', title: 'Agéndalas todas de una vez', text: 'Las citas recurrentes hacen el trabajo por ti.',
+      bullets: ['Dejas las 8-10 sesiones reservadas', 'Recordatorio antes de cada hora', 'El paciente no se pierde ninguna', 'Tu agenda ordenada sin esfuerzo'] },
+    { tipo: 'cierre', title: 'Menos ausencias, *más altas*', text: 'Tu agenda kine ordenada en un solo lugar.',
+      bullets: ['Series completas, no a medias', 'Recordatorios automáticos', 'Historial de cada paciente'], cta: venta('Crea tu agenda online') },
   ],
 };
 

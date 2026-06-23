@@ -158,11 +158,14 @@ ${tplLines}
       negocio en el mock), rows (2-3 ítems cortos de la UI; el último simula la hora/acción elegida,
       ej "Hoy 16:30"), button (texto del botón, ej "Reservar hora"), note (qué funcionalidad muestra).
     * comparacion: antes (3-4 frases del "sin Agendamelo"), despues (3-4 del "con Agendamelo"), cierre.
-    * carrusel: slides (3-4 láminas, en orden). Cada slide es {tipo, ...}:
-        - {tipo:"portada", hook (gancho fuerte con *énfasis*), subtitle, badge?}  (lámina 1)
-        - {tipo:"punto", title (3-5 palabras), text (1-2 frases con valor), icon}  (1 o 2 láminas)
-          icon ∈ [${ICONS.join(', ')}].
-        - {tipo:"cierre", title (frase de cierre, puede llevar *énfasis*), text, cta {title, sub}}  (última)
+    * carrusel: slides (3-4 láminas, en orden). Las láminas deben venir BIEN CARGADAS de información
+      (nada de láminas casi vacías). Cada slide es {tipo, ...}:
+        - {tipo:"portada", hook (gancho fuerte con *énfasis*), subtitle (1 frase potente)}  (lámina 1)
+        - {tipo:"punto", title (3-6 palabras), text (1-2 frases que explican la idea), bullets
+          (3-4 frases CORTAS con datos/pasos/ejemplos concretos del rubro), icon}  (1 o 2 láminas)
+          icon ∈ [${ICONS.join(', ')}]. Esta es la lámina de contenido: llénala de valor real.
+        - {tipo:"cierre", title (frase de cierre, puede llevar *énfasis*), text (1 frase), bullets
+          (2-3 frases de recap de lo aprendido), cta {title, sub}}  (última)
       El resto de campos comunes (items, cards, figure, etc.) van en null cuando formato=carrusel.
   Los campos que NO aplican van en null (incluido "slides" en las de formato imagen).
   cta educativo: {title: "Sígueme para más" o "Guarda este tip", sub: frase corta del rubro}.
