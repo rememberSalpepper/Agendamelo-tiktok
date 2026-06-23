@@ -16,6 +16,7 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { buildPrompt, TIPOS, ICONS, NICHOS, ORIENTACIONES, FORMATOS } from './prompt.js';
+import { getNiche } from './niches.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
@@ -154,16 +155,35 @@ function cleanContent(c) { // quita los null para que el render reciba solo lo q
   for (const [k, v] of Object.entries(c)) if (v !== null && v !== undefined) o[k] = v;
   return o;
 }
-function fixHashtags(tags) {
-  let t = tags.map((x) => x.toLowerCase().replace(/\s+/g, '')).filter(Boolean);
-  if (!t.includes('#agendamelo')) t = ['#agendamelo', ...t];
-  t = [...new Set(t)].slice(0, 5);
-  // Relleno sin duplicar, por si vinieron menos de 5 únicos.
-  for (const f of ['#agendaonline', '#paginaweb', '#pymeschile', '#emprendimiento']) {
-    if (t.length >= 5) break;
-    if (!t.includes(f)) t.push(f);
+// Hashtags ENFOCADOS AL NICHO y deterministas: siempre #agendamelo + 2 del rubro
+// (rotando para variar entre posts) + los del tema que propuso el LLM + relleno.
+const BROAD_TAGS = ['#agendaonline', '#reservasonline', '#pymeschile', '#emprendimientochile', '#negocioschile', '#paginaweb'];
+function cleanTag(x) {
+  return '#' + String(x).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // saca tildes
+    .replace(/[^a-z0-9]/g, '');                        // solo letras/números
+}
+function fixHashtags(tags, niche) {
+  const pool = (getNiche(niche).hashtags || []).map(cleanTag);
+  const out = ['#agendamelo'];
+  // 2 del nicho, partiendo en un punto aleatorio del pool para que no se repitan iguales.
+  const start = pool.length ? Math.floor(Math.random() * pool.length) : 0;
+  for (let i = 0, added = 0; i < pool.length && added < 2; i++) {
+    const c = pool[(start + i) % pool.length];
+    if (!out.includes(c)) { out.push(c); added++; }
   }
-  return t.join(' ');
+  // Los que propuso el LLM (relevantes al tema puntual), hasta llegar a 4.
+  for (const raw of (tags || [])) {
+    if (out.length >= 4) break;
+    const c = cleanTag(raw);
+    if (c.length > 1 && !out.includes(c)) out.push(c);
+  }
+  // Completa hasta 5: primero más del nicho, luego amplios/locales.
+  for (const c of [...pool, ...BROAD_TAGS.map(cleanTag)]) {
+    if (out.length >= 5) break;
+    if (!out.includes(c)) out.push(c);
+  }
+  return out.slice(0, 5).join(' ');
 }
 
 // Columnas del CSV (define el orden; se usa cuando el CSV está vacío = solo header).
@@ -210,7 +230,7 @@ function main() {
     Object.assign(row, {
       id, estado: 'pendiente', niche: idea.niche, orientacion, formato, tipo_plantilla: tipo,
       titulo: idea.titulo, tema: idea.tema || '', hook: idea.hook, descripcion: idea.descripcion,
-      hashtags: fixHashtags(idea.hashtags), fecha_creacion: today, imagen_json: JSON.stringify(cleanContent(c)),
+      hashtags: fixHashtags(idea.hashtags, idea.niche), fecha_creacion: today, imagen_json: JSON.stringify(cleanContent(c)),
     });
     newRows.push(row);
     console.log(`  ✓ ${id}  (${idea.niche}/${orientacion}/${formato}/${tipo})  ${idea.hook}`);

@@ -129,7 +129,8 @@ ${tplLines}
   "citas-recurrentes", "mostrar-trabajos"). Sirve para no repetir ángulos. Debe ser ÚNICO en el lote.
 - hook: ver sección HOOKS. Fuerte, con *énfasis*, sin voseo.
 - subtitle: refuerza el hook sin repetirlo; agrega contexto o el "por qué importa".
-- descripcion: MUY LARGA (230 a 350 palabras), 2 o 3 párrafos, español con acentos. DEBE ENSEÑAR:
+- descripcion: MUY LARGA (250 a 350 palabras, MÍNIMO 1200 caracteres — esto es obligatorio, no
+  entregues descripciones cortas), 2 o 3 párrafos, español con acentos. DEBE ENSEÑAR:
   entrega al menos un consejo concreto y accionable que la persona pueda aplicar HOY, aunque nunca
   use Agendamelo (ej. "bloquea 2 horarios fijos para tus controles", "responde las 3 dudas típicas
   en una sección de preguntas frecuentes"). Profundiza el dolor con la jerga del rubro (qué pasa,
@@ -140,10 +141,11 @@ ${tplLines}
   kinesiología", "cómo aparecer en Google con mi consulta"). Cierra con CTA acorde a la orientación.
   NO incluyas hashtags ni asteriscos. Regla de oro: si borras toda mención a Agendamelo y el texto
   igual le sirve a un dueño de negocio, está bien hecho.
-- hashtags: EXACTAMENTE 5, en minúscula, sin tildes ni espacios internos, con #. Incluye SIEMPRE
-  #agendamelo. Mezcla: 1 amplio (#emprendimiento o #negocios) + 2-3 del rubro/tema (#barberia,
-  #manicure, #psicologia, #psicopedagogia, #kinesiologia, #clasesparticulares, #agendaonline,
-  #paginaweb) + 1 local/intención (#pymeschile, #emprendedoreschile, #clientes).
+- hashtags: 5 en minúscula, sin tildes ni espacios, con #. ENFÓCALOS AL RUBRO y al tema puntual
+  del post (ej. #barberiachile, #unaschile, #psicologochile, #kinesiologia, #clasesparticulares,
+  #apoyoescolar, #saludmental, #reforzamiento). Prioriza hashtags específicos del nicho y del ángulo,
+  NO genéricos. El sistema garantiza automáticamente que SIEMPRE se incluya #agendamelo y al menos
+  2 hashtags del rubro, así que no malgastes espacio en hashtags amplios o repetidos.
 - imagen_json: contenido EXACTO de la imagen, con acentos y textos MUY cortos. Campos comunes:
   badge (etiqueta corta del ángulo; si va null se usa la del rubro), subtitle (frase de apoyo bajo
   el hook), cta {title, sub}, y SEGÚN la plantilla:

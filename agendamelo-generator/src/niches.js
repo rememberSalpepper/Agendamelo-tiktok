@@ -14,6 +14,7 @@ export const NICHES = {
     jerga: 'fade, degradado, corte clásico, afeitado a navaja, perfilado de barba, combo corte+barba',
     dolor: 'sillas vacías, clientes que no llegan, agendar cortes por WhatsApp/DM, horas muertas',
     recurrente: 'el cliente fiel que vuelve cada 2-3 semanas: deja su próxima hora agendada sola',
+    hashtags: ['#barberia', '#barberiachile', '#barbershop', '#cortedepelo', '#fade', '#barbero'],
   },
   manicure: {
     label: 'Manicure',
@@ -22,6 +23,7 @@ export const NICHES = {
     jerga: 'esmaltado semipermanente, kapping, soft gel, acrílicas, nail art, diseños, retiro, mantención',
     dolor: 'clientas que no llegan, agendar por DM de Instagram, mostrar tus diseños, citas que chocan',
     recurrente: 'la mantención cada 3-4 semanas: agenda la serie de citas de una vez',
+    hashtags: ['#manicure', '#unaschile', '#nailart', '#manicurista', '#esmaltadosemipermanente', '#unas'],
   },
   psicopedagogos: {
     label: 'Psicopedagogía',
@@ -30,6 +32,7 @@ export const NICHES = {
     jerga: 'evaluación, sesiones de apoyo, reforzamiento, informe, estrategias, apoyo escolar, NEE',
     dolor: 'coordinar con apoderados, recordar sesiones semanales, agenda de varios niños, sesiones que se caen',
     recurrente: 'el plan de apoyo es semanal: deja agendadas todas las sesiones del mes con cada familia',
+    hashtags: ['#psicopedagogia', '#psicopedagoga', '#apoyoescolar', '#aprendizaje', '#educacionchile', '#nee'],
   },
   psicologos: {
     label: 'Psicología',
@@ -38,6 +41,7 @@ export const NICHES = {
     jerga: 'sesión, primera consulta, proceso terapéutico, online o presencial, ficha, encuadre',
     dolor: 'sesiones que se caen a última hora, coordinar horarios, recordatorios, pacientes recurrentes',
     recurrente: 'la terapia es semanal: agenda el mismo bloque por varias semanas y deja que el sistema recuerde',
+    hashtags: ['#psicologia', '#psicologochile', '#saludmental', '#terapia', '#psicologoonline', '#psicologa'],
   },
   kinesiologos: {
     label: 'Kinesiología',
@@ -46,6 +50,7 @@ export const NICHES = {
     jerga: 'sesión, evaluación, rehabilitación, plan de ejercicios, control, terapia manual',
     dolor: 'series de sesiones que se interrumpen, pacientes que abandonan, recordar la próxima hora',
     recurrente: 'la rehabilitación es una serie: agenda las 8-10 sesiones juntas para que el paciente no abandone',
+    hashtags: ['#kinesiologia', '#kinesiologochile', '#rehabilitacion', '#kine', '#terapiafisica', '#kinesiologo'],
   },
   profesores: {
     label: 'Clases particulares',
@@ -54,6 +59,7 @@ export const NICHES = {
     jerga: 'clase particular, reforzamiento, cupos, prueba/PAES, online o presencial, materia',
     dolor: 'coordinar horarios con apoderados, clases que se cancelan, llenar cupos, cobrar a tiempo',
     recurrente: 'las clases son semanales: agenda el horario fijo del semestre y evita el caos del WhatsApp',
+    hashtags: ['#clasesparticulares', '#profesorparticular', '#reforzamiento', '#preuniversitario', '#clasesonline', '#paes'],
   },
 };
 
@@ -64,5 +70,6 @@ export function getNiche(key) {
   return NICHES[key] || {
     label: 'Agendamelo', accent: '#EA580C', accent2: '#F59E0B', soft: '#FDF0E7',
     icon: 'sparkle', badge: 'Para tu negocio', jerga: '', dolor: '', recurrente: '',
+    hashtags: ['#agendaonline', '#reservasonline', '#paginaweb', '#emprendimientochile'],
   };
 }
