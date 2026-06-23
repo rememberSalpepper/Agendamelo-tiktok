@@ -9,8 +9,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const samples = [
   // 1) BARBERÍAS — venta — comparacion
   { niche: 'barberias', orientacion: 'venta', tipo: 'comparacion', bg: 1,
-    hook: 'Agendar por WhatsApp te *cuesta clientes*',
-    subtitle: 'Lo que cambia cuando tu barbería reserva sola.',
+    hook: '2 sillas vacías al día = *$400 mil al mes*',
+    subtitle: 'La plata que se va por no tener agenda online.',
     antes: ['Respondes el celular a cada rato', 'Clientes que no llegan', 'Horas muertas entre citas', 'Nadie te encuentra en Google'],
     despues: ['Reservan solos, 24/7', 'Recordatorio automático', 'Agenda llena y ordenada', 'Apareces en Google'],
     cierre: 'Mini-web + agenda en un solo lugar.',
@@ -18,8 +18,8 @@ const samples = [
 
   // 2) MANICURE — plataforma — feature (mockup del sitio)
   { niche: 'manicure', orientacion: 'plataforma', tipo: 'feature', bg: 2,
-    hook: 'Reciben tu hora *sin escribirte*',
-    subtitle: 'Así se ve tu salón de uñas en Agendamelo.',
+    hook: 'Tus clientas reservan a las *11 PM*',
+    subtitle: 'Mientras duermes, tu agenda se llena sola.',
     screen_slug: 'unas-belen', screen_title: 'Nails by Belén',
     rows: ['Semipermanente · $15.000', 'Soft gel · $22.000', 'Hoy 16:30'],
     button: 'Reservar hora',
@@ -28,8 +28,8 @@ const samples = [
 
   // 3) PSICOPEDAGOGÍA — educativo — stat
   { niche: 'psicopedagogos', orientacion: 'educativo', tipo: 'stat', bg: 3,
-    hook: 'El *80%* de los apoderados te busca online',
-    subtitle: 'Si no apareces, eligen a otro.',
+    hook: 'Te googlean antes de *confiarte a su hijo*',
+    subtitle: 'Sin presencia online, el apoderado elige a otro.',
     figure: '80%',
     figure_caption: 'de los apoderados busca apoyo escolar por internet',
     points: ['Una mini-web te da presencia profesional', 'Apareces en Google por tu comuna', 'Reservan la evaluación sin llamar'],
@@ -38,8 +38,8 @@ const samples = [
 
   // 4) PSICOLOGÍA — plataforma — feature (citas recurrentes)
   { niche: 'psicologos', orientacion: 'plataforma', tipo: 'feature', bg: 1,
-    hook: 'Agenda *8 sesiones* en un clic',
-    subtitle: 'Citas recurrentes hechas para terapia.',
+    hook: '¿Reagendas la sesión *cada semana*?',
+    subtitle: 'Las citas recurrentes lo hacen una sola vez.',
     screen_slug: 'psi-rojas', screen_title: 'Consulta J. Rojas',
     rows: ['Sesión semanal · Lun 10:00', 'Repetir por 8 semanas', 'Confirmado'],
     button: 'Agendar serie',
@@ -48,7 +48,7 @@ const samples = [
 
   // 5) KINESIOLOGÍA — educativo — stat
   { niche: 'kinesiologos', orientacion: 'educativo', tipo: 'stat', bg: 4,
-    hook: '1 de cada 3 pacientes *abandona*',
+    hook: 'Kinesiólogo: 1 de cada 3 *no termina*',
     subtitle: 'La terapia que se corta no rehabilita.',
     figure: '1 de 3',
     figure_caption: 'pacientes deja la rehabilitación antes de tiempo',
@@ -58,7 +58,7 @@ const samples = [
 
   // 6) PROFESORES — venta — comparacion
   { niche: 'profesores', orientacion: 'venta', tipo: 'comparacion', bg: 2,
-    hook: 'Coordinar clases por WhatsApp es un *caos*',
+    hook: 'Cada cambio por WhatsApp te *cuesta un alumno*',
     subtitle: 'Ordena tus clases particulares de una vez.',
     antes: ['Cadenas de mensajes con apoderados', 'Clases que se cancelan', 'Cupos que quedan vacíos', 'Cobrar a la suerte'],
     despues: ['Reservan el horario fijo online', 'Recordatorio automático', 'Cupos llenos y visibles', 'Todo en tu panel'],

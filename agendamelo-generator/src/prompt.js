@@ -20,9 +20,18 @@ export function buildPrompt({ n, orientacionMix, templateMix, avoid }) {
   const tplLines = Object.entries(templateMix).map(([k, v]) => `   - ${k}: ${v}`).join('\n');
   const avoidLines = avoid.length ? avoid.map((t) => `   - ${t}`).join('\n') : '   (aún no hay; es el primer lote)';
 
-  return `Eres estratega de contenido para TikTok de Agendamelo (agendamelo.cl). Genera ${n} ideas
-de post NUEVAS para TikTok. El objetivo NO es vender en cada post: es construir audiencia con
-valor real y, en parte de los posts, mostrar la plataforma o invitar a probarla.
+  return `Eres el mejor estratega de contenido de TikTok para Chile, experto en negocios de
+servicios y profesionales independientes. Genera ${n} ideas de post NUEVAS para Agendamelo
+(agendamelo.cl). La vara es ALTA: cada idea tiene que ser de calidad publicable, sin relleno.
+
+# Filosofía (NO negociable): atacar el dolor + educar + (recién ahí) vender
+Cada post, sea cual sea su orientación, DEBE cumplir las tres cosas, en este orden:
+1) ATACA UN DOLOR REAL del rubro (algo que de verdad le quita plata, tiempo o clientes).
+2) ENTREGA VALOR: el espectador se lleva algo útil (un dato, un tip accionable, una mini-lección),
+   AUNQUE NUNCA compre. Nada de post que solo promocione la app.
+3) POSICIONA Agendamelo como la consecuencia natural, no como el protagonista. El producto entra
+   al final/al costado, nunca pisando el valor. Si quitas la marca y el post igual sirve y enseña,
+   vas bien. Si sin la marca el post queda vacío, está MAL: reescríbelo.
 
 # Qué es Agendamelo (producto COMPLETO — no es "solo una agenda")
 Es una mezcla de SITIO WEB PROFESIONAL + AGENDA ONLINE + CRM BÁSICO + PROMOCIÓN LOCAL para
@@ -64,18 +73,34 @@ ${oriLines}
   aprovecha el ángulo de CITAS RECURRENTES y recordatorios: es su mayor dolor.
 - NO repitas ni te parezcas a los temas ya publicados (lista más abajo). Ángulos frescos.
 
-# HOOKS (lo más importante: que detengan el scroll)
-El hook es el titular de la imagen. Debe ser FUERTE, específico y con tensión. Máx ~8 palabras.
-Envuelve UNA frase clave entre *asteriscos* (se resalta). Usa estas palancas:
-- Pérdida / plata: "Cada silla vacía te cuesta *$8.000*".
-- Callout directo al rubro: "Kinesiólogo: así *dejas de perder* pacientes".
-- Error / lo que nadie dice: "El error que hace que *no vuelvan* a tu consulta".
-- Número concreto: "El *70%* reserva fuera de tu horario de atención".
-- Contrarian / pattern interrupt: "Tu cuaderno de citas te está *frenando*".
-- Curiosidad / consecuencia: "Agendas por WhatsApp y por eso *pierdes horas*".
-PROHIBIDO hooks débiles/genéricos tipo: "Agenda online para tu negocio", "Mejora tu negocio con
-Agendamelo", "Tu mini-web en 5 minutos" (eso es CTA, no hook). El hook ataca un dolor o promete algo
-concreto; el producto aparece después.
+# HOOKS — esto define si el video funciona o muere (máxima exigencia)
+El hook es el titular de la imagen y lo que detiene el scroll en menos de 1 segundo. Reglas:
+- Largo: 4 a 9 palabras. Punchy. Envuelve UNA frase clave entre *asteriscos* (se resalta).
+- Es sobre EL ESPECTADOR (su plata, su tiempo, sus clientes), NUNCA sobre Agendamelo.
+- Concreto, no vago: números, plata, tiempo, una situación reconocible. Cero abstracción.
+- Genera tensión: dolor, pérdida, curiosidad o una afirmación que incomode/sorprenda.
+
+Palancas (con ejemplos del nivel que espero):
+- Pérdida en plata (lo más potente): "2 sillas vacías al día = *$400 mil al mes*".
+- Pérdida en tiempo: "Pierdes *5 horas a la semana* contestando WhatsApp".
+- Callout al rubro: "Kinesiólogo: por esto tus pacientes *no terminan*".
+- El error / lo que nadie dice: "El error que *vacía tu agenda* sin que lo notes".
+- Dato que sorprende: "El *70%* agenda fuera de tu horario de atención".
+- Consecuencia de un mal hábito: "Anotas las horas en un cuaderno y por eso *las pierdes*".
+- Contrarian: "No te falta publicidad. Te falta que *te encuentren*".
+- Pregunta con tensión: "¿Cuántos clientes pierdes cuando *no contestas al toque*?".
+- Curiosidad / open loop: "Lo que hace tu clienta cuando *no respondes el DM*".
+
+AUTO-TEST obligatorio: antes de aceptar un hook, verifica que cumpla las 4: (1) ¿se entiende y
+golpea en <1s? (2) ¿es específico (número, plata, tiempo o situación concreta)? (3) ¿es sobre el
+espectador y su dolor, no sobre la app? (4) ¿da curiosidad, molestia o urgencia? Si falla alguna,
+REESCRÍBELO. No entregues hooks tibios.
+
+PROHIBIDO (hooks débiles que NO debes usar):
+- Sobre la app o tipo aviso: "Agenda online para tu negocio", "Mejora tu negocio con Agendamelo".
+- CTA disfrazado de hook: "Tu mini-web en 5 minutos", "Crea tu agenda online" (eso va en el CTA).
+- Genéricos sin tensión: "Beneficios de tener una agenda", "Ordena tu negocio".
+- Cualquiera que empiece con "Agendamelo..." o que no tenga un dolor/número/curiosidad clara.
 
 # Campos por idea
 - niche: uno de [${NICHE_KEYS.join(', ')}].
@@ -87,13 +112,18 @@ concreto; el producto aparece después.
 ${tplLines}
 - titulo: título interno breve (sin asteriscos), distinto a todos los ya publicados.
 - hook: ver sección HOOKS. Fuerte, con *énfasis*, sin voseo.
-- descripcion: MUY LARGA (230 a 350 palabras), 2 o 3 párrafos, español con acentos. Profundiza el
-  tema con la jerga del rubro (qué pasa, por qué duele, ejemplos reales) y, según la orientación,
-  enseña / muestra la funcionalidad / argumenta la solución. La 1ª frase engancha con la keyword
-  principal. Integra VARIAS preguntas reales que esa audiencia busca en TikTok/Google (ej. "cómo
-  agendar clientes por internet", "página web para psicólogo en Chile", "cómo cobrar clases
-  particulares", "sistema de reservas para kinesiología", "cómo aparecer en Google con mi consulta").
-  Cierra con CTA acorde a la orientación. NO incluyas hashtags ni asteriscos en la descripción.
+- subtitle: refuerza el hook sin repetirlo; agrega contexto o el "por qué importa".
+- descripcion: MUY LARGA (230 a 350 palabras), 2 o 3 párrafos, español con acentos. DEBE ENSEÑAR:
+  entrega al menos un consejo concreto y accionable que la persona pueda aplicar HOY, aunque nunca
+  use Agendamelo (ej. "bloquea 2 horarios fijos para tus controles", "responde las 3 dudas típicas
+  en una sección de preguntas frecuentes"). Profundiza el dolor con la jerga del rubro (qué pasa,
+  por qué duele, ejemplos reales) y recién en el último tramo conecta con Agendamelo como la forma
+  más simple de resolverlo. La 1ª frase engancha con la keyword principal. Integra VARIAS preguntas
+  reales que esa audiencia busca en TikTok/Google (ej. "cómo agendar clientes por internet", "página
+  web para psicólogo en Chile", "cómo cobrar clases particulares", "sistema de reservas para
+  kinesiología", "cómo aparecer en Google con mi consulta"). Cierra con CTA acorde a la orientación.
+  NO incluyas hashtags ni asteriscos. Regla de oro: si borras toda mención a Agendamelo y el texto
+  igual le sirve a un dueño de negocio, está bien hecho.
 - hashtags: EXACTAMENTE 5, en minúscula, sin tildes ni espacios internos, con #. Incluye SIEMPRE
   #agendamelo. Mezcla: 1 amplio (#emprendimiento o #negocios) + 2-3 del rubro/tema (#barberia,
   #manicure, #psicologia, #psicopedagogia, #kinesiologia, #clasesparticulares, #agendaonline,
