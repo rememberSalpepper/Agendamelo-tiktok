@@ -86,27 +86,31 @@ async function main() {
   const [a, b] = process.argv.slice(2);
   const rows = parse(readFileSync(CSV), { columns: true, skip_empty_lines: true, relax_quotes: true });
 
-  let targets = rows.filter((r) => r.estado === 'renderizado');
-  if (a === 'one') targets = rows.filter((r) => r.id === b);
-  else if (/^\d+$/.test(a || '')) targets = targets.slice(0, parseInt(a, 10));
+  // 'ver <id>' = previsualizar SIN cambiar estado (no consume). 'one <id>' = enviar y marcar enviado.
+  const PEEK = a === 'ver';
+  let targets;
+  if (a === 'one' || a === 'ver') targets = rows.filter((r) => r.id === b);
+  else {
+    targets = rows.filter((r) => r.estado === 'renderizado');
+    if (/^\d+$/.test(a || '')) targets = targets.slice(0, parseInt(a, 10));
+  }
 
-  if (targets.length === 0) { console.log('No hay posts para enviar (estado=renderizado).'); return; }
-  console.log(`Enviando ${targets.length} post(s) a Telegram...`);
+  if (targets.length === 0) { console.log('No hay posts para enviar.'); return; }
+  console.log(`${PEEK ? 'Previsualizando' : 'Enviando'} ${targets.length} post(s)...`);
 
   let sent = 0;
   try {
     for (const row of targets) {
       await sendPost(row, sent + 1, targets.length);
-      row.estado = 'enviado';
-      row.fecha_realizado = today;
+      if (!PEEK) { row.estado = 'enviado'; row.fecha_realizado = today; }
       sent++;
-      console.log(`  ✓ enviado ${row.id}  (${row.tipo_plantilla})`);
+      console.log(`  ✓ ${PEEK ? 'visto' : 'enviado'} ${row.id}  (${row.formato || 'imagen'})`);
       await sleep(1200); // suave con el rate limit por chat
     }
   } finally {
-    if (sent > 0) writeFileSync(CSV, stringify(rows, { header: true, columns: Object.keys(rows[0]) }));
+    if (!PEEK && sent > 0) writeFileSync(CSV, stringify(rows, { header: true, columns: Object.keys(rows[0]) }));
   }
-  console.log(`Listo: ${sent}/${targets.length} enviado(s) y marcados como 'enviado'.`);
+  console.log(`Listo: ${sent}/${targets.length} ${PEEK ? 'visto(s)' : "enviado(s) y marcados 'enviado'"}.`);
 }
 
 main();

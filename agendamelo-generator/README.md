@@ -39,8 +39,14 @@ npm run telegram      # envía las 'renderizado' por Telegram
 npm run bot           # bot de comandos + salud en :3000
 ```
 
-Comandos del bot: `/generar [N]`, **`/dia`** (set de 3 posts variados del día), `/enviar [N]`,
-`/textos [N]`, `/siguiente`, `/estado`, `/borrar <id>`. Los carruseles se envían como álbum.
+### Comandos del bot (Telegram)
+- **Crear:** `/generar [N]` — genera N ideas con Codex y las renderiza.
+- **Revisar:** `/estado` · `/cola` (listos por publicar) · `/reporte` (variedad por nicho/orientación/
+  formato) · `/textos [N]` · `/ver <id>` (reenvía un post sin consumirlo).
+- **Publicar (te los entrega):** `/dia` (set de 3 variados) · `/siguiente` · `/enviar [N]`.
+- **Gestionar:** `/rehacer <id>` (re-render) · `/publicado <id>` (marcar en vivo) · `/borrar <id>`.
+
+Los carruseles se envían como álbum. Flujo de publicación: ver `docs/LINEA-EDITORIAL.md`.
 
 ## Capa de marca / nicho (lo único editable por estética)
 

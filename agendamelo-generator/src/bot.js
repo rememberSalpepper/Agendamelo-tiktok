@@ -26,13 +26,26 @@ const readRows = () => parse(readFileSync(CSV), { columns: true, skip_empty_line
 
 const AYUDA = [
   '🤖 *Comandos Agendamelo*',
-  '/estado — resumen de ideas (pendientes/listas/enviadas)',
-  '/generar [N] — genera N ideas nuevas con Codex (default 14)',
-  '/dia — el set del día: 3 posts variados (nicho/orientación/formato distintos)',
-  '/enviar [N] — envía N posts listos (imagen + texto)',
-  '/textos [N] — envía solo el texto (sin imagen), para revisar',
-  '/siguiente — envía el próximo post',
-  '/borrar <id> — elimina una idea (ej. /borrar AGENDA-IDEA-024)',
+  '',
+  '*Crear*',
+  '/generar [N] — genera N ideas nuevas con Codex (default 14) y las renderiza',
+  '',
+  '*Revisar*',
+  '/estado — resumen (pendientes/listas/enviadas/publicadas)',
+  '/cola — lista de posts listos por publicar',
+  '/reporte — variedad por nicho/orientación/formato',
+  '/textos [N] — solo el texto (sin imagen), para copiar',
+  '/ver <id> — reenvía un post para revisarlo (no lo consume)',
+  '',
+  '*Publicar (te los entrega)*',
+  '/dia — el set del día: 3 posts variados',
+  '/siguiente — el próximo post',
+  '/enviar [N] — N posts listos',
+  '',
+  '*Gestionar*',
+  '/rehacer <id> — vuelve a renderizar un post',
+  '/publicado <id> — márcalo como publicado en TikTok',
+  '/borrar <id> — elimina una idea',
   '/ayuda — esta lista',
 ].join('\n');
 
@@ -68,6 +81,11 @@ async function reply(chat, text) {
   if (TEST) { console.log(`[BOT→${chat}]\n${text}\n`); return; }
   await api('sendMessage', { chat_id: chat, text, parse_mode: 'Markdown', disable_web_page_preview: true });
 }
+// Texto plano (sin Markdown): para listas con contenido dinámico que podría romper el parseo.
+async function replyText(chat, text) {
+  if (TEST) { console.log(`[BOT→${chat}]\n${text}\n`); return; }
+  await api('sendMessage', { chat_id: chat, text, disable_web_page_preview: true });
+}
 
 // Corre uno de nuestros scripts como proceso hijo y devuelve {code, out, err}.
 function runScript(args, extraEnv = {}) {
@@ -83,9 +101,42 @@ const tail = (s, n = 300) => (s || '').trim().split('\n').slice(-3).join('\n').s
 
 function estado() {
   const rows = readRows();
-  const c = { pendiente: 0, renderizado: 0, enviado: 0, otro: 0 };
+  const c = { pendiente: 0, renderizado: 0, enviado: 0, publicado: 0, otro: 0 };
   for (const r of rows) (c[r.estado] !== undefined ? c[r.estado]++ : c.otro++);
-  return `📊 *Estado Agendamelo*\nTotal: ${rows.length}\n• Pendientes: ${c.pendiente}\n• Listas para enviar: ${c.renderizado}\n• Enviadas: ${c.enviado}`;
+  return `📊 *Estado Agendamelo*\nTotal: ${rows.length}\n• Pendientes (sin imagen): ${c.pendiente}`
+    + `\n• Listas: ${c.renderizado}\n• Enviadas (por subir): ${c.enviado}\n• Publicadas: ${c.publicado}`;
+}
+
+const strip = (s) => (s || '').replace(/\*(.+?)\*/g, '$1');
+
+// Cola de publicación: lo que está listo o entregado pero aún no publicado.
+function cola() {
+  const rows = readRows().filter((r) => r.estado === 'renderizado' || r.estado === 'enviado');
+  if (!rows.length) return 'No hay posts en cola. Usa /generar para crear más.';
+  const lines = rows.slice(0, 25).map((r) => {
+    const mark = r.estado === 'enviado' ? '📤' : '🟢';
+    return `${mark} ${r.id} · ${r.niche}/${r.orientacion}/${r.formato}\n   ${strip(r.hook || r.titulo)}`;
+  });
+  return `🗂️ Cola de publicación (${rows.length})  🟢 lista · 📤 enviada\n\n${lines.join('\n')}`;
+}
+
+// Reporte de variedad sobre lo que aún no se publica (para asegurar cobertura por nicho/orientación/formato).
+function reporte() {
+  const active = readRows().filter((r) => r.estado !== 'publicado');
+  if (!active.length) return 'Nada en preparación. Usa /generar.';
+  const by = (k) => Object.entries(active.reduce((m, r) => ((m[r[k]] = (m[r[k]] || 0) + 1), m), {}))
+    .sort((a, b) => b[1] - a[1]).map(([v, n]) => `${v}: ${n}`).join(' · ');
+  return `📈 Reporte (sin publicar: ${active.length})\nNicho — ${by('niche')}\nOrientación — ${by('orientacion')}\nFormato — ${by('formato')}`;
+}
+
+// Marca un post como publicado en TikTok (registro de lo que está en vivo).
+function publicado(id) {
+  const rows = readRows();
+  const r = rows.find((x) => x.id === id);
+  if (!r) return `No encontré ${id}.`;
+  r.estado = 'publicado';
+  writeFileSync(CSV, stringify(rows, { header: true, columns: Object.keys(rows[0]) }));
+  return `✅ ${id} marcado como publicado en TikTok.`;
 }
 
 function borrar(id) {
@@ -94,8 +145,9 @@ function borrar(id) {
   if (idx === -1) return `No encontré ${id}.`;
   const [removed] = rows.splice(idx, 1);
   writeFileSync(CSV, stringify(rows, { header: true, columns: Object.keys(rows[0] || removed) }));
-  const img = join(ROOT, 'dist', `${id}.png`);
-  if (existsSync(img)) unlinkSync(img);
+  // Borra los PNG (imagen simple o todas las láminas del carrusel).
+  const files = (removed.imagen_url || `dist/${id}.png`).split(',').map((p) => p.trim()).filter(Boolean);
+  for (const f of files) { const fp = join(ROOT, f); if (existsSync(fp)) unlinkSync(fp); }
   return `🗑️ Borrada ${id} (“${removed.hook || removed.titulo}”).`;
 }
 
@@ -170,6 +222,35 @@ async function handle(chat, text) {
       }
       return;
     }
+    case '/cola':
+      return replyText(chat, cola());
+    case '/reporte':
+      return replyText(chat, reporte());
+    case '/ver': {
+      if (!arg) return reply(chat, 'Uso: /ver AGENDA-IDEA-024');
+      if (busy) return reply(chat, '⏳ Ocupado, espera.');
+      busy = true;
+      try {
+        const e = await runScript(['src/telegram.js', 'ver', arg], { TELEGRAM_CHAT_ID: String(chat) });
+        if (e.code !== 0) return reply(chat, `❌ ${tail(e.err || e.out)}`);
+      } finally { busy = false; }
+      return;
+    }
+    case '/rehacer': {
+      if (!arg) return reply(chat, 'Uso: /rehacer AGENDA-IDEA-024');
+      if (busy) return reply(chat, '⏳ Ocupado, espera.');
+      busy = true;
+      await reply(chat, `🎨 Re-renderizando ${arg}...`);
+      try {
+        const e = await runScript(['src/pipeline.js', 'one', arg]);
+        if (e.code !== 0) return reply(chat, `❌ ${tail(e.err || e.out)}`);
+        await reply(chat, `✅ ${arg} re-renderizado. Usa /ver ${arg} para revisarlo.`);
+      } finally { busy = false; }
+      return;
+    }
+    case '/publicado':
+      if (!arg) return reply(chat, 'Uso: /publicado AGENDA-IDEA-024');
+      return reply(chat, publicado(arg));
     case '/borrar':
       if (!arg) return reply(chat, 'Uso: /borrar AGENDA-IDEA-024');
       return reply(chat, borrar(arg));
@@ -184,12 +265,17 @@ async function main() {
 
   // Registra el menú de comandos (lo que aparece al teclear "/") al arrancar.
   await api('setMyCommands', { commands: [
-    { command: 'estado', description: 'Resumen de ideas (pendientes/listas/enviadas)' },
     { command: 'generar', description: 'Genera N ideas nuevas con Codex (default 14)' },
     { command: 'dia', description: 'El set del dia: 3 posts variados' },
-    { command: 'enviar', description: 'Envia N posts listos (imagen + texto)' },
-    { command: 'textos', description: 'Envia solo el texto (sin imagen), para revisar' },
+    { command: 'cola', description: 'Lista de posts listos por publicar' },
+    { command: 'reporte', description: 'Variedad por nicho/orientacion/formato' },
+    { command: 'estado', description: 'Resumen (pendientes/listas/enviadas/publicadas)' },
+    { command: 'ver', description: 'Reenvia un post para revisarlo (no lo consume)' },
+    { command: 'textos', description: 'Envia solo el texto (sin imagen)' },
     { command: 'siguiente', description: 'Envia el proximo post' },
+    { command: 'enviar', description: 'Envia N posts listos' },
+    { command: 'rehacer', description: 'Vuelve a renderizar un post' },
+    { command: 'publicado', description: 'Marca un post como publicado en TikTok' },
     { command: 'borrar', description: 'Elimina una idea por id' },
     { command: 'ayuda', description: 'Lista de comandos' },
   ] }).catch(() => {});
@@ -198,7 +284,7 @@ async function main() {
   const PORT = process.env.PORT || 3000;
   createServer((req, res) => {
     const rows = (() => { try { return readRows(); } catch { return []; } })();
-    const c = { total: rows.length, pendiente: 0, renderizado: 0, enviado: 0 };
+    const c = { total: rows.length, pendiente: 0, renderizado: 0, enviado: 0, publicado: 0 };
     for (const r of rows) if (c[r.estado] !== undefined) c[r.estado]++;
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ ok: true, servicio: 'agendamelo-bot', ...c }));

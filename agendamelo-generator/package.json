@@ -9,6 +9,7 @@
     "render": "node src/pipeline.js pending",
     "render:all": "node src/pipeline.js all",
     "render:one": "node src/pipeline.js one",
+    "preview": "node src/preview.js",
     "generate": "node src/generate.js",
     "expand": "node src/expand-descriptions.js",
     "telegram": "node src/telegram.js",

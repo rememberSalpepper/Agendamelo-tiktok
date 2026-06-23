@@ -82,6 +82,21 @@ Banco de ejemplos: ver `src/prompt.js` (sección HOOKS).
 Español neutro/chileno **sin voseo**; márgenes seguros 230/430; render 2x; íconos SVG; acento por
 nicho; logo y fuentes self-hosted. Diseño impecable y consistente en TODO post.
 
+## Cómo publicar (operación diaria)
+TikTok no tiene API de subida en este stack, así que la publicación es **manual** (rápida). Flujo:
+1. **Semanal:** `/generar 21` (≈ una semana de contenido). Quedan listos (renderizado).
+2. **Diario:** `/dia` → recibes 3 posts variados en Telegram (imagen o álbum de carrusel) + el título
+   y el caption listos para copiar.
+3. **Sube a TikTok** (app o tiktok.com/upload): foto única o **carrusel** (sube las 3-4 láminas en
+   orden), pega el caption (descripción + 5 hashtags), **agrega un audio en tendencia** (TikTok premia
+   el sonido incluso en fotos) y publica. Reparte los 3 en el día (mañana/mediodía/tarde).
+   *Tip:* en el editor web de TikTok puedes **programar** los 3 posts a horas fijas y dejarlos agendados.
+4. (Opcional) `/publicado <id>` para llevar registro de lo que está en vivo.
+
+Comandos: `/generar` · `/dia` · `/cola` · `/reporte` · `/estado` · `/ver <id>` · `/textos` ·
+`/siguiente` · `/enviar` · `/rehacer <id>` · `/publicado <id>` · `/borrar <id>`.
+Estados: pendiente → renderizado → enviado (lo tienes para subir) → publicado (en vivo).
+
 ## KPIs a mirar (para iterar la línea)
 Retención/watch time, **guardados** y **compartidos** (señal de valor), comentarios, visitas al
 perfil y **clics al link en bio**. Si un pilar/nicho/plantilla rinde, súbele el peso en el reparto.
