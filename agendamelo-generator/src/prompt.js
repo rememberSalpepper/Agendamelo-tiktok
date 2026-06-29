@@ -13,6 +13,21 @@ export const ORIENTACIONES = ['educativo', 'plataforma', 'venta'];
 export const FORMATOS = ['imagen', 'carrusel'];
 export const NICHOS = NICHE_KEYS;
 
+// Ángulos de hook: la palanca emocional/racional del gancho. El operador NO repite ángulo en posts
+// seguidos (TikTok entierra lo que parece clonado), y cada idea trae variantes de ángulos distintos.
+export const ANGULOS = ['plata', 'tiempo', 'no-show', 'repetir-info', 'comparacion-ig', 'curiosidad'];
+const ANGULO_DESC = {
+  plata: 'plata que pierdes o dejas de ganar (clientas que se van, precio que regalas)',
+  tiempo: 'horas que se te van coordinando, o que recuperas (WhatsApp, cuadrar de cero cada semana)',
+  'no-show': 'inasistencias y cancelaciones de último minuto que te dejan la hora vacía',
+  'repetir-info': 'cansancio de contestar lo mismo una y otra vez (precios, horarios, ubicación) por DM',
+  'comparacion-ig': 'verse poco profesional o perder clientes en Instagram/WhatsApp vs tener sitio propio',
+  curiosidad: 'un dato, error o afirmación que sorprende o incomoda y obliga a seguir mirando',
+};
+
+// Chuleta de ángulos para el prompt (palanca de cada hook).
+const angulosCheat = ANGULOS.map((a) => `   - ${a}: ${ANGULO_DESC[a]}`).join('\n');
+
 // Chuleta de voz/jerga/datos por rubro -> que hooks y descripciones hablen el idioma del negocio.
 const nicheCheat = NICHE_KEYS
   .map((k) => `   - ${k} (${NICHES[k].label}):
@@ -146,25 +161,30 @@ gancho de regalo.
 - Recordatorios por WhatsApp/SMS: NO. Son POR CORREO.
 
 # 12. HOOKS — esto define si el video funciona o muere (máxima exigencia)
-El hook es el titular de la imagen y lo que detiene el scroll en <1 segundo. Reglas:
-- Largo: 4 a 7 palabras. Punchy. Envuelve UNA frase clave entre *asteriscos* (se resalta).
+El hook ES el titular de la imagen y lo que detiene el scroll en <1 segundo. Queda EN PANTALLA, así
+que carga la keyword en los primeros 2 segundos de video. Reglas de cada hook:
+- Largo: MÁXIMO 12 palabras (ideal 6-10). Punchy. Envuelve UNA frase clave entre *asteriscos* (se resalta).
+- Es un DOLOR concreto o una CURIOSIDAD que incomoda. NUNCA un TEMA ni una categoría.
+- La KEYWORD del nicho va DENTRO del hook (uñas/semipermanente/clientas/manicure, etc.): así la
+  palabra clave queda en pantalla y se indexa fuerte.
 - Es sobre EL ESPECTADOR (su plata, su tiempo, sus clientes), NUNCA sobre Agendamelo.
 - Concreto, no vago: números, plata, tiempo, una situación reconocible. Cero abstracción.
-- Genera tensión: dolor, pérdida, curiosidad o una afirmación que incomode/sorprenda.
-Palancas (con el nivel que espero):
-- Pérdida en plata: "Pierdes clientas *por contestar lento*".
-- Pérdida en tiempo: "*5 horas a la semana* contestando WhatsApp".
-- Callout al rubro: "Manicurista: por esto *te cancelan*".
-- El error / lo que nadie dice: "El error que *vacía tu agenda*".
-- Dato que sorprende: "El *70%* agenda fuera de tu horario".
-- Consecuencia de un mal hábito: "Anotas en una libreta y *las pierdes*".
-- Contrarian: "No te falta publicidad. Falta que *te encuentren*".
-- Pregunta con tensión: "¿Cuántas clientas pierdes *en el DM*?".
-AUTO-TEST: antes de aceptar un hook verifica las 4: (1) ¿golpea en <1s? (2) ¿es específico (número,
-plata, tiempo, situación)? (3) ¿es sobre el espectador, no la app? (4) ¿da curiosidad/molestia/urgencia?
-Si falla alguna, REESCRÍBELO.
+Ejemplos:
+  ❌ "Mantención de uñas: gestión de agenda."   (es un TEMA, no duele, no da curiosidad)
+  ✅ "3 clientas pidieron la misma hora. *Perdiste a 2*."   (dolor concreto, número, keyword)
+  ✅ "El *DM* te está vaciando la agenda de uñas."
+AUTO-TEST por hook (las 4): (1) ¿golpea en <1s? (2) ¿es específico (número, plata, tiempo, situación)?
+(3) ¿es sobre el espectador, no la app? (4) ¿da curiosidad/molestia/urgencia? Si falla alguna, REESCRÍBELO.
 PROHIBIDO (hooks débiles): "Agenda online para tu negocio", "Tu mini-web en 5 minutos" (eso es CTA),
 genéricos sin tensión ("Beneficios de tener una agenda"), o cualquiera que empiece con "Agendamelo...".
+
+## 12.1 VARIANTES DE HOOK (campo "hook_variantes") — TÚ NO ELIGES, el operador elige
+Por CADA idea entrega entre 3 y 5 hooks, cada uno desde un ÁNGULO DISTINTO, todos sobre el MISMO post
+(misma idea, mismo contenido de imagen). NO marques uno como ganador: el operador humano elegirá cuál
+sale desde Telegram. Cada variante = {texto, angulo}. Ángulos disponibles (campo "angulo"):
+${angulosCheat}
+Reglas: 3 a 5 variantes, ÁNGULOS distintos entre sí, todas cumplen el AUTO-TEST y todas llevan la
+keyword del nicho. Varía la palanca de verdad (que no sean la misma frase reescrita).
 
 # 13. Campos por idea
 - niche: uno de [${NICHE_KEYS.join(', ')}].
@@ -174,8 +194,11 @@ genéricos sin tensión ("Beneficios de tener una agenda"), o cualquiera que emp
 - titulo: título interno breve (sin asteriscos), distinto a todos los ya publicados.
 - tema: etiqueta corta del ángulo en kebab-case (ej. "no-shows", "aparecer-en-google",
   "sesiones-recurrentes", "mostrar-disenos"). ÚNICO en el lote y distinto a los publicados.
-- hook: ver sección 12. Fuerte, con *énfasis*, sin voseo argentino.
-- subtitle: refuerza el hook sin repetirlo; agrega contexto o el "por qué importa".
+- hook_variantes: ver sección 12 y 12.1. ENTRE 3 Y 5 variantes {texto, angulo}, ángulos distintos,
+  cada texto ≤12 palabras, con *énfasis* y la keyword del nicho, sin voseo argentino.
+- subtitle: refuerza el ángulo del post sin repetir un hook; agrega contexto o el "por qué importa".
+- descripcion_corta: 1 SOLA frase de ≤150 caracteres, estilo gancho, que ABRA con la keyword
+  principal (es la variante A/B corta del caption). Sin hashtags ni asteriscos.
 - descripcion: MUY LARGA (250 a 350 palabras, MÍNIMO 1200 caracteres — obligatorio), 2 o 3 párrafos,
   español con acentos. DEBE ENSEÑAR: al menos un consejo concreto y accionable que la persona aplique
   HOY aunque nunca use Agendamelo. Profundiza el dolor con la jerga del nicho y recién al final conecta
@@ -218,8 +241,9 @@ ${avoidLines}
 # 15. AUTO-CHEQUEO antes de emitir CADA idea (si algo falla, reescribe)
 1. ¿Voseo o slang argentino? -> corrige. 2. ¿Aparece "gratis/prueba/trial/seña/anticipo/software/
 comisión al cliente/Flow/Isapre/recordatorio por WhatsApp"? -> corrige. 3. ¿Algún número como resultado
-real de Agendamelo sin fuente? -> reescríbelo como dato de mercado o hipótesis condicional. 4. ¿Hook
-≤7 palabras, se entiende sin audio? 5. ¿Usa la jerga verbatim del nicho? 6. ¿El slang corresponde al
+real de Agendamelo sin fuente? -> reescríbelo como dato de mercado o hipótesis condicional. 4. ¿3-5
+hook_variantes de ángulos distintos, cada una ≤12 palabras, con keyword y sin tema? 5. ¿Usa la jerga
+verbatim del nicho? 6. ¿El slang corresponde al
 nicho (manicure jugado / salud sobrio)? 7. ¿CTA compliant + 5 hashtags? 8. ¿Dice "mini-web + agenda",
 no "software"? 9. ¿stat con source? Solo emite si todas pasan.
 

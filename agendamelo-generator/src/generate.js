@@ -16,7 +16,7 @@ import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { buildPrompt, TIPOS, ICONS, NICHOS, ORIENTACIONES, FORMATOS } from './prompt.js';
+import { buildPrompt, TIPOS, ICONS, NICHOS, ORIENTACIONES, FORMATOS, ANGULOS } from './prompt.js';
 import { getNiche } from './niches.js';
 import { codexBaseArgs } from './codex.js';
 import { getSettings } from './settings.js';
@@ -65,7 +65,7 @@ const schema = {
       type: 'array',
       items: {
         type: 'object', additionalProperties: false,
-        required: ['niche', 'orientacion', 'formato', 'tipo_plantilla', 'titulo', 'tema', 'hook', 'descripcion', 'hashtags', 'imagen_json'],
+        required: ['niche', 'orientacion', 'formato', 'tipo_plantilla', 'titulo', 'tema', 'hook_variantes', 'descripcion_corta', 'descripcion', 'hashtags', 'imagen_json'],
         properties: {
           niche: { type: 'string', enum: NICHOS },
           orientacion: { type: 'string', enum: ORIENTACIONES },
@@ -73,7 +73,15 @@ const schema = {
           tipo_plantilla: { type: 'string', enum: [...TIPOS, 'carrusel'] },
           titulo: { type: 'string' },
           tema: { type: 'string' },
-          hook: { type: 'string' },
+          // 3-5 variantes de hook, cada una con su ángulo; el operador elige cuál sale.
+          hook_variantes: {
+            type: 'array', minItems: 3, maxItems: 5,
+            items: {
+              type: 'object', additionalProperties: false, required: ['texto', 'angulo'],
+              properties: { texto: { type: 'string' }, angulo: { type: 'string', enum: ANGULOS } },
+            },
+          },
+          descripcion_corta: { type: 'string' },
           descripcion: { type: 'string' },
           hashtags: { type: 'array', items: { type: 'string' }, minItems: 5, maxItems: 5 },
           imagen_json: {
@@ -184,13 +192,27 @@ function fixHashtags(tags, niche) {
 }
 
 // Columnas del CSV (define el orden; se usa cuando el CSV está vacío = solo header).
-const HEADER = ['id', 'estado', 'niche', 'orientacion', 'formato', 'tipo_plantilla', 'titulo', 'tema', 'hook',
-  'descripcion', 'hashtags', 'fecha_creacion', 'fecha_realizado', 'imagen_url', 'imagen_json', 'notas_plantilla'];
+// hook = hook EFECTIVO que usa el render (provisional = 1ª variante hasta que el operador elija).
+// hook_variantes = JSON [{texto, angulo}]; hook_elegido = texto curado por el humano (vacío = sin curar).
+const HEADER = ['id', 'estado', 'niche', 'orientacion', 'formato', 'tipo_plantilla', 'titulo', 'tema',
+  'angulo', 'hook', 'hook_variantes', 'hook_elegido', 'descripcion', 'descripcion_corta', 'hashtags',
+  'estilo_caption', 'fecha_creacion', 'fecha_realizado', 'imagen_url', 'imagen_json', 'notas_plantilla'];
+
+// Valida las variantes de hook (3-5, cada una con texto y ángulo conocido).
+function cleanVariants(variants) {
+  if (!Array.isArray(variants)) return [];
+  return variants
+    .filter((v) => v && typeof v.texto === 'string' && v.texto.trim() && ANGULOS.includes(v.angulo))
+    .map((v) => ({ texto: v.texto.trim(), angulo: v.angulo }))
+    .slice(0, 5);
+}
 
 // ---------- Main ----------
 function main() {
   const rows = parse(readFileSync(CSV), { columns: true, skip_empty_lines: true, relax_quotes: true });
-  const header = rows.length ? Object.keys(rows[0]) : HEADER;
+  // Header: si hay filas viejas, conserva su orden y AGREGA las columnas nuevas que falten (compat).
+  const existing = rows.length ? Object.keys(rows[0]) : [];
+  const header = rows.length ? [...existing, ...HEADER.filter((k) => !existing.includes(k))] : HEADER;
   // Anti-repetición: evita por "titulo — tema" de TODAS las filas (semántico, no solo el título).
   const avoid = rows.map((r) => [r.titulo, r.tema].filter(Boolean).join(' — ')).filter(Boolean);
   const maxNum = rows.length ? Math.max(...rows.map((r) => parseInt(String(r.id).replace(/\D/g, ''), 10) || 0)) : 0;
@@ -222,17 +244,28 @@ function main() {
       console.warn(`  ✗ descartada: niche inválido "${idea.niche}" -> ${idea.titulo}`);
       continue;
     }
+    const variants = cleanVariants(idea.hook_variantes);
+    if (variants.length < 3) {
+      console.warn(`  ✗ descartada: necesita ≥3 hook_variantes válidas (tiene ${variants.length}) -> ${idea.titulo}`);
+      continue;
+    }
     const orientacion = ORIENTACIONES.includes(idea.orientacion) ? idea.orientacion : 'educativo';
     num++;
     const id = `AGENDA-IDEA-${String(num).padStart(3, '0')}`;
     const row = Object.fromEntries(header.map((k) => [k, '']));
+    // hook provisional = 1ª variante (para que render/lint nunca queden sin hook); hook_elegido vacío
+    // marca "sin curar": el operador elige el definitivo desde /revisar antes de /render.
     Object.assign(row, {
       id, estado: 'pendiente', niche: idea.niche, orientacion, formato, tipo_plantilla: tipo,
-      titulo: idea.titulo, tema: idea.tema || '', hook: idea.hook, descripcion: idea.descripcion,
-      hashtags: fixHashtags(idea.hashtags, idea.niche), fecha_creacion: today, imagen_json: JSON.stringify(cleanContent(c)),
+      titulo: idea.titulo, tema: idea.tema || '',
+      angulo: variants[0].angulo, hook: variants[0].texto,
+      hook_variantes: JSON.stringify(variants), hook_elegido: '',
+      descripcion: idea.descripcion, descripcion_corta: (idea.descripcion_corta || '').trim(),
+      hashtags: fixHashtags(idea.hashtags, idea.niche), estilo_caption: '',
+      fecha_creacion: today, imagen_json: JSON.stringify(cleanContent(c)),
     });
     newRows.push(row);
-    console.log(`  ✓ ${id}  (${idea.niche}/${orientacion}/${formato}/${tipo})  ${idea.hook}`);
+    console.log(`  ✓ ${id}  (${idea.niche}/${orientacion}/${formato}/${tipo})  ${variants.length} hooks · ${variants[0].texto}`);
   }
 
   if (newRows.length === 0) { console.error('No se agregó ninguna idea válida.'); process.exit(1); }
