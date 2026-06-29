@@ -38,8 +38,10 @@ y voz/jerga propios (`src/niches.js`); se habla con su jerga VERBATIM.
 | **profesores-paes** | azul | cercano y motivador | horario en libreta + alumnos que preguntan otras materias; usa el peak PAES como urgencia. |
 | **fonoaudiologas** | verde/teal | cálida y profesional | apoderados que se confunden + WhatsApps de noche; "una hora cada lunes" + derivaciones desde Google. |
 
-**Reparto por lote:** ~30% manicuristas, ~25% psicopedagogas, ~25% profesores-paes, ~20%
-fonoaudiologas. (Manicure aporta reach; las otras tres, conversión de alto LTV.)
+**Un nicho por tanda** (`/nicho <slug>`): concentra el SEO y respeta "un solo nicho por tanda". El
+reparto entre rubros se logra cambiando el nicho activo entre tandas. Peso histórico de referencia:
+~30% manicuristas, ~25% psicopedagogas, ~25% profesores-paes, ~20% fonoaudiologas (manicure aporta
+reach; las otras tres, conversión de alto LTV). **Sprint actual: 100% manicuristas.**
 
 ## Orientaciones de contenido (campo `orientacion`, mezcla 40/30/30)
 - **educativo (~40%)**: ayuda al profesional sin vender directo (cuánto cobrar, organizar, evitar
@@ -74,12 +76,29 @@ Reglas: **nunca el mismo nicho ni la misma plantilla dos veces el mismo día**.
 - **Nichos:** los 4 a lo largo de la semana, respetando el reparto 30/25/25/20.
 - **Plantillas:** las 5 (imagen) + carrusel; varía, no repitas seguido.
 - **Anti-repetición de temas:** cada post lleva un `tema` (kebab-case, ej. `no-shows`,
-  `aparecer-en-google`, `sesiones-recurrentes`). El generador NO repite ángulos.
+  `aparecer-en-google`, `sesiones-recurrentes`). El generador NO repite temas.
+- **Anti-repetición de ángulos:** además del `tema`, cada hook tiene un `angulo`. No publiques dos
+  posts seguidos con el mismo ángulo; `/estado` muestra el reparto de ángulos en las pendientes.
 
-## Hooks (la regla más importante)
-4-7 palabras, sobre el espectador (su plata/tiempo/clientes), concreto y con tensión. Auto-test:
-golpea en <1s, es específico, no es sobre la app, da curiosidad/urgencia. Prohibidos: avisos, CTA
-disfrazado, genéricos sin tensión, cualquiera que empiece con "Agendamelo…". Banco: ver `src/prompt.js`.
+## Hooks (la regla más importante) — el humano elige, el bot propone
+El hook ES el titular de la imagen: queda en pantalla, así que carga la keyword en los primeros 2
+segundos. Reglas: **≤12 palabras** (ideal 6-10), un **dolor concreto o una curiosidad**, NUNCA un
+tema; la **keyword del nicho va dentro** del hook. Sobre el espectador (su plata/tiempo/clientes), no
+sobre la app. Auto-test: golpea en <1s, es específico, no es sobre Agendamelo, da curiosidad/urgencia.
+- ❌ "Mantención de uñas: gestión de agenda." (es un tema, no duele)
+- ✅ "3 clientas pidieron la misma hora. *Perdiste a 2*."
+
+**Variantes + ángulo (human-in-the-loop):** cada idea trae **3-5 hooks de ángulos distintos**; el LLM
+no decide cuál sale, lo elige el operador desde `/revisar` (botones). Ángulo = palanca del gancho:
+`plata` · `tiempo` · `no-show` · `repetir-info` (dejar de contestar lo mismo) · `comparacion-ig` ·
+`curiosidad`. **No repitas ángulo en posts seguidos** (TikTok entierra lo que parece clonado).
+Prohibidos: avisos, CTA disfrazado, genéricos sin tensión, cualquiera que empiece con "Agendamelo…".
+
+## Las 4 reglas TikTok-SEO en cada pieza
+1. **Keyword en pantalla** en los primeros 2 s (va dentro del hook/headline).
+2. **Keyword al inicio del caption** (la línea 1 es el hook con la keyword).
+3. **3-5 hashtags de nicho** (siempre `#agendamelo` + del rubro/tema).
+4. Un **gancho** que haga ver el video completo. Y **un solo nicho por tanda**.
 
 ## Idioma (regla dura)
 Español neutro/chileno **sin voseo argentino** (nada de "tenés/hacé/mirá/dale"). El **voseo chileno**
@@ -101,18 +120,38 @@ solas → link en bio" · "Desde $4.990 al mes, sin comisión ni contrato → li
 **PROHIBIDO:** "gratis", "prueba gratis", "primer mes gratis", "trial", "sin compromiso".
 
 ## Caption (lo que va en TikTok) y hashtags
-- Caption parte con 👇×4 + descripción larga (230-350 palabras, con valor + preguntas reales de
-  búsqueda) + 5 hashtags.
+- **Línea 1 = el hook con la keyword** (es lo que TikTok muestra colapsado e indexa más fuerte). Recién
+  DESPUÉS van los 👇 (empujan el texto para no tapar la imagen), la descripción y los 5 hashtags.
+- **A/B de largo** (`/estilo`): `largo` = descripción SEO (230-350 palabras, con valor + preguntas
+  reales de búsqueda); `corto` = un gancho de ≤150 caracteres. Sirve para medir retención sin asumir
+  cuál gana.
 - 5 hashtags exactos, **siempre `#agendamelo`** + 2-3 de rubro/tema (el sistema garantiza el del nicho).
 
-## Cómo publicar (operación diaria)
-TikTok no tiene API de subida en este stack → publicación **manual**. Flujo:
-1. **Semanal:** `/generar 21` (≈ una semana). Quedan `renderizado`.
-2. **Diario:** `/dia` → 3 posts variados en Telegram + título y caption listos.
-3. **Sube a TikTok**: foto única o carrusel (láminas en orden), pega el caption, **agrega audio en
-   tendencia** y publica. Reparte los 3 en el día.
+## Nicho activo y sprint
+Una tanda = **un solo nicho** (el activo). Se controla con `/nicho <slug>` (persistido fuera de git).
+**Sprint en curso: foco 100% en `manicuristas`** (volumen alto, hooks impecables) para conseguir
+usuarios de pago rápido. Flipear de nicho después es un comando.
 
-Estados: `pendiente → renderizado → enviado`.
+## Cómo publicar (operación diaria)
+TikTok no tiene API de subida en este stack → publicación **manual**. Flujo 100% desde Telegram:
+1. **Generar:** `/generar 21 manicuristas` (≈ una semana). Quedan `pendiente`, cada una con 3-5 hooks.
+2. **Curar el hook:** `/revisar` → toca el botón del ángulo que quieras en cada idea (o `🔁 Otros hooks`
+   para regenerar). Eso fija el `hook_elegido`.
+3. **Renderizar:** `/render` → solo las que ya tienen hook elegido pasan a `renderizado`.
+4. **Diario:** `/dia` → 3 posts variados + título y caption listos (o `/siguiente`, `/enviar`).
+5. **Sube a TikTok**: foto única o carrusel (láminas en orden), pega el caption (la línea 1 ya trae la
+   keyword), **elige el sonido** (ver abajo) y publica. Reparte los 3 en el día.
+
+Estados: `pendiente (con/ sin hook elegido) → renderizado → enviado`.
+
+## Sonido al subir (paso MANUAL del operador, no lo hace el bot)
+El sonido es señal de alcance en TikTok y el bot no lo controla. Al subir:
+- **Posts faceless del bot** (imagen/carrusel): elige un **sonido en tendencia** desde el buscador (el
+  del **ícono ↑**, el que está subiendo), de vibe **informativo** y a **volumen bajo**. NO te quedes
+  con el "recomendado" por defecto: suele estar saturado.
+- **Videos hablados por ti** (tu cara/voz): usa el **audio original**, no lo entierres bajo música; la
+  voz es el gancho. La música, si va, apenas de fondo.
+El gancho final y **responder los comentarios en la primera hora** tampoco se automatizan: son tuyos.
 
 ## KPIs a mirar
 Retención/watch time, **guardados** y **compartidos**, comentarios, visitas al perfil y **clics al
