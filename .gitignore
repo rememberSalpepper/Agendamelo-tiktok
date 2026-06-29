@@ -14,6 +14,9 @@ agendamelo-generator/dist/*
 # La semilla agendamelo_ideas.seed.csv SÍ se versiona.
 /agendamelo_ideas.csv
 
+# Ajustes de operación vivos (nicho activo + estilo de caption): por máquina, fuera de git.
+/agendamelo_settings.json
+
 # Respaldos del CSV
 *.backup*.csv
 

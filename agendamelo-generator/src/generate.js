@@ -19,11 +19,16 @@ import { fileURLToPath } from 'node:url';
 import { buildPrompt, TIPOS, ICONS, NICHOS, ORIENTACIONES, FORMATOS } from './prompt.js';
 import { getNiche } from './niches.js';
 import { codexBaseArgs } from './codex.js';
+import { getSettings } from './settings.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
 const today = new Date().toISOString().slice(0, 10);
 const N = parseInt(process.argv[2], 10) || 7;
+// Nicho de la tanda: arg explícito (node src/generate.js N nicho) o el nicho activo de settings.
+// Una tanda = UN solo nicho (regla TikTok-SEO: un nicho por tanda).
+const ARG_NICHE = (process.argv[3] || '').trim();
+const ACTIVE_NICHE = NICHOS.includes(ARG_NICHE) ? ARG_NICHE : getSettings().nicho;
 
 // ---------- Repartos balanceados (orientación y plantilla) ----------
 // Orientaciones: ~40% educativo, ~30% plataforma, ~30% venta.
@@ -45,13 +50,9 @@ function distributeFormato(n) {
   const carrusel = Math.round(n * 0.4);
   return { imagen: Math.max(0, n - carrusel), carrusel };
 }
-// Nichos: ~30% manicuristas, ~25% psicopedagogas, ~25% profesores-paes, ~20% fonoaudiologas.
-function distributeNiche(n) {
-  const manicuristas = Math.round(n * 0.30);
-  const psicopedagogas = Math.round(n * 0.25);
-  const profesores = Math.round(n * 0.25);
-  const fono = Math.max(0, n - manicuristas - psicopedagogas - profesores);
-  return { manicuristas, psicopedagogas, 'profesores-paes': profesores, fonoaudiologas: fono };
+// Nichos: una tanda = UN solo nicho (el activo o el pasado por arg). 100% para concentrar el SEO.
+function distributeNiche(n, niche) {
+  return { [niche]: n };
 }
 
 // ---------- Schema de salida (compatible con structured outputs) ----------
@@ -194,9 +195,10 @@ function main() {
   const avoid = rows.map((r) => [r.titulo, r.tema].filter(Boolean).join(' — ')).filter(Boolean);
   const maxNum = rows.length ? Math.max(...rows.map((r) => parseInt(String(r.id).replace(/\D/g, ''), 10) || 0)) : 0;
 
+  console.log(`Nicho de la tanda: ${ACTIVE_NICHE} (100%).`);
   const prompt = buildPrompt({
     n: N,
-    nicheMix: distributeNiche(N),
+    nicheMix: distributeNiche(N, ACTIVE_NICHE),
     orientacionMix: distributeOrientacion(N),
     formatoMix: distributeFormato(N),
     templateMix: distributeTemplates(N),
