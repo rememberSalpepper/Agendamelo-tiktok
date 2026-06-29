@@ -4,7 +4,8 @@
 // Requiere: codex CLI autenticado.  Luego: npm run lint && npm run render
 //
 // Variables de entorno opcionales:
-//   AGENDAMELO_CODEX_MODEL   modelo a usar en codex (-m)
+//   AGENDAMELO_CODEX_MODEL   modelo a usar en codex (-m); ver src/codex.js
+//   AGENDAMELO_CODEX_EFFORT  esfuerzo de razonamiento (default medium); ver src/codex.js
 //   AGENDAMELO_CSV           ruta del CSV
 
 import './env.js';
@@ -17,6 +18,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { buildPrompt, TIPOS, ICONS, NICHOS, ORIENTACIONES, FORMATOS } from './prompt.js';
 import { getNiche } from './niches.js';
+import { codexBaseArgs } from './codex.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
@@ -121,10 +123,8 @@ function callCodex(prompt) {
   const outFile = join(tmpdir(), 'agendamelo-out.json');
   const logFile = join(tmpdir(), 'agendamelo-codex.log');
   writeFileSync(schemaFile, JSON.stringify(schema));
-  const args = ['exec', '--skip-git-repo-check', '-s', 'read-only',
-    '--output-schema', schemaFile, '--output-last-message', outFile];
-  if (process.env.AGENDAMELO_CODEX_MODEL) args.push('-m', process.env.AGENDAMELO_CODEX_MODEL);
-  args.push('-');
+  const args = [...codexBaseArgs(),
+    '--output-schema', schemaFile, '--output-last-message', outFile, '-'];
   console.log('Llamando a Codex (puede tardar 1-3 min)...');
   const fd = openSync(logFile, 'w'); // sesión de Codex -> archivo, consola limpia
   try {

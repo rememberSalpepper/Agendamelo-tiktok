@@ -10,6 +10,7 @@ import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { codexBaseArgs } from './codex.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
@@ -33,8 +34,7 @@ function callCodex(prompt) {
   const sf = join(tmpdir(), 'agendamelo-exp-schema.json');
   const of = join(tmpdir(), 'agendamelo-exp-out.json');
   writeFileSync(sf, JSON.stringify(schema));
-  execFileSync('codex', ['exec', '--skip-git-repo-check', '-s', 'read-only',
-    '--output-schema', sf, '--output-last-message', of, '-'],
+  execFileSync('codex', [...codexBaseArgs(), '--output-schema', sf, '--output-last-message', of, '-'],
     { input: prompt, stdio: ['pipe', 'ignore', 'inherit'], timeout: 480000 });
   return JSON.parse(readFileSync(of, 'utf8')).items || [];
 }
