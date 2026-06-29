@@ -12,7 +12,6 @@ import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildCaption } from './caption.js';
 import { getSettings, setNicho, setEstilo } from './settings.js';
 import { codexConfigLabel } from './codex.js';
 import { NICHE_KEYS } from './niches.js';
@@ -30,28 +29,22 @@ const readRows = () => parse(readFileSync(CSV), { columns: true, skip_empty_line
 const AYUDA = [
   '🤖 *Comandos Agendamelo*',
   '',
-  '*Flujo (humano elige el hook)*',
-  '/generar [N] [nicho] — N ideas con 3-5 hooks c/u (default 7, nicho activo)',
+  '*Flujo diario* (tú eliges el hook)',
+  '/generar [N] [nicho] — N ideas con 3-5 hooks (default 7, nicho activo)',
   '/revisar [N] — elige el hook de cada idea con botones',
-  '/render [N] — renderiza las ideas con hook ya elegido',
-  '/enviar [N] — te entrega N posts listos',
+  '/render — renderiza las ideas con hook elegido',
+  '/enviar [N] — te entrega N posts listos  ·  /dia — 3 variados',
   '',
-  '*Operación*',
+  '*Ajustes*',
   '/nicho <slug> — fija el nicho activo (manicuristas, psicopedagogas…)',
   '/estilo corto|largo — variante A/B del caption',
-  '/estado — nicho activo, conteos y ángulos de las pendientes',
-  '/cola — lista de posts listos por publicar',
-  '/reporte — variedad por nicho/orientación/formato',
-  '/dia — el set del día: 3 posts variados',
-  '/siguiente — el próximo post',
-  '/textos [N] — solo el texto (sin imagen), para copiar',
-  '/ver <id> — reenvía un post para revisarlo (no lo consume)',
+  '/estado — nicho activo, conteos y posts listos',
   '',
   '*Gestionar*',
-  '/rehacer <id> [hook|desc|caption] — regenera hooks/descripción o re-renderiza',
+  '/ver <id> — reenvía un post sin consumirlo',
+  '/rehacer <id> [hook|desc] — regenera hooks/descripción o re-renderiza',
   '/borrar <id> — elimina una idea',
-  '/diagnostico — revisión integral (sistema, CSV, imágenes)',
-  '/ayuda — esta lista',
+  '/diagnostico — revisión integral del sistema',
 ].join('\n');
 
 // Selecciona 3 posts listos (renderizado) maximizando variedad de nicho/orientación/formato.
@@ -126,47 +119,32 @@ const strip = (s) => (s || '').replace(/\*(.+?)\*/g, '$1');
 // Una pendiente está "sin curar" si tiene variantes pero el operador aún no elige hook.
 const sinCurar = (r) => r.estado === 'pendiente' && r.hook_variantes && !r.hook_elegido;
 
+// Estado en texto plano (sin Markdown): incluye la lista de posts listos para publicar (antes /cola).
 function estado() {
   const rows = readRows();
   const s = getSettings();
-  const c = { pendiente: 0, renderizado: 0, enviado: 0, otro: 0 };
-  for (const r of rows) (c[r.estado] !== undefined ? c[r.estado]++ : c.otro++);
-  const porCurar = rows.filter(sinCurar);
+  const c = { pendiente: 0, renderizado: 0, enviado: 0 };
+  for (const r of rows) if (c[r.estado] !== undefined) c[r.estado]++;
+  const porCurar = rows.filter(sinCurar).length;
   const listasRender = rows.filter((r) => r.estado === 'pendiente' && !sinCurar(r)).length;
   // Ángulos de las pendientes (hook provisional o elegido).
   const ang = {};
   for (const r of rows.filter((r) => r.estado === 'pendiente')) if (r.angulo) ang[r.angulo] = (ang[r.angulo] || 0) + 1;
   const angStr = Object.entries(ang).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(' · ') || '—';
-  return `📊 *Estado Agendamelo*\n`
-    + `Nicho activo: *${s.nicho}* · caption: *${s.estilo_caption}* · Codex: ${codexConfigLabel()}\n`
-    + `Total: ${rows.length}\n`
-    + `• Pendientes por elegir hook: ${porCurar.length}  (usa /revisar)\n`
-    + `• Pendientes con hook listo: ${listasRender}  (usa /render)\n`
-    + `• Renderizadas (listas): ${c.renderizado}\n`
+  const listas = rows.filter((r) => r.estado === 'renderizado');
+  const colaLines = listas.slice(0, 10).map((r) => `   🟢 ${r.id} · ${r.niche}/${r.orientacion} · ${strip(r.hook || r.titulo)}`);
+  return `📊 Estado Agendamelo\n`
+    + `Nicho activo: ${s.nicho} · caption: ${s.estilo_caption} · Codex: ${codexConfigLabel()}\n\n`
+    + `Flujo:\n`
+    + `• Por elegir hook: ${porCurar}  → /revisar\n`
+    + `• Con hook, por renderizar: ${listasRender}  → /render\n`
+    + `• Listas para publicar: ${c.renderizado}  → /enviar\n`
     + `• Enviadas: ${c.enviado}\n`
-    + `Ángulos en pendientes — ${angStr}`;
+    + `Ángulos en pendientes — ${angStr}`
+    + (colaLines.length
+      ? `\n\nListas por publicar:\n${colaLines.join('\n')}${listas.length > 10 ? `\n   …y ${listas.length - 10} más` : ''}`
+      : '');
 }
-
-// Cola: lo que está listo (renderizado) o ya entregado (enviado).
-function cola() {
-  const rows = readRows().filter((r) => r.estado === 'renderizado' || r.estado === 'enviado');
-  if (!rows.length) return 'No hay posts en cola. Usa /generar para crear más.';
-  const lines = rows.slice(0, 25).map((r) => {
-    const mark = r.estado === 'enviado' ? '📤' : '🟢';
-    return `${mark} ${r.id} · ${r.niche}/${r.orientacion}/${r.formato}\n   ${strip(r.hook || r.titulo)}`;
-  });
-  return `🗂️ Cola de publicación (${rows.length})  🟢 lista · 📤 enviada\n\n${lines.join('\n')}`;
-}
-
-// Reporte de variedad (para asegurar cobertura por nicho/orientación/formato).
-function reporte() {
-  const active = readRows();
-  if (!active.length) return 'Nada en preparación. Usa /generar.';
-  const by = (k) => Object.entries(active.reduce((m, r) => ((m[r[k]] = (m[r[k]] || 0) + 1), m), {}))
-    .sort((a, b) => b[1] - a[1]).map(([v, n]) => `${v}: ${n}`).join(' · ');
-  return `📈 Reporte (sin publicar: ${active.length})\nNicho — ${by('niche')}\nOrientación — ${by('orientacion')}\nFormato — ${by('formato')}`;
-}
-
 
 function borrar(id) {
   const rows = readRows();
@@ -187,7 +165,7 @@ async function handle(chat, text) {
     case '/start': case '/ayuda': case '/help':
       return reply(chat, AYUDA);
     case '/estado':
-      return reply(chat, estado());
+      return replyText(chat, estado());
     case '/generar': {
       if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera a que termine.');
       const n = parseInt(arg, 10) || 7;
@@ -244,34 +222,6 @@ async function handle(chat, text) {
       } finally { busy = false; }
       return;
     }
-    case '/siguiente': {
-      if (busy) return reply(chat, '⏳ Ocupado, espera.');
-      busy = true;
-      try {
-        const e = await runScript(['src/telegram.js', '1'], { TELEGRAM_CHAT_ID: String(chat) });
-        if (e.code !== 0) return replyText(chat, `❌ ${tail(e.err || e.out)}`);
-      } finally { busy = false; }
-      return;
-    }
-    case '/textos': {
-      // Solo texto (título + descripción), sin imagen. No cambia el estado (es para revisar/copiar).
-      let targets = readRows().filter((r) => r.estado === 'renderizado');
-      const n = parseInt(arg, 10);
-      if (n) targets = targets.slice(0, n);
-      if (targets.length === 0) return reply(chat, 'No hay ideas listas (estado renderizado) para mostrar.');
-      await reply(chat, `📝 ${targets.length} idea(s) en texto (sin imagen):`);
-      for (const r of targets) {
-        const titulo = (r.hook || r.titulo).replace(/\*(.+?)\*/g, '$1');
-        await api('sendMessage', { chat_id: chat, text: titulo });
-        await api('sendMessage', { chat_id: chat, text: buildCaption(r), disable_web_page_preview: true });
-        await sleep(500);
-      }
-      return;
-    }
-    case '/cola':
-      return replyText(chat, cola());
-    case '/reporte':
-      return replyText(chat, reporte());
     case '/revisar': {
       // Human-in-the-loop: por cada idea sin curar, manda sus variantes como botones para elegir hook.
       const rows = readRows();
@@ -412,15 +362,11 @@ async function main() {
     { command: 'revisar', description: 'Elige el hook de cada idea con botones' },
     { command: 'render', description: 'Renderiza las ideas con hook ya elegido' },
     { command: 'enviar', description: 'Te entrega N posts listos' },
+    { command: 'dia', description: 'El set del dia: 3 posts variados' },
     { command: 'nicho', description: 'Fija el nicho activo' },
     { command: 'estilo', description: 'Variante A/B del caption (corto|largo)' },
-    { command: 'estado', description: 'Nicho activo, conteos y angulos de pendientes' },
-    { command: 'dia', description: 'El set del dia: 3 posts variados' },
-    { command: 'cola', description: 'Lista de posts listos por publicar' },
-    { command: 'reporte', description: 'Variedad por nicho/orientacion/formato' },
+    { command: 'estado', description: 'Nicho activo, conteos y posts listos' },
     { command: 'ver', description: 'Reenvia un post para revisarlo (no lo consume)' },
-    { command: 'textos', description: 'Envia solo el texto (sin imagen)' },
-    { command: 'siguiente', description: 'Envia el proximo post' },
     { command: 'rehacer', description: 'Regenera hooks/desc o re-renderiza un post' },
     { command: 'borrar', description: 'Elimina una idea por id' },
     { command: 'diagnostico', description: 'Revision integral (sistema, CSV, imagenes)' },

@@ -59,13 +59,17 @@ try {
 }
 log(`• Filas: ${rows.length}`);
 
+// Solo se valida lo que aún se va a publicar; lo 'enviado' es historia (no se revalida).
+const porPublicar = rows.filter((r) => r.estado !== 'enviado');
+const enviadas = rows.length - porPublicar.length;
 let invalidas = 0;
-for (const r of rows) {
+for (const r of porPublicar) {
   const issues = validateRow(r);
   if (issues.length) { invalidas++; if (invalidas <= 8) log(`  ✗ ${r.id}: ${issues.join('; ')}`); }
 }
-log(invalidas ? `✗ ${invalidas} fila(s) con problemas de validación.` : '✓ Todas las filas pasan la validación.');
-if (invalidas) problems.push(`${invalidas} fila(s) inválidas (corre npm run lint para el detalle).`);
+log(invalidas ? `✗ ${invalidas} fila(s) por publicar con problemas.` : '✓ Todas las filas por publicar pasan la validación.');
+if (enviadas) log(`• ${enviadas} enviada(s): historia, no se revalidan.`);
+if (invalidas) problems.push(`${invalidas} fila(s) inválidas por publicar (corre npm run lint para el detalle).`);
 
 // Duplicados (tema / hook)
 const dup = (key, label) => {

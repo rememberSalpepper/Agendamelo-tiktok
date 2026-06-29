@@ -60,10 +60,11 @@ Si `high` no baja el descarte ni mejora los hooks de forma clara, quédate en `m
 
 ### Comandos del bot (Telegram)
 - **Flujo:** `/generar [N] [nicho]` (genera con 3-5 hooks, no renderiza) → `/revisar [N]` (elige el hook
-  con botones) → `/render [N]` (solo las curadas) → `/enviar [N]`.
-- **Operación:** `/nicho <slug>` (nicho activo) · `/estilo corto|largo` (A/B del caption) · `/estado` ·
-  `/cola` · `/reporte` · `/dia` · `/siguiente` · `/textos [N]` · `/ver <id>`.
-- **Gestionar:** `/rehacer <id> [hook|desc|caption]` · `/borrar <id>` · `/diagnostico` (revisión integral).
+  con botones) → `/render` (solo las curadas) → `/enviar [N]` (o `/dia` para 3 variados).
+- **Ajustes:** `/nicho <slug>` (nicho activo) · `/estilo corto|largo` (A/B del caption) · `/estado`
+  (conteos + posts listos).
+- **Gestionar:** `/ver <id>` · `/rehacer <id> [hook|desc]` · `/borrar <id>` · `/diagnostico` (revisión
+  integral). Lo `enviado` es historia y no se revalida en lint/diagnóstico.
 
 Los carruseles se envían como álbum. Flujo de publicación: ver `docs/LINEA-EDITORIAL.md`.
 

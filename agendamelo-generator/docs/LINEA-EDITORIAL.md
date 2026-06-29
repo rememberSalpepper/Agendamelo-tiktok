@@ -138,7 +138,7 @@ TikTok no tiene API de subida en este stack → publicación **manual**. Flujo 1
 2. **Curar el hook:** `/revisar` → toca el botón del ángulo que quieras en cada idea (o `🔁 Otros hooks`
    para regenerar). Eso fija el `hook_elegido`.
 3. **Renderizar:** `/render` → solo las que ya tienen hook elegido pasan a `renderizado`.
-4. **Diario:** `/dia` → 3 posts variados + título y caption listos (o `/siguiente`, `/enviar`).
+4. **Diario:** `/dia` → 3 posts variados + título y caption listos (o `/enviar [N]`).
 5. **Sube a TikTok**: foto única o carrusel (láminas en orden), pega el caption (la línea 1 ya trae la
    keyword), **elige el sonido** (ver abajo) y publica. Reparte los 3 en el día.
 

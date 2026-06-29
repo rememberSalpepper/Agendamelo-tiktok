@@ -11,12 +11,17 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
 
 const rows = parse(readFileSync(CSV), { columns: true, skip_empty_lines: true, relax_quotes: true });
+// Solo se valida lo que aún se va a publicar. Lo 'enviado' es historia inmutable (puede venir de
+// versiones viejas del esquema) y NO se revalida: no tiene sentido y solo mete ruido.
+const porPublicar = rows.filter((r) => r.estado !== 'enviado');
+const enviadas = rows.length - porPublicar.length;
 const errors = [];
-for (const r of rows) for (const issue of validateRow(r)) errors.push(`${r.id}: ${issue}`);
+for (const r of porPublicar) for (const issue of validateRow(r)) errors.push(`${r.id}: ${issue}`);
 
 if (errors.length) {
   console.error(`✗ ${errors.length} problema(s):`);
   for (const e of errors) console.error('  - ' + e);
   process.exit(1);
 }
-console.log(`✓ OK: ${rows.length} filas válidas (5 hashtags #agendamelo, niche, orientacion, formato, tema, plantilla/slides, hook).`);
+console.log(`✓ OK: ${porPublicar.length} fila(s) por publicar válidas`
+  + `${enviadas ? ` (+${enviadas} enviadas, no se revalidan)` : ''}.`);
