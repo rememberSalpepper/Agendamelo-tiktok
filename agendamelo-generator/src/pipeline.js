@@ -46,7 +46,10 @@ async function main() {
   let targets;
   if (mode === 'all') targets = rows;
   else if (mode === 'one') targets = rows.filter((r) => r.id === arg);
-  else targets = rows.filter((r) => r.estado !== 'renderizado' && r.estado !== 'enviado');
+  // pending: solo lo CURADO por el humano (hook elegido). Las filas viejas sin hook_variantes
+  // se consideran curadas (compat). Así /render nunca saca una idea con el hook sin elegir.
+  else targets = rows.filter((r) => r.estado !== 'renderizado' && r.estado !== 'enviado'
+    && r.hook && (r.hook_elegido || !r.hook_variantes));
 
   if (targets.length === 0) { console.log('No hay ideas que renderizar para el modo:', mode); return; }
   console.log(`Renderizando ${targets.length} imagen(es) [modo: ${mode}]...`);
