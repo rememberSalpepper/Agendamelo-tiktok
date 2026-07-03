@@ -33,8 +33,9 @@ VOLUMEN, no alcance: el bot produce OPCIONES; el humano cura el hook y elige el 
 
 ```bash
 npm install && npx playwright install chromium   # primera vez
-npm run generate      # Codex crea ideas del nicho activo (necesita Codex autenticado)
-npm run lint          # valida el CSV (5 hashtags, #agendamelo, hook ≤12 palabras, angulo, voseo…)
+npm run generate      # Codex crea ideas de imagen del nicho activo (necesita Codex autenticado)
+npm run kit           # Codex crea N kits de video TikTok/Reels (solo texto) → agendamelo_kits.csv
+npm run lint          # valida AMBOS CSV: imágenes (5 hashtags, #agendamelo, hook ≤12, voseo…) y kits
 npm run render        # renderiza solo las pendientes CON hook elegido
 npm run render:all    # renderiza todas
 npm run render:one AGENDA-IDEA-008   # una sola
@@ -59,8 +60,13 @@ AGENDAMELO_CSV=/tmp/high.csv   npm run lint
 Si `high` no baja el descarte ni mejora los hooks de forma clara, quédate en `medium` (más barato/rápido).
 
 ### Comandos del bot (Telegram)
-- **Flujo:** `/generar [N] [nicho]` (genera con 3-5 hooks, no renderiza) → `/revisar [N]` (elige el hook
-  con botones) → `/render` (solo las curadas) → `/enviar [N]` (o `/dia` para 3 variados).
+- **Imágenes → Facebook:** `/generar [N] [nicho]` (genera con 3-5 hooks, no renderiza) → `/revisar [N]`
+  (elige el hook con botones) → `/render` (solo las curadas) → `/enviar [N]` (o `/dia` para 3 variados).
+- **Kit de video → TikTok/Reels:** `/kit [N] [nicho]` (default 5, máx 7) genera N kits faceless de UN
+  nicho —solo texto— y los entrega listos para copiar (hook / escenas / CTA / caption / hashtags /
+  ideas de imagen IA). El bot **no publica ni renderiza** para TikTok: tú armas el video a mano
+  (fotos/B-roll + sonido en tendencia). El nicho **rota** por tanda (30/25/25/20); datos en el CSV
+  hermano `agendamelo_kits.csv` (`pendiente → entregado`). Detalle en `docs/ROADMAP.md`.
 - **Ajustes:** `/nicho <slug>` (nicho activo) · `/estilo corto|largo` (A/B del caption) · `/estado`
   (conteos + posts listos).
 - **Gestionar:** `/ver <id>` · `/rehacer <id> [hook|desc]` · `/borrar <id>` · `/diagnostico` (revisión

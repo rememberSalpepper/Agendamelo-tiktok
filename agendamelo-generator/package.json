@@ -12,6 +12,7 @@
     "render:one": "node src/pipeline.js one",
     "preview": "node src/preview.js",
     "generate": "node src/generate.js",
+    "kit": "node src/kit.js",
     "expand": "node src/expand-descriptions.js",
     "telegram": "node src/telegram.js",
     "bot": "node src/bot.js"

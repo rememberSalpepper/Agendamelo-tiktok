@@ -15,9 +15,13 @@ import { fileURLToPath } from 'node:url';
 import { getSettings, setNicho, setEstilo } from './settings.js';
 import { codexConfigLabel } from './codex.js';
 import { NICHE_KEYS } from './niches.js';
+import { formatKit } from './kit-format.js';
+import { KIT_DEFAULT, KIT_MAX } from './kit-validate.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
+// CSV hermano del modo kit (videos TikTok/Reels, solo texto). Vive fuera de git, junto al de imágenes.
+const KITS_CSV = process.env.AGENDAMELO_KITS_CSV || join(ROOT, '..', 'agendamelo_kits.csv');
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const API = `https://api.telegram.org/bot${TOKEN}`;
 const ALLOWED = (process.env.AGENDAMELO_ALLOWED_CHATS || '').split(',').map((s) => s.trim()).filter(Boolean);
@@ -25,15 +29,32 @@ const TEST = process.argv[2] === 'test';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const readRows = () => parse(readFileSync(CSV), { columns: true, skip_empty_lines: true, relax_quotes: true });
+// Kits (modo TikTok): CSV propio; puede no existir aún (primera vez).
+const readKitRows = () => (existsSync(KITS_CSV)
+  ? parse(readFileSync(KITS_CSV), { columns: true, skip_empty_lines: true, relax_quotes: true })
+  : []);
+// Marca kits como 'entregado' (fecha) tras enviarlos como texto. Los no entregados quedan 'pendiente'.
+function markKitsEntregado(ids) {
+  const rows = readKitRows();
+  if (!rows.length) return;
+  const set = new Set(ids);
+  const hoy = new Date().toISOString().slice(0, 10);
+  let changed = false;
+  for (const r of rows) if (set.has(r.id) && r.estado !== 'entregado') { r.estado = 'entregado'; r.fecha_entregado = hoy; changed = true; }
+  if (changed) writeFileSync(KITS_CSV, stringify(rows, { header: true, columns: Object.keys(rows[0]) }));
+}
 
 const AYUDA = [
   '🤖 *Comandos Agendamelo*',
   '',
-  '*Flujo diario* (tú eliges el hook)',
+  '*Imágenes → Facebook* (tú eliges el hook)',
   '/generar [N] [nicho] — N ideas con 3-5 hooks (default 7, nicho activo)',
   '/revisar [N] — elige el hook de cada idea con botones',
   '/render — renderiza las ideas con hook elegido',
   '/enviar [N] — te entrega N posts listos  ·  /dia — 3 variados',
+  '',
+  '*Kit de video → TikTok/Reels* (texto para armar a mano)',
+  '/kit [N] [nicho] — N kits de video listos para copiar (default 5, máx 7)',
   '',
   '*Ajustes*',
   '/nicho <slug> — fija el nicho activo (manicuristas, psicopedagogas…)',
@@ -181,6 +202,31 @@ async function handle(chat, text) {
         const l = await runScript(['src/lint.js']);
         if (l.code !== 0) await replyText(chat, `⚠️ Aviso de lint:\n${tail(l.err || l.out)}`);
         await reply(chat, `✅ Ideas generadas con 3-5 hooks cada una. Usa /revisar para elegir los hooks.`);
+      } finally { busy = false; }
+      return;
+    }
+    case '/kit': {
+      // Modo TikTok/Reels: genera N kits de video (solo texto) y los entrega listos para copiar.
+      // No renderiza imágenes ni toca el modo Facebook.
+      if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera a que termine.');
+      const pedido = parseInt(arg, 10) || KIT_DEFAULT;
+      const n = Math.min(Math.max(pedido, 1), KIT_MAX);
+      const nicho = arg2 && NICHE_KEYS.includes(arg2) ? arg2 : '';
+      if (arg2 && !nicho) return reply(chat, `Nicho inválido "${arg2}". Opciones: ${NICHE_KEYS.join(', ')}.`);
+      busy = true;
+      try {
+        if (pedido > KIT_MAX) await reply(chat, `ℹ️ Máx ${KIT_MAX} kits por tanda; genero ${n}.`);
+        await reply(chat, `🎬 Generando ${n} kit(s) de video para TikTok/Reels${nicho ? ` de *${nicho}*` : ''} con Codex (${codexConfigLabel()})... (1-3 min)`);
+        const before = new Set(readKitRows().map((r) => r.id));
+        const g = await runScript(['src/kit.js', String(n), nicho]);
+        if (g.code !== 0) return replyText(chat, `❌ Error al generar kits:\n${tail(g.err || g.out)}`);
+        const nuevos = readKitRows().filter((r) => !before.has(r.id));
+        if (nuevos.length === 0) return reply(chat, '⚠️ No quedó ningún kit válido en la tanda. Prueba de nuevo o baja N.');
+        const l = await runScript(['src/lint.js']);
+        if (l.code !== 0) await replyText(chat, `⚠️ Aviso de lint:\n${tail(l.err || l.out)}`);
+        await reply(chat, `✅ ${nuevos.length} kit(s) listos · tanda ${nuevos[0].tanda} · ${nuevos[0].niche}. Cópialos:`);
+        for (const r of nuevos) { await replyText(chat, formatKit(r)); await sleep(250); }
+        markKitsEntregado(nuevos.map((r) => r.id));
       } finally { busy = false; }
       return;
     }
@@ -363,6 +409,7 @@ async function main() {
     { command: 'render', description: 'Renderiza las ideas con hook ya elegido' },
     { command: 'enviar', description: 'Te entrega N posts listos' },
     { command: 'dia', description: 'El set del dia: 3 posts variados' },
+    { command: 'kit', description: 'N kits de video TikTok/Reels (texto, default 5, max 7)' },
     { command: 'nicho', description: 'Fija el nicho activo' },
     { command: 'estilo', description: 'Variante A/B del caption (corto|largo)' },
     { command: 'estado', description: 'Nicho activo, conteos y posts listos' },
