@@ -5,7 +5,8 @@ El "cerebro" listo está en `src/prompt.agendamelo.example.js` (cópialo como `s
 
 ## Qué es
 SaaS chileno: **mini-web profesional + agenda online 24/7** para negocios de servicios.
-- Precio: **$4.990** primer mes / **$7.990** mes. Sin contratos ni comisión por reserva.
+- Precio: **$12.990/mes** · plan anual **$64.000**. Publica gratis 7 días, sin tarjeta.
+- Sin contratos ni comisión por reserva.
 - Setup en 5 minutos, sin código. Dominio `agendamelo.cl/tu-negocio`.
 
 ## Nichos (audiencia)

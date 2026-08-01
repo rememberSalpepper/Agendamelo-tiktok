@@ -19,8 +19,8 @@ Estado y próximos pasos del sistema de contenido. Guía para el usuario y futur
   `agendamelo_kits.csv` (`pendiente → entregado`), **7 ángulos** (los 6 de imagen + `visibilidad`),
   **ángulos únicos por tanda**, nicho **rotando 30/25/25/20** (override `/kit N <nicho>`). Reglas
   duras en `src/kit-validate.js` (hook ≤12 palabras, caption ≤150 keyword-first, 3-5 hashtags de
-  nicho sin #fyp/#viral, anti-voseo) enganchadas a `npm run lint`. Switch de precio Pricing 2.0:
-  `PRICING_20_LIVE` en `src/kit-config.js` (hoy `false`, ver «Principios»). **No toca el modo imagen.**
+  nicho sin #fyp/#viral, anti-voseo, lista blanca de precio/oferta) enganchadas a `npm run lint` y
+  cubiertas por `npm test`. Verdad de precio: `PRICING_CANONICO` en `src/kit-config.js`.
 - **Línea editorial** documentada (`docs/LINEA-EDITORIAL.md`).
 - Infra: Docker + docker-compose (puerto 3011) + auto-deploy (GitHub Actions).
 
@@ -47,9 +47,13 @@ y consistente; márgenes 230/430; 5 hashtags con `#agendamelo` (modo imagen); ca
 cierre en CTA. En el **modo kit**: hooks ≤12 palabras, un solo nicho por tanda, ángulos únicos, 3-5
 hashtags de nicho (sin #fyp/#viral), el bot NO publica ni renderiza para TikTok.
 
-## Punto de cambio pendiente — Pricing 2.0
-Cuando Pricing 2.0 fase 1 (repo `reservaHoras`) esté en producción en agendamelo.cl, la verdad de
-precio pasa a **$12.990/mes · anual $64.000 · publica gratis 7 días sin tarjeta**. Hay que: (1) poner
-`PRICING_20_LIVE = true` en `src/kit-config.js` (habilita el pricing nuevo en los kits), y (2)
-actualizar `src/prompt.js` + el `CLAUDE.md` raíz para el modo imagen. Hasta entonces, ni kits ni
-imágenes se centran en precio ni en "no es prueba gratis".
+## Pricing 2.0 — CERRADO (2026-07-31)
+Pricing 2.0 está en producción en agendamelo.cl desde el 2026-07-14 y el bot ya lo refleja: la verdad
+única es **$12.990/mes · plan anual $64.000 · publica gratis 7 días sin tarjeta**, y vive en
+`src/kit-config.js` (`PRICING_CANONICO`), que consumen los dos modos (kit e imagen).
+
+El switch `PRICING_20_LIVE` se **eliminó**: existía para un evento que ya ocurrió y dejarlo puesto era
+el riesgo de que alguien lo volviera a `false` y el bot mintiera de nuevo. En su lugar, la regla de
+precio se hace cumplir con una **lista blanca siempre activa** (`findPriceIssues` en
+`src/kit-validate.js`), que además cubre `scenes[]` e `imagePrompts[]` —antes quedaban fuera— y
+distingue el precio de Agendamelo de los precios de mercado del rubro. Cubierto por `npm test`.

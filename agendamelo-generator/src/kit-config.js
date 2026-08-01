@@ -1,23 +1,21 @@
-// PUNTO ÚNICO DE CAMBIO — Pricing 2.0 para el modo "kit de video" (TikTok/Reels).
+// PUNTO ÚNICO DE CAMBIO — la verdad de precio de Agendamelo para TODO el bot de contenido.
+// La usan el modo KIT (kit-prompt.js) y el modo IMAGEN (prompt.js), y la hace cumplir kit-validate.js.
 //
-// HOY (Pricing 2.0 NO deployado en agendamelo.cl): PRICING_20_LIVE = false.
-//   → Ningún kit se centra en el precio ni en "no es prueba gratis" (ambas cosas están por cambiar
-//     en el sitio). El generador NO menciona cifras de precio, ni "gratis", ni "prueba/trial", y la
-//     validación (kit-validate.js) rechaza esos términos. El CTA es de DESCUBRIMIENTO
-//     ("Búscalo: agendamelo.cl"), no de oferta.
-//
-// CUANDO Pricing 2.0 esté en PRODUCCIÓN en agendamelo.cl:
-//   1) Cambia PRICING_20_LIVE a true (única línea que hay que tocar aquí).
-//   2) La verdad de precio pasa a PRICING.nuevo y se habilita "publica gratis 7 días sin tarjeta".
-//   3) Actualiza también src/prompt.js y el CLAUDE.md raíz (el precio del modo IMAGEN es aparte).
-// Contexto: PLAN-CANALES-2026-07.md §1 y la nota de CLAUDE.md (2026-07-02).
+// Pricing 2.0 está EN PRODUCCIÓN en agendamelo.cl desde el 2026-07-14, así que aquí hay UNA sola
+// verdad y ya no un switch: el switch PRICING_20_LIVE existía para un evento que ya ocurrió y dejarlo
+// puesto era el riesgo de que alguien lo volviera a false y el bot mintiera otra vez.
+// Fuente en el producto: lib/pricing-rules.ts del repo reservaHoras.
 
-export const PRICING_20_LIVE = false;
+export const PRICING_CANONICO = '$12.990/mes · plan anual $64.000 · publica gratis 7 días, sin tarjeta';
 
-// Verdades de precio (referencia; hoy NO se inyectan en los kits porque no se centran en precio).
-export const PRICING = {
-  // Verdad canónica del sitio HASTA que Pricing 2.0 fase 1 esté en producción.
-  actual: '$4.990 el primer mes, luego $7.990/mes, sin contrato ni comisión (configurar sin costo; publicar cuesta desde el día 1; no es prueba gratis)',
-  // Verdad DESDE el deploy de Pricing 2.0 fase 1 (repo reservaHoras).
-  nuevo: '$12.990/mes · plan anual $64.000 · publica gratis 7 días sin tarjeta',
-};
+// CTA canónico de venta (el que preferimos que use el modelo en ambos modos).
+export const CTA_CANONICO = 'Publica gratis 7 días, sin tarjeta -> agendamelo.cl';
+
+// Las ÚNICAS cifras que el bot puede presentar como PRECIO DE AGENDAMELO.
+// El plan fundador ($49.990/año) NO entra aquí a propósito: es palanca de outreach por DM, nunca
+// contenido público.
+export const PRECIOS_AGENDAMELO = ['12.990', '64.000'];
+
+// Precios que Agendamelo YA NO cobra. Se prohíben en cualquier parte del texto para que una
+// regresión (o un modelo con memoria vieja) no los reviva.
+export const PRECIOS_MUERTOS = ['4.990', '7.990'];

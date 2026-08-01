@@ -22,8 +22,9 @@ reservas" ni "plataforma de gestión". En una URL propia `agendamelo.cl/tu-nombr
 - Aparición en Google y en directorios por rubro y comuna.
 - Listo en 5 minutos, sin código.
 
-Precio: **$4.990 primer mes / $7.990 mes**. Sin contrato, sin permanencia, cancela con un clic. **Cero
-comisión**. Modelo: CONFIGURAR es sin costo; PUBLICAR cuesta desde el día 1 (**no es prueba gratis**).
+Precio: **$12.990/mes · plan anual $64.000**. Sin contrato, sin permanencia, cancela con un clic.
+**Cero comisión**. Modelo: CONFIGURAR el sitio es sin costo; PUBLICARLO es **gratis los primeros 7
+días, sin tarjeta** (un trial por negocio) y después se paga la suscripción.
 **No es:** ficha clínica, CRM avanzado, LMS; no procesa pagos del cliente final; no se integra con
 Isapres/Fonasa; no cobra comisión.
 
@@ -110,14 +111,20 @@ Agendamelo es nuevo: **NUNCA** presentes números como resultados reales de clie
 es (a) precio de mercado del nicho (con `source` = "precios de mercado en Chile") o (b) un cálculo de
 tiempo claramente hipotético. Beneficios futuros en condicional ("podrías", "deja de").
 
-## Estrategia de CTA (sin "gratis")
-CTA canónico: **"Configura tu sitio sin costo y publícalo desde $4.990/mes → link en bio"**.
+## Estrategia de CTA (el trial es el gancho)
+CTA canónico: **"Publica gratis 7 días, sin tarjeta → agendamelo.cl"**.
 Variantes: "Tu sitio + agenda en 5 minutos → agendamelo.cl" · "Aparece en Google y recibe reservas
-solas → link en bio" · "Desde $4.990 al mes, sin comisión ni contrato → link en bio".
+solas → link en bio" · "Desde $12.990 al mes, sin comisión ni contrato → link en bio".
 - educativo → "Sígueme para más" / "Guarda este tip".
 - plataforma → "Míralo en agendamelo.cl · Link en bio".
-- venta → "Configura tu sitio sin costo" / "Arma tu agenda en 5 minutos · Publica desde $4.990/mes".
-**PROHIBIDO:** "gratis", "prueba gratis", "primer mes gratis", "trial", "sin compromiso".
+- venta → "Publica gratis 7 días" / "Arma tu agenda en 5 minutos · Sin tarjeta, después $12.990/mes".
+
+**La única forma de "gratis" es el trial de publicación de 7 días sin tarjeta**, y la palabra solo
+puede ir pegada a él. **PROHIBIDO:** "gratis" suelto, "mes gratis", "primer mes gratis", "prueba
+gratis", "trial" (anglicismo), "sin compromiso" como gancho de regalo, y cualquier descuento, oferta,
+promoción o cupón. Las únicas cifras de precio de Agendamelo son **$12.990** y **$64.000**; el plan
+fundador NO se nombra en contenido público (es outreach por DM). Los precios de **mercado del rubro**
+sí se citan como dato, con su fuente. Lo hace cumplir `src/kit-validate.js` (`findPriceIssues`).
 
 ## Caption (lo que va en TikTok) y hashtags
 - **Línea 1 = el hook con la keyword** (es lo que TikTok muestra colapsado e indexa más fuerte). Recién

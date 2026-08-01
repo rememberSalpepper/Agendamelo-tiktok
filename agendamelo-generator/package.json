@@ -4,7 +4,7 @@
   "description": "Generador de contenido para TikTok de Agendamelo (mini-web + agenda online), con identidad por nicho.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "lint": "node src/lint.js",
     "revisar": "node src/review.js",
     "render": "node src/pipeline.js pending",

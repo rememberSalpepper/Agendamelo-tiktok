@@ -7,7 +7,7 @@
 
 import { NICHES } from './niches.js';
 import { KIT_ANGULOS } from './kit-validate.js';
-import { PRICING_20_LIVE, PRICING } from './kit-config.js';
+import { PRICING_CANONICO, CTA_CANONICO } from './kit-config.js';
 
 const ANGULO_DESC = {
   plata: 'plata que pierde o deja de ganar (clientas/pacientes/alumnos que se van, precio que regala)',
@@ -24,14 +24,17 @@ export function buildKitPrompt({ n, niche, avoid }) {
   const angulosCheat = KIT_ANGULOS.map((a) => `   - ${a}: ${ANGULO_DESC[a]}`).join('\n');
   const avoidLines = avoid.length ? avoid.map((t) => `   - ${t}`).join('\n') : '   (aún no hay historia de kits; es la primera tanda)';
 
-  // Bloque de precio: hoy NO se centra en precio; cuando Pricing 2.0 esté en producción se abre.
-  const precioBloque = PRICING_20_LIVE
-    ? `REGLA DE PRECIO (Pricing 2.0 VIGENTE): la verdad es "${PRICING.nuevo}". Puedes usar como CTA
-"Publica gratis 7 días, sin tarjeta -> agendamelo.cl" cuando calce. No exageres cifras ni inventes descuentos.`
-    : `REGLA DE PRECIO (CRÍTICA — Pricing 2.0 NO deployado todavía): NINGÚN kit puede centrarse en el
-precio ni en "no es prueba gratis" (ambas cosas están por cambiar en el sitio). PROHIBIDO mencionar
-cifras de precio, "$", "gratis", "prueba", "trial" o "sin compromiso" en hookText, scenes, ctaText o
-captionSEO. El CTA es de DESCUBRIMIENTO (que te encuentren / que vean el sitio), no una oferta.`;
+  // Bloque de precio: verdad única (kit-config.js), la misma que hace cumplir kit-validate.js.
+  const precioBloque = `REGLA DE PRECIO (verdad canónica, no la cambies): ${PRICING_CANONICO}.
+- El mejor gancho es el trial: publicar el sitio es GRATIS 7 días y SIN TARJETA (uno por negocio).
+- La palabra "gratis" SOLO puede ir pegada a ese trial ("publica gratis 7 días, sin tarjeta").
+  PROHIBIDO "mes gratis", "primer mes gratis", "prueba gratis" y la palabra "trial" (es anglicismo:
+  di "prueba de 7 días" o "gratis 7 días").
+- Las ÚNICAS cifras de precio de Agendamelo son $12.990/mes y $64.000 el plan anual. No inventes
+  otras, ni descuentos, ni ofertas, ni promociones, ni cupones, ni porcentajes de rebaja.
+- Sí puedes citar PRECIOS DE MERCADO del rubro (los de la sección 3) como dato, con su fuente.
+- Configurar el sitio no cuesta; lo que se paga es publicarlo una vez terminados los 7 días.
+- El cliente final SIEMPRE reserva sin pagar y sin tarjeta: jamás insinúes seña, abono ni anticipo.`;
 
   return `Eres el mejor estratega de TikTok-SEO faceless de Chile y el motor de contenido de Agendamelo.
 Genera ${n} KITS DE VIDEO nuevos para TikTok/Reels, TODOS del nicho "${niche}" (${info.label || niche}).
@@ -92,8 +95,10 @@ ${angulosCheat}
 
 # 5. CTA Y PRECIO
 ${precioBloque}
-CTAs válidos (de descubrimiento): "Búscalo: agendamelo.cl", "Encuéntralo en agendamelo.cl",
-"Tu sitio + agenda en agendamelo.cl", "Link en la descripción -> agendamelo.cl".
+CTA de venta (preferido cuando el kit va al grano): "${CTA_CANONICO}".
+CTAs de descubrimiento (igual de válidos, alterna): "Búscalo: agendamelo.cl",
+"Encuéntralo en agendamelo.cl", "Tu sitio + agenda en agendamelo.cl",
+"Link en la descripción -> agendamelo.cl".
 
 # 6. INTEGRIDAD DE DATOS (no mientas)
 Agendamelo es nuevo: NUNCA presentes números como resultados reales de clientes ("nuestras usuarias
@@ -125,8 +130,9 @@ ${avoidLines}
 1. ¿hookText ≤12 palabras, duele/intriga, con keyword y *énfasis*? 2. ¿La keyword está literal en el
 hook o en la 1ª scene? 3. ¿captionSEO ≤150 car., keyword al inicio, humano, sin lista de comas?
 4. ¿3-5 hashtags del nicho, sin #fyp/#viral/#parati? 5. ¿Ángulos DISTINTOS entre los ${n} kits?
-6. ¿Cero voseo argentino? 7. ¿Cero precio/"gratis" (mientras no cambie el pricing)? 8. ¿Usa la jerga
-verbatim de ${niche}? Emite solo si TODO pasa.
+6. ¿Cero voseo argentino? 7. ¿El precio es $12.990/mes o $64.000 anual, sin cifras inventadas, y
+"gratis" solo pegado a los 7 días sin tarjeta (cero "mes gratis", cero "trial", cero descuentos)?
+8. ¿Usa la jerga verbatim de ${niche}? Emite solo si TODO pasa.
 
 # Salida
 Devuelve SOLO el JSON con la forma del schema (un objeto con "kits"). Nada de texto extra.`;

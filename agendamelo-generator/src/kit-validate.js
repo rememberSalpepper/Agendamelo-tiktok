@@ -7,7 +7,7 @@
 
 import { NICHOS } from './prompt.js';
 import { findVoseo } from './validate.js';
-import { PRICING_20_LIVE } from './kit-config.js';
+import { PRECIOS_AGENDAMELO, PRECIOS_MUERTOS } from './kit-config.js';
 
 // 7 ángulos: los 6 del modo imagen + "visibilidad" (que te encuentren en Google/directorios).
 // Con 7 ángulos, una tanda de hasta 7 kits puede tener todos los ángulos distintos.
@@ -21,10 +21,83 @@ const BANNED_TAGS = new Set([
   '#viral', '#viralvideo', '#viraltiktok', '#tiktok', '#trending', '#trend',
 ]);
 
-// Términos de precio/oferta prohibidos MIENTRAS Pricing 2.0 no esté deployado (ver kit-config.js).
-const PRICE_TOKENS = [/gratis/i, /prueba\s+gratis/i, /\btrial\b/i, /\$\s?\d/];
-
 const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+// ---------------------------------------------------------------------------------------------
+// Reglas de precio y oferta — SIEMPRE activas (antes dependían del switch Pricing 2.0, que ya no
+// existe). Son lista BLANCA: en vez de prohibir términos sueltos, se define lo único que se puede
+// decir. Así, prender el precio nuevo no deja al generador libre de inventar ofertas.
+// ---------------------------------------------------------------------------------------------
+
+// "gratis" SOLO vale pegado al trial de publicación de 7 días: es la única forma de gratis que
+// existe en el producto. Cualquier otro uso es un regalo inventado.
+const TRIAL_OK = /(?:gratis\s+(?:por\s+|durante\s+)?7\s*d[ií]as|7\s*d[ií]as\s+(?:de\s+)?gratis)/gi;
+
+// Colocaciones que son un regalo inventado aunque nombren "7 días" en otra parte de la frase.
+const GRATIS_PROHIBIDO = [
+  [/\bprimer\s+mes\s+gratis\b/i, '"primer mes gratis" (no existe: la única forma de gratis es el trial de 7 días)'],
+  [/\bmes\s+gratis\b/i, '"mes gratis" (no existe: la única forma de gratis es el trial de 7 días)'],
+  [/\bprueba\s+gratis\b/i, '"prueba gratis" (di "publica gratis 7 días, sin tarjeta")'],
+  [/\bgratis\s+el\s+primer\s+mes\b/i, '"gratis el primer mes" (no existe)'],
+  [/\btrial\b/i, '"trial" (anglicismo: en español es "prueba de 7 días" o "gratis 7 días")'],
+];
+
+// Lenguaje de oferta/descuento: Agendamelo no hace descuentos ni promociones en contenido público.
+// Ojo: NO se prohíbe "%" a secas porque los datos de mercado del rubro lo usan de forma legítima
+// ("la sesión online sale 10–15% más económica"). Lo que se prohíbe es el vocabulario de descuento.
+const OFERTA_PROHIBIDA = ['descuento', 'oferta', 'promocion', 'promo', 'cupon', '2x1', 'rebaja'];
+
+// Cifras con forma de precio CLP: "$12.990", "12.990", "$64.000", "$ 8.000".
+// (los grupos de miles se piden explícitos para no tragarse el punto final de la frase: "$18.000.")
+const PRECIO_RE = /\$\s?\d{1,3}(?:\.\d{3})*|\b\d{1,3}\.\d{3}\b/g;
+// Contexto que convierte una cifra en un PRECIO DE AGENDAMELO (y no en un dato de mercado del rubro).
+const CONTEXTO_SUSCRIPCION = /(\/\s*mes|al\s+mes|por\s+mes|mensual|cada\s+mes|al\s+a[nñ]o|anual|\bplan\b|suscripci[oó]n|publica|publicar|agendamelo)/i;
+// Los datos de mercado del rubro (niches.js) son siempre miles redondos: $8.000, $12.000, $50.000.
+const MERCADO_RE = /^\d{1,3}\.000$/;
+
+const soloCifra = (s) => s.replace(/^\$\s?/, '').trim();
+
+// Devuelve los problemas de precio/oferta de UN texto visible. Exportada para poder testearla sola.
+export function findPriceIssues(txt) {
+  const problemas = [];
+  const raw = String(txt || '');
+  if (!raw.trim()) return problemas;
+  const n = norm(raw);
+
+  for (const [re, motivo] of GRATIS_PROHIBIDO) if (re.test(raw)) problemas.push(motivo);
+
+  // Todo "gratis" que no sea el trial de 7 días sobra.
+  if (/gratis/i.test(raw.replace(TRIAL_OK, ''))) {
+    problemas.push('"gratis" suelto (solo vale pegado al trial: "publica gratis 7 días, sin tarjeta")');
+  }
+
+  for (const palabra of OFERTA_PROHIBIDA) {
+    if (new RegExp(`(?<![\\p{L}])${palabra}(?![\\p{L}])`, 'u').test(n)) {
+      problemas.push(`lenguaje de oferta prohibido "${palabra}" (Agendamelo no hace descuentos ni promociones)`);
+    }
+  }
+  if (/(?<![\p{L}])off(?![\p{L}])/iu.test(n)) problemas.push('lenguaje de oferta prohibido "off"');
+
+  for (const match of raw.match(PRECIO_RE) || []) {
+    const cifra = soloCifra(match);
+    if (PRECIOS_MUERTOS.includes(cifra)) {
+      problemas.push(`precio muerto "${match}" (Agendamelo cobra ${PRECIOS_AGENDAMELO.map((p) => '$' + p).join(' / ')})`);
+      continue;
+    }
+    if (PRECIOS_AGENDAMELO.includes(cifra)) continue;
+
+    // Una cifra pegada a lenguaje de suscripción se lee como el precio de Agendamelo: solo valen
+    // los dos oficiales. Fuera de ese contexto, se acepta un precio de MERCADO del rubro.
+    const i = raw.indexOf(match);
+    const ventana = raw.slice(Math.max(0, i - 30), i + match.length + 30);
+    if (CONTEXTO_SUSCRIPCION.test(ventana)) {
+      problemas.push(`"${match}" se presenta como precio de Agendamelo (solo valen ${PRECIOS_AGENDAMELO.map((p) => '$' + p).join(' / ')})`);
+    } else if (!MERCADO_RE.test(cifra)) {
+      problemas.push(`cifra de precio no permitida "${match}" (solo el precio de Agendamelo o un dato de mercado del rubro)`);
+    }
+  }
+  return problemas;
+}
 const stripEmphasis = (s) => String(s || '').replace(/\*(.+?)\*/g, '$1');
 const wordCount = (s) => stripEmphasis(s).trim().split(/\s+/).filter(Boolean).length;
 const cleanTagLower = (t) => norm(t).trim();
@@ -80,21 +153,17 @@ export function validateKit(k) {
   const imgs = Array.isArray(k.imagePrompts) ? k.imagePrompts.filter((s) => String(s || '').trim()) : [];
   if (imgs.length < 1) e.push('imagePrompts debe tener al menos 1 idea');
 
-  // Idioma (regla dura de marca): cero voseo argentino en ningún texto visible.
+  // TODO el texto que termina en pantalla o en el caption. Antes las reglas de precio solo miraban
+  // hookText/captionSEO/ctaText y dejaban fuera scenes[] e imagePrompts[], que también son visibles.
   const campos = [['hookText', hook], ['ctaText', k.ctaText], ['captionSEO', cap],
     ...scenes.map((s, i) => [`scene[${i}]`, s]), ...imgs.map((s, i) => [`imagePrompt[${i}]`, s])];
+
   for (const [campo, txt] of campos) {
+    // Idioma (regla dura de marca): cero voseo argentino en ningún texto visible.
     const hit = findVoseo(txt);
     if (hit) e.push(`voseo argentino en ${campo}: "${hit}"`);
-  }
-
-  // Restricción Pricing 2.0: mientras no esté deployado, ningún kit se centra en precio/"gratis".
-  if (!PRICING_20_LIVE) {
-    for (const [campo, txt] of [['hookText', hook], ['captionSEO', cap], ['ctaText', k.ctaText]]) {
-      if (PRICE_TOKENS.some((re) => re.test(String(txt || '')))) {
-        e.push(`${campo} menciona precio/"gratis" (prohibido hasta que Pricing 2.0 esté en producción)`);
-      }
-    }
+    // Precio y oferta: lista blanca siempre activa (ver findPriceIssues).
+    for (const p of findPriceIssues(txt)) e.push(`${campo}: ${p}`);
   }
   return e;
 }

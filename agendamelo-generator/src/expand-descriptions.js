@@ -67,9 +67,12 @@ Reglas de cada descripción:
   psicopedagoga", "cómo organizar alumnos paes", "página web para fonoaudióloga en Chile").
 - Primera frase enganchadora con la keyword principal.
 - Termina SIEMPRE con un CTA al final: si es educativo invita a guardar/seguir; si es de venta invita
-  a configurar su sitio sin costo y publicarlo desde $4.990/mes en agendamelo.cl (link en bio).
-- PROHIBIDO: "gratis/prueba gratis/trial", "seña/anticipo/cobro online", "comisión", "Flow",
-  "Isapres/Fonasa", recordatorios por WhatsApp/SMS (son por correo). NO incluyas hashtags ni asteriscos.
+  a configurar su sitio sin costo y publicarlo gratis 7 días sin tarjeta (después $12.990/mes o
+  $64.000 el plan anual) en agendamelo.cl (link en bio).
+- PROHIBIDO: "gratis" fuera de los 7 días sin tarjeta, "prueba gratis/mes gratis/trial", cualquier
+  descuento/oferta/promoción, cifras de precio de Agendamelo distintas a $12.990 y $64.000,
+  "seña/anticipo/cobro online", "comisión", "Flow", "Isapres/Fonasa", recordatorios por WhatsApp/SMS
+  (son por correo). NO incluyas hashtags ni asteriscos.
 
 Posts:
 

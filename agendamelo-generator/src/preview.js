@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const venta = (t) => ({ title: t, sub: 'Publica desde $4.990/mes · link en bio' });
+const venta = (t) => ({ title: t, sub: 'Gratis 7 días · después $12.990/mes · link en bio' });
 const edu = (t, s) => ({ title: t, sub: s });
 
 const imgs = [

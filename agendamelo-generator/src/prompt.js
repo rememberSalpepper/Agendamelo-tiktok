@@ -4,6 +4,7 @@
 // hooks fuertes y el esquema de contenido por plantilla.
 
 import { NICHES, NICHE_KEYS } from './niches.js';
+import { PRICING_CANONICO, CTA_CANONICO } from './kit-config.js';
 
 // Íconos permitidos para las cards de carrusel (genéricos, no del badge de nicho).
 export const ICONS = ['calendar', 'repeat', 'clock', 'bell', 'phone', 'globe', 'search', 'users', 'target', 'sparkles', 'shield', 'star', 'tag', 'chat', 'check'];
@@ -62,10 +63,10 @@ Agendamelo es la "mini-web profesional + agenda online" para profesionales en Ch
 - Recordatorios automáticos POR CORREO (confirmación, día antes, 1 h antes). NO por WhatsApp/SMS.
 - Aparición en Google y en directorios por rubro y comuna.
 - Listo en 5 minutos, sin código, sin servidores, sin diseñador.
-Precio: $4.990 CLP el primer mes, luego $7.990 CLP/mes. Sin contrato, sin permanencia, cancela con un
-clic. CERO comisión por reserva.
-Modelo: CONFIGURAR es sin costo; PUBLICAR (aparecer y recibir reservas) cuesta desde el día 1. NO es
-prueba gratis.
+Precio: ${PRICING_CANONICO}. Sin contrato, sin permanencia, cancela con un clic. CERO comisión por
+reserva.
+Modelo: CONFIGURAR el sitio es sin costo. PUBLICARLO (aparecer y recibir reservas) es GRATIS los
+primeros 7 días y sin tarjeta (una sola vez por negocio); después se paga la suscripción.
 Lo que NO es (no lo prometas): no es ficha clínica, no es CRM avanzado, no es LMS, no procesa pagos del
 cliente final, no se integra con Isapres/Fonasa, no cobra comisión.
 
@@ -141,16 +142,21 @@ Agendamelo es nuevo y casi no tiene clientes. Por lo tanto:
   perder ~1 h cada lunes"). Todo stat lleva "source". Si no hay fuente, no es stat.
 - Para beneficios futuros usa condicional: "podrías", "imagina", "deja de"; nunca "lograrás/garantizado".
 
-# 10. CTA Y OFERTA (usa estas, NO inventes "gratis")
-CTA canónico (preferido): "Configura tu sitio sin costo y publícalo desde $4.990/mes -> link en bio".
+# 10. CTA Y OFERTA (usa estas, NO inventes ofertas)
+CTA canónico (preferido): "${CTA_CANONICO}".
 Variantes válidas:
 - "Tu sitio + agenda en 5 minutos -> agendamelo.cl"
 - "Aparece en Google y recibe reservas solas -> link en bio"
-- "Desde $4.990 al mes, sin comisión ni contrato -> link en bio"
-Oferta (cuando aplique): "$4.990 el primer mes, luego $7.990/mes. Sin contrato, cancela cuando quieras.
+- "Publica tu sitio gratis 7 días, sin tarjeta -> link en bio"
+- "Desde $12.990 al mes, sin comisión ni contrato -> link en bio"
+Precio (cuando aplique): "$12.990/mes o $64.000 el plan anual. Sin contrato, cancela cuando quieras.
 Cero comisión."
-PROHIBIDO en CTA/copy: "gratis", "prueba gratis", "primer mes gratis", "trial", "sin compromiso" como
-gancho de regalo.
+REGLA DURA de "gratis": la ÚNICA forma de gratis que existe es el trial de publicación de 7 días sin
+tarjeta, y la palabra solo puede ir pegada a él ("publica gratis 7 días, sin tarjeta").
+PROHIBIDO: "gratis" suelto, "mes gratis", "primer mes gratis", "prueba gratis", "trial" (anglicismo),
+"sin compromiso" como gancho de regalo, y cualquier descuento, oferta, promoción, cupón o 2x1.
+PROHIBIDO inventar cifras: las únicas de Agendamelo son $12.990/mes y $64.000 anual. (Los precios de
+MERCADO del rubro sí se citan, con su fuente — ver sección 9.)
 
 # 11. PROHIBICIONES DURAS (de marca y producto)
 - "software de reservas", "plataforma de gestión" -> di "mini-web + agenda".
@@ -232,15 +238,18 @@ keyword del nicho. Varía la palanca de verdad (que no sean la misma frase reesc
   Los campos que NO aplican van en null (incluido "slides" en las de formato imagen).
   cta educativo: {title: "Sígueme para más" o "Guarda este tip", sub: frase corta del rubro}.
   cta plataforma: {title: "Míralo en agendamelo.cl", sub: "Link en bio"}.
-  cta venta: {title: "Configura tu sitio sin costo" / "Arma tu agenda en 5 minutos",
-              sub: "Publica desde $4.990/mes · link en bio"}.  (NUNCA "gratis"/"prueba gratis".)
+  cta venta: {title: "Publica gratis 7 días" / "Arma tu agenda en 5 minutos",
+              sub: "Sin tarjeta · después $12.990/mes · link en bio"}.
+              ("gratis" SOLO pegado a los 7 días; nunca "prueba gratis" ni "mes gratis".)
 
 # 14. Temas ya publicados (NO repetir, busca ángulos distintos)
 ${avoidLines}
 
 # 15. AUTO-CHEQUEO antes de emitir CADA idea (si algo falla, reescribe)
-1. ¿Voseo o slang argentino? -> corrige. 2. ¿Aparece "gratis/prueba/trial/seña/anticipo/software/
-comisión al cliente/Flow/Isapre/recordatorio por WhatsApp"? -> corrige. 3. ¿Algún número como resultado
+1. ¿Voseo o slang argentino? -> corrige. 2. ¿Aparece "gratis" fuera de los 7 días sin tarjeta, o
+"prueba gratis/mes gratis/trial/descuento/oferta/seña/anticipo/software/comisión al cliente/Flow/
+Isapre/recordatorio por WhatsApp", o una cifra de precio de Agendamelo que no sea $12.990 o $64.000?
+-> corrige. 3. ¿Algún número como resultado
 real de Agendamelo sin fuente? -> reescríbelo como dato de mercado o hipótesis condicional. 4. ¿3-5
 hook_variantes de ángulos distintos, cada una ≤12 palabras, con keyword y sin tema? 5. ¿Usa la jerga
 verbatim del nicho? 6. ¿El slang corresponde al
