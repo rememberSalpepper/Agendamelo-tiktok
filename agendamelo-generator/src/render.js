@@ -1,4 +1,4 @@
-// Motor de render Agendamelo: data -> HTML -> PNG (Playwright/Chromium headless).
+// Motor de render Agendamelo: data -> HTML -> imagen 4:5 (Playwright/Chromium headless).
 // Fuentes en base64 y logo (SVG) inline -> reproducibilidad total (mismo render en Mac y VPS).
 // El ACENTO POR NICHO se resuelve aquí (niches.js) y se inyecta en el CSS: toda la imagen se
 // recolorea según el rubro, manteniendo la base de marca (crema, ámbar, fuentes, layout).
@@ -15,7 +15,7 @@ export function renderHtml(data) {
   const css = buildCss({ fontFace, accent: niche.accent, accent2: niche.accent2, soft: niche.soft });
   const body = templates[data.tipo](data);
   const headline = data.headline ?? hookToHeadline(data.hook);
-  const cta = data.cta || { title: 'Crea tu agenda online', sub: 'Link en bio · agendamelo.cl' };
+  const cta = data.cta || { title: 'Crea tu Perfil Gratis', sub: 'Sin tarjeta · agendamelo.cl' };
   const bg = data.bg || 1; // variante de fondo (1-4)
   // Badge: el del contenido, o la etiqueta por defecto del nicho. Lleva el ícono del rubro.
   const badgeText = data.badge || niche.badge;
@@ -41,12 +41,13 @@ export function renderHtml(data) {
 
 async function shotHtml(html, outPath, browser) {
   const page = await browser.newPage({
-    viewport: { width: 1080, height: 1920 },
-    deviceScaleFactor: 2, // salida 2160x3840 -> máxima nitidez
+    viewport: { width: 1080, height: 1350 },
+    deviceScaleFactor: 2, // salida 2160x2700 -> feed 4:5 nítido
   });
   await page.setContent(html, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready.then(() => true));
-  await page.locator('.canvas').screenshot({ path: outPath });
+  const jpeg = /\.jpe?g$/i.test(outPath);
+  await page.locator('.canvas').screenshot({ path: outPath, ...(jpeg ? { type: 'jpeg', quality: 94 } : {}) });
   await page.close();
 }
 
@@ -60,14 +61,14 @@ export async function renderToPng(data, outPath, existingBrowser = null) {
   return outPath;
 }
 
-// Carrusel: una imagen por slide. `basePath` = ".../dist/<id>" -> genera <id>-1.png, <id>-2.png, ...
+// Carrusel: una imagen por slide. `basePath` = ".../dist/<id>" -> genera <id>-1.jpg, <id>-2.jpg, ...
 export async function renderCarousel(data, basePath, existingBrowser = null) {
   const slides = data.slides || [];
   const browser = existingBrowser ?? await chromium.launch();
   const outPaths = [];
   try {
     for (let i = 0; i < slides.length; i++) {
-      const out = `${basePath}-${i + 1}.png`;
+      const out = `${basePath}-${i + 1}.jpg`;
       const html = renderSlideHtml(slides[i], { niche: data.niche, bg: data.bg || (i % 4) + 1, index: i, total: slides.length });
       await shotHtml(html, out, browser);
       outPaths.push(out);

@@ -34,7 +34,7 @@ async function renderRow(row, browser) {
     const paths = await renderCarousel(data, join(ROOT, 'dist', row.id), browser);
     return paths.map((p) => `dist/${p.split('/').pop()}`).join(',');
   }
-  const rel = `dist/${row.id}.png`;
+  const rel = `dist/${row.id}.jpg`;
   await renderToPng(data, join(ROOT, rel), browser);
   return rel;
 }
@@ -48,7 +48,7 @@ async function main() {
   else if (mode === 'one') targets = rows.filter((r) => r.id === arg);
   // pending: solo lo CURADO por el humano (hook elegido). Las filas viejas sin hook_variantes
   // se consideran curadas (compat). Así /render nunca saca una idea con el hook sin elegir.
-  else targets = rows.filter((r) => r.estado !== 'renderizado' && r.estado !== 'enviado'
+  else targets = rows.filter((r) => r.estado !== 'renderizado' && r.estado !== 'enviado' && r.estado !== 'publicado'
     && r.hook && (r.hook_elegido || !r.hook_variantes));
 
   if (targets.length === 0) { console.log('No hay ideas que renderizar para el modo:', mode); return; }
@@ -59,7 +59,7 @@ async function main() {
   try {
     for (const row of targets) {
       const url = await renderRow(row, browser);
-      if (row.estado !== 'enviado') row.estado = 'renderizado'; // no degradar lo ya enviado
+      if (row.estado !== 'enviado' && row.estado !== 'publicado') row.estado = 'renderizado';
       row.imagen_url = url;
       done++;
       const tag = row.formato === 'carrusel' ? `carrusel x${url.split(',').length}` : row.tipo_plantilla;

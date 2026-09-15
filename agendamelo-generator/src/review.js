@@ -59,8 +59,8 @@ try {
 }
 log(`• Filas: ${rows.length}`);
 
-// Solo se valida lo que aún se va a publicar; lo 'enviado' es historia (no se revalida).
-const porPublicar = rows.filter((r) => r.estado !== 'enviado');
+// Solo se valida lo que aún se va a publicar; lo enviado/publicado es historia.
+const porPublicar = rows.filter((r) => !['enviado', 'publicado'].includes(r.estado));
 const enviadas = rows.length - porPublicar.length;
 let invalidas = 0;
 for (const r of porPublicar) {
@@ -109,24 +109,24 @@ let sinRender = 0, incompletos = 0;
 for (const r of rows) {
   const files = (r.imagen_url || '').split(',').map((p) => p.trim()).filter(Boolean);
   files.forEach((f) => referenced.add(f.split('/').pop()));
-  const debeTener = r.estado === 'renderizado' || r.estado === 'enviado';
+  const debeTener = ['renderizado', 'enviado', 'publicado'].includes(r.estado);
   if (debeTener) {
     if (!files.length) { sinRender++; if (sinRender <= 5) log(`  ✗ ${r.id}: estado ${r.estado} pero sin imagen_url`); continue; }
     const faltan = files.filter((f) => !existsSync(join(ROOT, f)));
-    if (faltan.length) { incompletos++; if (incompletos <= 5) log(`  ✗ ${r.id}: faltan ${faltan.length}/${files.length} PNG en disco`); }
+    if (faltan.length) { incompletos++; if (incompletos <= 5) log(`  ✗ ${r.id}: faltan ${faltan.length}/${files.length} imágenes en disco`); }
   }
 }
 log(sinRender ? `✗ ${sinRender} fila(s) marcadas como listas SIN imagen_url.` : '✓ Toda fila lista tiene su imagen_url.');
-log(incompletos ? `✗ ${incompletos} fila(s) con PNG faltantes en disco.` : '✓ Todos los PNG referenciados existen en disco.');
+log(incompletos ? `✗ ${incompletos} fila(s) con imágenes faltantes en disco.` : '✓ Todas las imágenes referenciadas existen en disco.');
 if (sinRender) problems.push(`${sinRender} fila(s) sin render (corre npm run render:all).`);
 if (incompletos) problems.push(`${incompletos} fila(s) con láminas faltantes (re-renderiza con /rehacer <id>).`);
 
-// Huérfanos en dist (PNG de ideas no referenciados; ignora muestras _preview/_*).
+// Huérfanos en dist (imágenes de ideas no referenciadas; ignora muestras _preview/_*).
 let orphans = [];
 try {
-  orphans = readdirSync(DIST).filter((f) => f.endsWith('.png') && !f.startsWith('_') && !referenced.has(f));
+  orphans = readdirSync(DIST).filter((f) => /\.(?:png|jpe?g)$/i.test(f) && !f.startsWith('_') && !referenced.has(f));
 } catch { /* dist vacío */ }
-log(`${orphans.length ? '⚠️' : '✓'} PNG huérfanos en dist/: ${orphans.length || 'ninguno'}${orphans.length ? ' (' + orphans.slice(0, 4).join(', ') + '…)' : ''}`);
+log(`${orphans.length ? '⚠️' : '✓'} Imágenes huérfanas en dist/: ${orphans.length || 'ninguna'}${orphans.length ? ' (' + orphans.slice(0, 4).join(', ') + '…)' : ''}`);
 
 // ---------- RESUMEN ----------
 log('\n*Resumen*');

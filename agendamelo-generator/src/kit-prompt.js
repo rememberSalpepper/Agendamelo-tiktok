@@ -26,21 +26,23 @@ export function buildKitPrompt({ n, niche, avoid }) {
 
   // Bloque de precio: verdad única (kit-config.js), la misma que hace cumplir kit-validate.js.
   const precioBloque = `REGLA DE PRECIO (verdad canónica, no la cambies): ${PRICING_CANONICO}.
-- El mejor gancho es el trial: publicar el sitio es GRATIS 7 días y SIN TARJETA (uno por negocio).
-- La palabra "gratis" SOLO puede ir pegada a ese trial ("publica gratis 7 días, sin tarjeta").
+- El CTA principal es crear el PERFIL GRATIS: la página queda visible, entra a directorios y recibe
+  consultas por WhatsApp, sin tarjeta ni fecha de término. La agenda online se apaga si no activa plan.
+- La agenda completa se puede probar 7 DÍAS GRATIS y SIN TARJETA (una vez por negocio).
+- La palabra "gratis" SOLO puede ir en "Perfil Gratis" o pegada a esos 7 días.
   PROHIBIDO "mes gratis", "primer mes gratis", "prueba gratis" y la palabra "trial" (es anglicismo:
   di "prueba de 7 días" o "gratis 7 días").
-- Las ÚNICAS cifras de precio de Agendamelo son $12.990/mes y $64.000 el plan anual. No inventes
-  otras, ni descuentos, ni ofertas, ni promociones, ni cupones, ni porcentajes de rebaja.
+- Las ÚNICAS cifras de precio de Agendamelo son $0 Perfil Gratis, $12.990/mes, $64.000/año y
+  $19.990/mes Web Pro. No inventes otras, ni descuentos, ni ofertas, ni promociones ni cupones.
 - Sí puedes citar PRECIOS DE MERCADO del rubro (los de la sección 3) como dato, con su fuente.
-- Configurar el sitio no cuesta; lo que se paga es publicarlo una vez terminados los 7 días.
+- Crear la página no cuesta; lo que se paga después es mantener agenda y automatizaciones activas.
 - El cliente final SIEMPRE reserva sin pagar y sin tarjeta: jamás insinúes seña, abono ni anticipo.`;
 
   return `Eres el mejor estratega de TikTok-SEO faceless de Chile y el motor de contenido de Agendamelo.
 Genera ${n} KITS DE VIDEO nuevos para TikTok/Reels, TODOS del nicho "${niche}" (${info.label || niche}).
 Cada kit es SOLO TEXTO: Jorge arma el video a mano (fotos/B-roll + sonido en tendencia) con lo que tú
-entregas. El ÚNICO objetivo de negocio es conseguir USUARIOS DE PAGO (dueños de negocio que activan su
-suscripción), no vistas vanidosas. Vara ALTA: cada hook tiene que doler o intrigar de verdad.
+entregas. El objetivo principal es conseguir registros calificados en Perfil Gratis y después
+activaciones de agenda, no vistas vanidosas. Vara ALTA: cada hook tiene que doler o intrigar de verdad.
 
 # 1. QUÉ ES AGENDAMELO (verdad canónica — NO inventes nada fuera de esto)
 Agendamelo es la "mini-web profesional + agenda online" para profesionales en Chile (URL propia
@@ -49,11 +51,12 @@ agendamelo.cl/tu-nombre). NUNCA lo llames "software de reservas" ni "plataforma 
 - Agenda online 24/7: los clientes reservan solos desde el link, sin que muevas un dedo.
 - SESIONES RECURRENTES (diferenciador estrella): deja agendada la próxima mantención/sesión al terminar,
   o bloquea semanas de un tratamiento en un paso.
-- Recordatorios automáticos POR CORREO (confirmación, día antes, 1 h antes). NO por WhatsApp/SMS.
+- Confirmaciones y recordatorios por correo y por WhatsApp para clientes que lo autorizan. WhatsApp es
+  limitado en Estándar y sin límite en Web Pro; nunca inventes el límite exacto. No ofrece SMS.
 - Aparición en Google y en directorios por rubro y comuna.
 - Listo en 5 minutos, sin código. Sin comisión por reserva. El cliente reserva SIN pagar por adelantado.
 Lo que NO es: no es ficha clínica, ni CRM avanzado, ni LMS; no procesa pagos del cliente final; no se
-integra con Isapres/Fonasa; no cobra comisión; no manda recordatorios por WhatsApp.
+integra con Isapres/Fonasa; no cobra comisión; no ofrece recordatorios por SMS.
 
 # 2. EL FORMATO FACELESS (estructura de CADA video: 7-12 s, sin cámara, sin cara)
 - HOOK (0-2 s): tu campo "hookText". Texto grande en pantalla, un DOLOR concreto o CURIOSIDAD, con la
@@ -130,8 +133,8 @@ ${avoidLines}
 1. ¿hookText ≤12 palabras, duele/intriga, con keyword y *énfasis*? 2. ¿La keyword está literal en el
 hook o en la 1ª scene? 3. ¿captionSEO ≤150 car., keyword al inicio, humano, sin lista de comas?
 4. ¿3-5 hashtags del nicho, sin #fyp/#viral/#parati? 5. ¿Ángulos DISTINTOS entre los ${n} kits?
-6. ¿Cero voseo argentino? 7. ¿El precio es $12.990/mes o $64.000 anual, sin cifras inventadas, y
-"gratis" solo pegado a los 7 días sin tarjeta (cero "mes gratis", cero "trial", cero descuentos)?
+6. ¿Cero voseo argentino? 7. ¿El precio es $0 Perfil Gratis, $12.990/mes, $64.000/año o $19.990/mes,
+sin cifras inventadas, y "gratis" solo aparece en Perfil Gratis o los 7 días sin tarjeta?
 8. ¿Usa la jerga verbatim de ${niche}? Emite solo si TODO pasa.
 
 # Salida

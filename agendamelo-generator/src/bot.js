@@ -7,16 +7,17 @@
 import './env.js';
 import { parse } from 'csv-parse/sync';
 import { stringify } from 'csv-stringify/sync';
-import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, unlinkSync, createReadStream } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getSettings, setNicho, setEstilo } from './settings.js';
 import { codexConfigLabel } from './codex.js';
 import { NICHE_KEYS } from './niches.js';
 import { formatKit } from './kit-format.js';
 import { KIT_DEFAULT, KIT_MAX } from './kit-validate.js';
+import { startMetaScheduler } from './meta-scheduler.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
@@ -47,11 +48,13 @@ function markKitsEntregado(ids) {
 const AYUDA = [
   '🤖 *Comandos Agendamelo*',
   '',
-  '*Imágenes → Facebook* (tú eliges el hook)',
+  '*Imágenes → Facebook + Instagram* (tú eliges el hook)',
   '/generar [N] [nicho] — N ideas con 3-5 hooks (default 7, nicho activo)',
   '/revisar [N] — elige el hook de cada idea con botones',
   '/render — renderiza las ideas con hook elegido',
-  '/enviar [N] — te entrega N posts listos  ·  /dia — 3 variados',
+  '/enviar [N] — vista previa por Telegram  ·  /dia — 3 variados',
+  '/publicar [id] — publica ahora en Meta (siguiente o id)',
+  '/meta — revisa conexión, canales y próxima pieza',
   '',
   '*Kit de video → TikTok/Reels* (texto para armar a mano)',
   '/kit [N] [nicho] — N kits de video listos para copiar (default 5, máx 7)',
@@ -144,7 +147,7 @@ const sinCurar = (r) => r.estado === 'pendiente' && r.hook_variantes && !r.hook_
 function estado() {
   const rows = readRows();
   const s = getSettings();
-  const c = { pendiente: 0, renderizado: 0, enviado: 0 };
+  const c = { pendiente: 0, renderizado: 0, enviado: 0, publicado: 0 };
   for (const r of rows) if (c[r.estado] !== undefined) c[r.estado]++;
   const porCurar = rows.filter(sinCurar).length;
   const listasRender = rows.filter((r) => r.estado === 'pendiente' && !sinCurar(r)).length;
@@ -152,18 +155,19 @@ function estado() {
   const ang = {};
   for (const r of rows.filter((r) => r.estado === 'pendiente')) if (r.angulo) ang[r.angulo] = (ang[r.angulo] || 0) + 1;
   const angStr = Object.entries(ang).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(' · ') || '—';
-  const listas = rows.filter((r) => r.estado === 'renderizado');
+  const listas = rows.filter((r) => ['renderizado', 'enviado'].includes(r.estado));
   const colaLines = listas.slice(0, 10).map((r) => `   🟢 ${r.id} · ${r.niche}/${r.orientacion} · ${strip(r.hook || r.titulo)}`);
   return `📊 Estado Agendamelo\n`
     + `Nicho activo: ${s.nicho} · caption: ${s.estilo_caption} · Codex: ${codexConfigLabel()}\n\n`
     + `Flujo:\n`
     + `• Por elegir hook: ${porCurar}  → /revisar\n`
     + `• Con hook, por renderizar: ${listasRender}  → /render\n`
-    + `• Listas para publicar: ${c.renderizado}  → /enviar\n`
-    + `• Enviadas: ${c.enviado}\n`
+    + `• Renderizadas: ${c.renderizado}  → /enviar o /publicar\n`
+    + `• Vistas en Telegram, aún en cola Meta: ${c.enviado}\n`
+    + `• Publicadas en Meta: ${c.publicado}\n`
     + `Ángulos en pendientes — ${angStr}`
     + (colaLines.length
-      ? `\n\nListas por publicar:\n${colaLines.join('\n')}${listas.length > 10 ? `\n   …y ${listas.length - 10} más` : ''}`
+      ? `\n\nCola Meta:\n${colaLines.join('\n')}${listas.length > 10 ? `\n   …y ${listas.length - 10} más` : ''}`
       : '');
 }
 
@@ -173,8 +177,8 @@ function borrar(id) {
   if (idx === -1) return `No encontré ${id}.`;
   const [removed] = rows.splice(idx, 1);
   writeFileSync(CSV, stringify(rows, { header: true, columns: Object.keys(rows[0] || removed) }));
-  // Borra los PNG (imagen simple o todas las láminas del carrusel).
-  const files = (removed.imagen_url || `dist/${id}.png`).split(',').map((p) => p.trim()).filter(Boolean);
+  // Borra las imágenes (pieza simple o todas las láminas del carrusel).
+  const files = (removed.imagen_url || `dist/${id}.jpg`).split(',').map((p) => p.trim()).filter(Boolean);
   for (const f of files) { const fp = join(ROOT, f); if (existsSync(fp)) unlinkSync(fp); }
   return `🗑️ Borrada ${id} (“${removed.hook || removed.titulo}”).`;
 }
@@ -267,6 +271,21 @@ async function handle(chat, text) {
         if (e.code !== 0) return replyText(chat, `❌ Error al enviar:\n${tail(e.err || e.out)}`);
       } finally { busy = false; }
       return;
+    }
+    case '/meta': {
+      const e = await runScript(['src/meta.js', 'check']);
+      if (e.code !== 0) return replyText(chat, `❌ Conexión Meta:\n${tail(e.err || e.out, 1200)}`);
+      return replyText(chat, (e.out || 'Sin salida.').slice(-3600));
+    }
+    case '/publicar': {
+      if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera.');
+      busy = true;
+      await reply(chat, `📣 Publicando ${arg || 'la siguiente pieza'} en Meta...`);
+      try {
+        const e = await runScript(arg ? ['src/meta.js', 'one', arg] : ['src/meta.js', 'next']);
+        if (e.code !== 0) return replyText(chat, `❌ Error al publicar:\n${tail(e.err || e.out, 1200)}`);
+        return replyText(chat, e.out.trim() || '✅ Publicación terminada.');
+      } finally { busy = false; }
     }
     case '/revisar': {
       // Human-in-the-loop: por cada idea sin curar, manda sus variantes como botones para elegir hook.
@@ -409,6 +428,8 @@ async function main() {
     { command: 'render', description: 'Renderiza las ideas con hook ya elegido' },
     { command: 'enviar', description: 'Te entrega N posts listos' },
     { command: 'dia', description: 'El set del dia: 3 posts variados' },
+    { command: 'publicar', description: 'Publica ahora la siguiente pieza en Meta' },
+    { command: 'meta', description: 'Estado de conexión y próxima pieza Meta' },
     { command: 'kit', description: 'N kits de video TikTok/Reels (texto, default 5, max 7)' },
     { command: 'nicho', description: 'Fija el nicho activo' },
     { command: 'estilo', description: 'Variante A/B del caption (corto|largo)' },
@@ -420,15 +441,38 @@ async function main() {
     { command: 'ayuda', description: 'Lista de comandos' },
   ] }).catch(() => {});
 
-  // Servidor de salud (para el healthcheck del VPS: curl http://127.0.0.1:PUERTO).
+  // Salud + archivos que Meta descarga por HTTPS a través del reverse proxy del VPS.
   const PORT = process.env.PORT || 3000;
   createServer((req, res) => {
+    const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+    if (url.pathname.startsWith('/media/')) {
+      let name = '';
+      try { name = decodeURIComponent(url.pathname.slice('/media/'.length)); }
+      catch { res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8' }); res.end('Archivo inválido.'); return; }
+      if (!name || basename(name) !== name || !/^[a-zA-Z0-9._-]+$/.test(name)) {
+        res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8' }); res.end('Archivo inválido.'); return;
+      }
+      const file = join(ROOT, 'dist', name);
+      if (!existsSync(file) || !/\.(?:png|jpe?g)$/i.test(extname(file))) {
+        res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' }); res.end('No encontrado.'); return;
+      }
+      const type = /\.jpe?g$/i.test(file) ? 'image/jpeg' : 'image/png';
+      res.writeHead(200, { 'content-type': type, 'cache-control': 'public, max-age=86400, immutable' });
+      createReadStream(file).pipe(res);
+      return;
+    }
+    if (url.pathname !== '/' && url.pathname !== '/health') {
+      res.writeHead(404, { 'content-type': 'application/json' }); res.end(JSON.stringify({ ok: false })); return;
+    }
     const rows = (() => { try { return readRows(); } catch { return []; } })();
-    const c = { total: rows.length, pendiente: 0, renderizado: 0, enviado: 0 };
+    const c = { total: rows.length, pendiente: 0, renderizado: 0, enviado: 0, publicado: 0 };
     for (const r of rows) if (c[r.estado] !== undefined) c[r.estado]++;
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ ok: true, servicio: 'agendamelo-bot', ...c }));
-  }).listen(PORT, () => console.log(`Salud en :${PORT}`));
+  }).listen(PORT, () => {
+    console.log(`Salud y media en :${PORT}`);
+    startMetaScheduler();
+  });
 
   // Descarta mensajes viejos: arranca desde el último update.
   let offset = 0;

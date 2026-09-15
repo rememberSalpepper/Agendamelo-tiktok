@@ -5,7 +5,7 @@
 // Agendamelo, pero con la identidad del nicho.
 //
 // Recibe fuentes (fontFace) ya en base64 y el acento del nicho (accent, accent2, soft).
-// Zonas seguras de TikTok: 230px arriba / 430px abajo. Lienzo 1080×1920 (render a 2x = 2160×3840).
+// Formato Meta feed: 1080×1350 (4:5), render a 2x = 2160×2700.
 
 export function buildCss({ fontFace, accent, accent2, soft }) {
   return `
@@ -21,11 +21,11 @@ ${fontFace}
   --amber:  #F59E0B;
   --orange: #F97316;
   --orange-d: #EA580C;
-  --ink:    #1C1917;   /* titulares */
-  --body:   #44403C;   /* texto cuerpo */
-  --body-2: #78716C;   /* texto secundario */
-  --cream:  #FAFAF5;   /* fondo base */
-  --cream-2:#F3F1E9;
+  --ink:    #171412;   /* titulares */
+  --body:   #3F3A36;   /* texto cuerpo */
+  --body-2: #746C65;   /* texto secundario */
+  --cream:  #F7F2E8;   /* fondo editorial */
+  --cream-2:#EEE7DA;
   --card:   #FFFFFF;
   --line:   #ECE7DD;   /* bordes suaves cálidos */
   --red:    #DC2626;
@@ -34,16 +34,16 @@ ${fontFace}
   --grad-brand: linear-gradient(135deg, var(--amber) 0%, var(--orange-d) 100%);
   --grad-accent: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 100%);
 
-  --safe-top: 230px;    /* margen calmo superior (HUD de TikTok) */
-  --safe-bottom: 430px; /* margen calmo inferior (ahí va la descripción de TikTok) */
-  --pad-x: 84px;        /* margen lateral del contenido */
-  --shadow: 0 24px 60px rgba(60, 47, 30, 0.12);
-  --shadow-sm: 0 10px 30px rgba(60, 47, 30, 0.08);
+  --safe-top: 56px;
+  --safe-bottom: 48px;
+  --pad-x: 64px;
+  --shadow: 0 22px 44px rgba(39, 29, 20, 0.13);
+  --shadow-sm: 0 8px 22px rgba(39, 29, 20, 0.09);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body { width: 1080px; height: 1920px; }
+html, body { width: 1080px; height: 1350px; }
 
 body {
   /* Fallbacks anchos (Noto/DejaVu) para glifos fuera del subset latino en el VPS Linux */
@@ -56,7 +56,7 @@ body {
 .canvas {
   position: relative;
   width: 1080px;
-  height: 1920px;
+  height: 1350px;
   overflow: hidden;
   background: var(--cream);
 }
@@ -70,7 +70,7 @@ body {
 .dots {
   position: absolute; width: 150px; height: 150px;
   background-image: radial-gradient(var(--accent) 2px, transparent 2px);
-  background-size: 26px 26px; opacity: 0.10;
+  background-size: 24px 24px; opacity: 0.13;
 }
 
 /* Variante 1 — glow del acento arriba + ámbar abajo */
@@ -127,79 +127,78 @@ body {
 
 /* ---------- Encabezado de marca ---------- */
 .brand {
-  display: flex; align-items: center; justify-content: center;
-  gap: 22px; margin-bottom: 26px;
+  display: flex; align-items: center; justify-content: flex-start;
+  gap: 14px; margin-bottom: 22px;
 }
-.brand .mark { width: 120px; height: 120px; display: block;
-  filter: drop-shadow(0 12px 26px rgba(234,88,12,0.28)); }
+.brand .mark { width: 62px; height: 62px; display: block;
+  filter: drop-shadow(0 8px 18px rgba(234,88,12,0.22)); }
 .brand .mark svg { width: 100%; height: 100%; display: block; }
 .brand .wm-wrap { display: flex; flex-direction: column; justify-content: center; }
 .brand .wm {
-  font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 96px;
-  letter-spacing: -2.5px; line-height: 0.98; color: var(--ink);
+  font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 46px;
+  letter-spacing: -1.4px; line-height: 0.98; color: var(--ink);
 }
 .brand .tag {
-  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 24px;
-  letter-spacing: 7px; color: var(--body-2); text-transform: uppercase; margin-top: 6px;
+  font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 13px;
+  letter-spacing: 4px; color: var(--body-2); text-transform: uppercase; margin-top: 3px;
 }
 
 .badge {
-  align-self: center;
+  align-self: flex-start;
   display: inline-flex; align-items: center; gap: 12px;
-  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 26px;
-  color: #fff; letter-spacing: 0.2px;
-  padding: 12px 28px 12px 20px; border-radius: 999px;
-  background: var(--grad-accent);
-  box-shadow: 0 12px 26px var(--accent-soft);
-  margin-bottom: 30px;
+  font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 20px;
+  color: var(--ink); letter-spacing: 0.1px;
+  padding: 10px 22px 10px 16px; border-radius: 999px;
+  background: var(--accent-soft); border: 2px solid var(--accent);
+  box-shadow: 5px 5px 0 var(--accent);
+  margin-bottom: 24px;
 }
-.badge svg { width: 30px; height: 30px; }
+.badge svg { width: 24px; height: 24px; color: var(--accent); }
 
 /* ---------- Titular ---------- */
 .headline {
   font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800;
-  font-size: 78px; line-height: 1.02; letter-spacing: -2px;
-  color: var(--ink); text-align: center;
+  font-size: 72px; line-height: 0.98; letter-spacing: -2.4px;
+  color: var(--ink); text-align: left; max-width: 94%;
 }
 .headline .hl {
-  background: var(--grad-accent);
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  color: var(--accent); -webkit-text-fill-color: var(--accent);
 }
 .subtitle {
-  font-size: 31px; line-height: 1.4; color: var(--body);
-  text-align: center; margin-top: 22px; font-weight: 400;
-  padding: 0 12px;
+  font-size: 27px; line-height: 1.28; color: var(--body);
+  text-align: left; margin-top: 16px; font-weight: 500;
+  max-width: 88%;
 }
 
 /* ---------- Bloque central flexible ---------- */
-.body { flex: 0 1 auto; display: flex; flex-direction: column; justify-content: flex-start; gap: 22px; margin: 36px 0 44px; }
+.body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 16px; margin: 24px 0; }
 
 /* ---------- CTA inferior ---------- */
 .cta {
-  display: flex; align-items: center; gap: 22px;
-  background: var(--grad-accent); border-radius: 28px;
-  padding: 28px 34px; box-shadow: 0 18px 40px var(--accent-soft);
+  display: flex; align-items: center; gap: 18px;
+  background: var(--ink); border-radius: 18px;
+  padding: 18px 24px; box-shadow: 8px 8px 0 var(--accent);
 }
-.cta .ic { flex: 0 0 auto; width: 64px; height: 64px; display: grid; place-items: center;
-  background: rgba(255,255,255,0.18); border-radius: 18px; }
+.cta .ic { flex: 0 0 auto; width: 50px; height: 50px; display: grid; place-items: center;
+  background: var(--accent); border-radius: 14px; }
 .cta .tx { color: #fff; }
-.cta .tx b { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 36px; display: block; line-height: 1.1; }
-.cta .tx span { font-size: 25px; opacity: 0.94; display: block; margin-top: 4px; }
+.cta .tx b { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 750; font-size: 30px; display: block; line-height: 1.06; }
+.cta .tx span { font-size: 20px; opacity: 0.9; display: block; margin-top: 3px; }
 .footer {
   display: flex; align-items: center; justify-content: center; gap: 12px;
-  margin-top: 22px; color: var(--orange-d); font-weight: 700; font-size: 27px;
+  margin-top: 14px; color: var(--orange-d); font-weight: 700; font-size: 21px;
   font-family: 'Bricolage Grotesque', sans-serif;
 }
 .footer svg { opacity: 0.9; }
 
 /* ---------- Franja de cierre (compartida: mito, pirámide, proceso, cards) ---------- */
 .closer {
-  display: flex; align-items: center; gap: 18px;
-  background: var(--accent-soft); border: 1px solid var(--line); border-radius: 22px;
-  padding: 22px 28px;
+  display: flex; align-items: center; gap: 14px;
+  background: var(--accent-soft); border: 1px solid var(--line); border-radius: 16px;
+  padding: 15px 20px;
 }
-.closer .ic { flex: 0 0 auto; width: 50px; height: 50px; border-radius: 14px;
+.closer .ic { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 12px;
   background: var(--grad-accent); display: grid; place-items: center; color: #fff; }
-.closer span { font-size: 30px; font-weight: 600; color: var(--ink); line-height: 1.25; }
+.closer span { font-size: 24px; font-weight: 650; color: var(--ink); line-height: 1.2; }
 `;
 }

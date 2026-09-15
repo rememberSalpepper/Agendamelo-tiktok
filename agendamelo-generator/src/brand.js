@@ -37,7 +37,7 @@ export function brandHeaderHtml(compact = false) {
     <span class="mark">${logomarkSvg}</span>
     <span class="wm-wrap">
       <span class="wm">Agendamelo</span>
-      <span class="tag">Reservas online</span>
+      <span class="tag">Tu sitio + agenda</span>
     </span>
   </div>`;
 }

@@ -1,121 +1,120 @@
-# Agendamelo — generador de posts para TikTok
+# Agendamelo — contenido orgánico para Meta
 
-Genera imágenes verticales (1080×1920) y captions optimizados para TikTok/SEO a partir de un CSV.
-Render con HTML/CSS + Playwright (Chromium headless): control pixel-perfect, sin marca de "IA".
-Las ideas (texto) las crea Codex CLI con salida JSON garantizada.
+Genera piezas 4:5 para Facebook e Instagram, permite curarlas desde Telegram y puede publicar una
+por día mediante Meta Graph API. La estrategia actual concentra el contenido en **manicuristas** y
+usa el **Perfil Gratis** como entrada: página pública a $0, sin tarjeta ni vencimiento; la agenda
+completa se prueba gratis durante 7 días.
 
-**Identidad por nicho:** misma marca Agendamelo en todos los posts (logo, fuentes, layout, crema),
-pero cada rubro trae su **color de acento**, su **ícono** y su **voz/dolor** propios. Todo eso vive
-en `src/niches.js` (4 nichos: manicuristas, psicopedagogas, profesores-paes, fonoaudiologas) y se
-inyecta solo en el render.
+TikTok y Reels quedan como un flujo separado de kits de video faceless. El sistema genera el guion y
+el caption, pero el montaje, audio y publicación se hacen manualmente.
 
-**3 orientaciones de contenido** (campo `orientacion`): `educativo` (enseña, suave), `plataforma`
-(muestra una funcionalidad de la app) y `venta` (por qué Agendamelo es la solución). El lote se
-reparte ~40/30/30 para no ser solo comercial.
+## Propuesta y precios canónicos
 
-**2 formatos** (campo `formato`): `imagen` (1 lámina, una de las 5 plantillas) y `carrusel` (3-4
-láminas: portada → punto → cierre con CTA), ~60/40. Estrategia completa en
-[`docs/LINEA-EDITORIAL.md`](docs/LINEA-EDITORIAL.md); pendientes en [`docs/ROADMAP.md`](docs/ROADMAP.md).
+- Perfil Gratis: **$0**, página pública sin agenda, hasta 2 servicios y 2 fotos.
+- Estándar: **$12.990/mes** o **$64.000/año**.
+- Web Pro: **$19.990/mes**.
+- Agenda completa: **7 días gratis, sin tarjeta**.
+- Recordatorios: correo y WhatsApp; WhatsApp limitado en Estándar e ilimitado en Web Pro.
 
-## Flujo (human-in-the-loop)
+No cambies estos datos solo en el copy: la fuente de verdad está en `src/kit-config.js` y los
+validadores rechazan cifras o afirmaciones incompatibles.
 
+## Flujo editorial
+
+```text
+agendamelo_ideas.csv
+  → npm run generate       crea ideas de un nicho, con variantes de hook
+  → /revisar               una persona elige el hook
+  → npm run render         crea JPEG 4:5 en dist/ (2160×2700)
+  → /enviar                entrega una vista previa por Telegram
+  → /publicar o scheduler  publica en Facebook + Instagram
 ```
-agendamelo_ideas.csv  (fuente de verdad; vive fuera de git, en la raíz del repo)
-   → src/generate.js   Codex crea ideas de UN nicho, cada una con 3-5 HOOKS → estado=pendiente
-   → /revisar          el operador ELIGE el hook de cada idea (botones) → hook_elegido
-   → src/pipeline.js   renderiza solo las curadas → PNG en dist/ → renderizado
-   → src/telegram.js   envía imagen + título + caption (hook+keyword, 👇, descripción, hashtags) → enviado
-```
-Máquina de estados: `pendiente (sin/ con hook elegido) → renderizado → enviado`. La automatización da
-VOLUMEN, no alcance: el bot produce OPCIONES; el humano cura el hook y elige el sonido al subir.
 
-## Comandos
+Estados: `pendiente → renderizado → enviado → publicado`. El CSV conserva los identificadores de
+Facebook e Instagram, por lo que un reintento parcial no duplica el canal que ya terminó.
+
+La mezcla editorial sigue siendo 40% educación, 30% producto y 30% conversión. El Perfil Gratis es
+el CTA principal; el precio pagado aparece solo cuando resuelve una objeción concreta.
+
+## Comandos locales
 
 ```bash
-npm install && npx playwright install chromium   # primera vez
-npm run generate      # Codex crea ideas de imagen del nicho activo (necesita Codex autenticado)
-npm run kit           # Codex crea N kits de video TikTok/Reels (solo texto) → agendamelo_kits.csv
-npm run lint          # valida AMBOS CSV: imágenes (5 hashtags, #agendamelo, hook ≤12, voseo…) y kits
-npm run render        # renderiza solo las pendientes CON hook elegido
-npm run render:all    # renderiza todas
-npm run render:one AGENDA-IDEA-008   # una sola
-npm run telegram      # envía las 'renderizado' por Telegram
-npm run bot           # bot de comandos + salud en :3000
+npm install
+npx playwright install chromium
+npm test
+npm run preview          # nueve muestras en dist/_preview-*.jpg
+npm run generate -- 12 manicuristas
+npm run lint
+npm run render
+npm run meta:dry-run     # valida configuración sin publicar
+npm run meta:check       # comprueba token y cuentas; no publica
+npm run meta:publish     # publica la próxima pieza renderizada
+npm run kit -- 5 manicuristas
+npm run bot
 ```
 
-Codex: `AGENDAMELO_CODEX_MODEL` fija el modelo y `AGENDAMELO_CODEX_EFFORT`
-(`minimal|low|medium|high|xhigh`, default `medium`) el esfuerzo de razonamiento. `high` no garantiza
-mejor copy: el lever principal es el prompt. Ver `.env.example`.
+Los comandos leen `.env`; parte copiando `.env.example`. `AGENDAMELO_CODEX_MODEL` y
+`AGENDAMELO_CODEX_EFFORT` permiten ajustar el modelo utilizado para generar texto.
 
-**Tanda comparativa (default vs high):** genera dos lotes del mismo nicho cambiando solo el esfuerzo y
-compara la tasa de descarte/lint de hooks (cuántas ideas pasan `npm run lint` y cuántos hooks no hubo
-que rehacer en `/revisar`):
+## Telegram
 
-```bash
-AGENDAMELO_CSV=/tmp/medium.csv AGENDAMELO_CODEX_EFFORT=medium npm run generate -- 12 manicuristas
-AGENDAMELO_CSV=/tmp/medium.csv npm run lint
-AGENDAMELO_CSV=/tmp/high.csv   AGENDAMELO_CODEX_EFFORT=high   npm run generate -- 12 manicuristas
-AGENDAMELO_CSV=/tmp/high.csv   npm run lint
+- `/generar [N] [nicho]`: crea ideas con variantes de hook.
+- `/revisar [N]`: presenta las opciones para curación humana.
+- `/render`: renderiza solo las ideas curadas.
+- `/enviar [N]`: entrega las piezas por Telegram.
+- `/meta`: prueba la configuración Meta sin publicar.
+- `/publicar [id]`: publica una pieza concreta o la siguiente de la cola.
+- `/kit [N] [nicho]`: crea kits manuales para Reels/TikTok.
+- `/nicho`, `/estilo`, `/estado`, `/ver`, `/rehacer`, `/borrar`, `/diagnostico`: operación y ajustes.
+
+## Publicación Meta
+
+Variables necesarias:
+
+```dotenv
+META_GRAPH_VERSION=v26.0
+META_PAGE_ID=
+META_IG_USER_ID=
+META_PAGE_ACCESS_TOKEN=
+PUBLIC_MEDIA_BASE_URL=https://contenido.agendamelo.cl/media
+META_TRACKING_URL=https://agendamelo.cl/?utm_source=facebook&utm_medium=organic&utm_campaign=perfil-gratis-manicuristas
+META_AUTO_PUBLISH=false
+META_PUBLISH_TIME=20:30
+META_TIMEZONE=America/Santiago
 ```
-Si `high` no baja el descarte ni mejora los hooks de forma clara, quédate en `medium` (más barato/rápido).
 
-### Comandos del bot (Telegram)
-- **Imágenes → Facebook:** `/generar [N] [nicho]` (genera con 3-5 hooks, no renderiza) → `/revisar [N]`
-  (elige el hook con botones) → `/render` (solo las curadas) → `/enviar [N]` (o `/dia` para 3 variados).
-- **Kit de video → TikTok/Reels:** `/kit [N] [nicho]` (default 5, máx 7) genera N kits faceless de UN
-  nicho —solo texto— y los entrega listos para copiar (hook / escenas / CTA / caption / hashtags /
-  ideas de imagen IA). El bot **no publica ni renderiza** para TikTok: tú armas el video a mano
-  (fotos/B-roll + sonido en tendencia). El nicho **rota** por tanda (30/25/25/20); datos en el CSV
-  hermano `agendamelo_kits.csv` (`pendiente → entregado`). Detalle en `docs/ROADMAP.md`.
-- **Ajustes:** `/nicho <slug>` (nicho activo) · `/estilo corto|largo` (A/B del caption) · `/estado`
-  (conteos + posts listos).
-- **Gestionar:** `/ver <id>` · `/rehacer <id> [hook|desc]` · `/borrar <id>` · `/diagnostico` (revisión
-  integral). Lo `enviado` es historia y no se revalida en lint/diagnóstico.
+`PUBLIC_MEDIA_BASE_URL` debe ser HTTPS y exponer los JPEG de `dist/`. Antes de activar el reloj:
 
-Los carruseles se envían como álbum. Flujo de publicación: ver `docs/LINEA-EDITORIAL.md`.
+1. deja `META_AUTO_PUBLISH=false`;
+2. verifica `npm run meta:dry-run`;
+3. comprueba permisos y cuentas con `npm run meta:check`;
+4. prueba una pieza con `/publicar <id>`;
+5. confirma el resultado en ambas cuentas;
+6. cambia a `META_AUTO_PUBLISH=true` y reinicia el contenedor.
 
-## Capa de marca / nicho (lo único editable por estética)
+Instagram requiere una cuenta profesional conectada a la página y el token debe tener los permisos
+de publicación de Instagram y administración de posts de página. Nunca guardes el token en git.
 
-- `src/niches.js` — color, ícono, etiqueta y jerga/dolor de cada rubro.
-- `src/theme.js` — base de marca (crema + ámbar) y variables de acento; 4 fondos.
-- `src/templates.js` — las 5 plantillas (se recolorean solas con el acento).
-- `src/prompt.js` — el "cerebro": producto completo + reglas + voz por nicho.
-- `assets/logos/logomark.svg` — logo vector oficial (inline).
-- `assets/fonts/` — Bricolage Grotesque (títulos) + DM Sans (cuerpo), self-hosted.
+## Archivos principales
 
-## Reglas de marca (fijas)
+- `src/prompt.js`: estrategia de imágenes y reglas de contenido.
+- `src/theme.js`, `src/templates.js`, `src/slides.js`: sistema visual 4:5.
+- `src/caption.js`: captions orientados al embudo freemium.
+- `src/meta.js`: publicación idempotente en Facebook e Instagram.
+- `src/meta-scheduler.js`: reloj diario en zona horaria de Santiago.
+- `src/kit-prompt.js`: kits manuales para Reels/TikTok.
+- `src/niches.js`: acento, lenguaje y dolores por nicho.
+- `docs/LINEA-EDITORIAL.md`: estrategia editorial vigente.
+- `docs/AUDITORIA-Y-PLAN-META-2026-09.md`: diagnóstico, métricas y plan de 30 días.
+- `docs/META-SETUP.md`: obtención segura de IDs/token y prueba de ambas cuentas.
 
-- **Márgenes seguros**: 230px arriba / 430px abajo (HUD + descripción de TikTok).
-- **Render 2x** (2160×3840), **íconos SVG** (no emojis), fuentes self-hosted en base64.
-- **Español neutro/chileno** (sin voseo argentino; `lint.js` lo detecta).
-- **5 hashtags** exactos, `#agendamelo` siempre.
-- **Caption**: línea 1 = hook con la keyword (lo que TikTok indexa); recién después van los 👇 y la
-  descripción. Estilo `corto` (gancho) o `largo` (SEO) según `/estilo`.
+## CSV de publicaciones
 
-## Plantillas (`tipo_plantilla`)
+Además del contenido y estado editorial, el CSV incluye:
 
-`stat` (dato de mercado, con fuente) · `mito_realidad` · `checklist` · `antes_despues` (caos → orden)
-· `feature` (mockup del sitio/app). En carrusel: `carrusel`.
+- `imagen_url`: uno o más JPEG separados por coma.
+- `facebook_post_id` e `instagram_media_id`: resultado remoto de cada canal.
+- `meta_published_at`: fecha ISO de publicación completa.
+- `meta_error`: último error recuperable.
 
-## Nichos (`niche`)
-
-`manicuristas` · `psicopedagogas` · `profesores-paes` · `fonoaudiologas`
-
-## Columnas del CSV
-
-`id, estado, niche, orientacion, formato, tipo_plantilla, titulo, tema, angulo, hook, hook_variantes,
-hook_elegido, descripcion, descripcion_corta, hashtags, estilo_caption, fecha_creacion,
-fecha_realizado, imagen_url, imagen_json, notas_plantilla`
-
-- `hook`: titular EFECTIVO de la imagen (provisional = 1ª variante hasta que el operador elija); el
-  `*texto*` entre asteriscos se resalta en el acento del nicho. Máx 12 palabras, keyword adentro.
-- `hook_variantes`: JSON `[{texto, angulo}]` con 3-5 opciones de ángulos distintos.
-- `hook_elegido`: el hook que el humano eligió en `/revisar` (vacío = sin curar, no se renderiza).
-- `angulo`: palanca del hook (`plata` | `tiempo` | `no-show` | `repetir-info` | `comparacion-ig` | `curiosidad`).
-- `descripcion` / `descripcion_corta`: cuerpo SEO largo (≥1200 car.) y gancho corto (≤150 car.) para A/B.
-- `estilo_caption`: override por fila (`corto|largo`); vacío = sigue el global (`/estilo`).
-- `imagen_json`: contenido estructurado (imagen simple, o `slides` para carrusel).
-- `niche`: color, ícono y voz del post. Una tanda = un solo nicho (el activo).
-- `orientacion`: `educativo` | `plataforma` | `venta`.
-- `formato`: `imagen` | `carrusel` (carrusel → `tipo_plantilla = carrusel`, `imagen_url` = lista de PNGs).
-- `tema`: etiqueta corta del ángulo (anti-repetición).
+Las piezas simples y cada lámina de carrusel usan 1080×1350 CSS y se exportan a 2160×2700 JPEG.

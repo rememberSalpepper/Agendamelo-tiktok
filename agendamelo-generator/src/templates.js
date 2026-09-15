@@ -54,22 +54,22 @@ export function checklist(data) {
     </div>`).join('');
   const note = data.note ? `<div class="ck-note"><span class="ck-note-ic">!</span><span>${esc(data.note)}</span></div>` : '';
   return `<style>
-    .ck-card { background: var(--card); border-radius: 32px; box-shadow: var(--shadow);
-      padding: 26px 32px; display: flex; flex-direction: column; border: 1px solid var(--line); }
-    .ck-row { display: flex; align-items: center; gap: 22px; padding: 15px 4px; }
+    .ck-card { background: var(--card); border-radius: 22px; box-shadow: var(--shadow);
+      padding: 16px 24px; display: flex; flex-direction: column; border: 1px solid var(--line); }
+    .ck-row { display: flex; align-items: center; gap: 16px; padding: 11px 2px; }
     .ck-row + .ck-row { border-top: 1px solid var(--line); }
-    .ck-num { flex: 0 0 auto; width: 58px; height: 58px; border-radius: 16px; background: var(--grad-accent);
-      color: #fff; font-family: 'Bricolage Grotesque',sans-serif; font-weight: 700; font-size: 30px; display: grid;
-      place-items: center; box-shadow: 0 8px 18px var(--accent-soft); }
-    .ck-tx { flex: 1; font-size: 36px; font-weight: 600; color: var(--ink); letter-spacing: -0.3px; }
-    .ck-ck { flex: 0 0 auto; width: 50px; height: 50px; border-radius: 50%; color: #fff;
+    .ck-num { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 13px; background: var(--grad-accent);
+      color: #fff; font-family: 'Bricolage Grotesque',sans-serif; font-weight: 700; font-size: 24px; display: grid;
+      place-items: center; box-shadow: 0 6px 14px var(--accent-soft); }
+    .ck-tx { flex: 1; font-size: 26px; line-height: 1.15; font-weight: 650; color: var(--ink); letter-spacing: -0.2px; }
+    .ck-ck { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; color: #fff;
       background: var(--grad-accent); display: grid; place-items: center;
       box-shadow: 0 6px 14px var(--accent-soft); }
-    .ck-note { display: flex; align-items: center; gap: 16px; margin-top: 18px; background: var(--red-bg);
-      border-radius: 20px; padding: 20px 26px; }
-    .ck-note-ic { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; background: var(--red);
-      color: #fff; font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 26px; display: grid; place-items: center; }
-    .ck-note span:last-child { font-size: 28px; font-weight: 600; color: #B91C1C; }
+    .ck-note { display: flex; align-items: center; gap: 14px; margin-top: 12px; background: var(--red-bg);
+      border-radius: 15px; padding: 14px 20px; }
+    .ck-note-ic { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; background: var(--red);
+      color: #fff; font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 21px; display: grid; place-items: center; }
+    .ck-note span:last-child { font-size: 22px; font-weight: 650; color: #B91C1C; }
   </style>
   <div class="ck-card">${rows}</div>${note}`;
 }
@@ -96,15 +96,15 @@ export function base_3_cards(data) {
 // ---------- MITO / REALIDAD ----------
 export function mito_realidad(data) {
   return `<style>
-    .mr { display: flex; gap: 22px; }
-    .mr .col { flex: 1; border-radius: 28px; padding: 28px; border: 1px solid; }
+    .mr { display: flex; gap: 18px; }
+    .mr .col { flex: 1; border-radius: 20px; padding: 22px; border: 1px solid; }
     .mr .mito { background: #FEF1F1; border-color: #FAD4D4; }
     .mr .real { background: var(--accent-soft); border-color: var(--line); }
     .mr .lbl { display: inline-flex; align-items: center; gap: 10px; font-family: 'Bricolage Grotesque',sans-serif;
-      font-weight: 700; font-size: 27px; padding: 8px 20px; border-radius: 999px; margin-bottom: 18px; color: #fff; }
+      font-weight: 700; font-size: 21px; padding: 7px 16px; border-radius: 999px; margin-bottom: 14px; color: #fff; }
     .mr .mito .lbl { background: var(--red); }
     .mr .real .lbl { background: var(--grad-accent); }
-    .mr .col p { font-size: 33px; line-height: 1.32; color: var(--ink); font-weight: 500; }
+    .mr .col p { font-size: 27px; line-height: 1.24; color: var(--ink); font-weight: 550; }
   </style>
   <div class="mr">
     <div class="col mito"><span class="lbl">${svg('x', 22)} Mito</span><p>${esc(data.mito)}</p></div>
@@ -159,19 +159,18 @@ export function stat(data) {
     <div class="st-row"><span class="st-dot">${svg('check', 24)}</span><span>${esc(p)}</span></div>`).join('');
   return `<style>
     .st { display: flex; flex-direction: column; align-items: center; }
-    .st-fig { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 220px; line-height: 0.92;
-      letter-spacing: -6px; background: var(--grad-accent); -webkit-background-clip: text; background-clip: text;
-      -webkit-text-fill-color: transparent; }
-    .st-cap { font-size: 36px; font-weight: 600; color: var(--ink); text-align: center; margin-top: 8px;
+    .st-fig { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 142px; line-height: 0.88;
+      letter-spacing: -5px; color: var(--accent); }
+    .st-cap { font-size: 29px; font-weight: 650; color: var(--ink); text-align: center; margin-top: 8px;
       line-height: 1.18; max-width: 80%; }
-    .st-src { font-size: 22px; font-weight: 500; color: var(--body-2); text-align: center; margin-top: 12px;
+    .st-src { font-size: 18px; font-weight: 500; color: var(--body-2); text-align: center; margin-top: 9px;
       font-style: italic; }
-    .st-card { width: 100%; margin-top: 30px; background: var(--card); border: 1px solid var(--line);
-      border-radius: 26px; box-shadow: var(--shadow-sm); padding: 14px 28px; }
-    .st-row { display: flex; align-items: center; gap: 18px; padding: 16px 2px; font-size: 31px;
+    .st-card { width: 100%; margin-top: 20px; background: var(--card); border: 1px solid var(--line);
+      border-radius: 18px; box-shadow: var(--shadow-sm); padding: 8px 22px; }
+    .st-row { display: flex; align-items: center; gap: 14px; padding: 10px 2px; font-size: 24px;
       font-weight: 500; color: var(--ink); }
     .st-row + .st-row { border-top: 1px solid var(--line); }
-    .st-dot { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%; color: #fff;
+    .st-dot { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; color: #fff;
       background: var(--grad-accent); display: grid; place-items: center; }
   </style>
   <div class="st">
@@ -193,28 +192,28 @@ export function feature(data) {
     </div>`;
   }).join('');
   return `<style>
-    .fe { display: flex; flex-direction: column; gap: 22px; }
-    .fe-card { background: var(--card); border: 1px solid var(--line); border-radius: 30px;
+    .fe { display: flex; flex-direction: column; gap: 16px; }
+    .fe-card { background: var(--card); border: 1px solid var(--line); border-radius: 22px;
       box-shadow: var(--shadow); overflow: hidden; }
-    .fe-bar { display: flex; align-items: center; gap: 10px; padding: 18px 24px; background: var(--cream-2);
+    .fe-bar { display: flex; align-items: center; gap: 8px; padding: 13px 18px; background: var(--cream-2);
       border-bottom: 1px solid var(--line); }
-    .fe-dot { width: 14px; height: 14px; border-radius: 50%; background: #D8D2C6; }
+    .fe-dot { width: 11px; height: 11px; border-radius: 50%; background: #D8D2C6; }
     .fe-url { margin-left: 14px; flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 999px;
-      padding: 8px 20px; font-size: 23px; color: var(--body-2); font-weight: 500; }
-    .fe-body { padding: 26px 28px; }
-    .fe-head { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
-    .fe-logo { width: 64px; height: 64px; border-radius: 18px; background: var(--grad-accent); flex: 0 0 auto; }
-    .fe-name { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 700; font-size: 38px; color: var(--ink); }
+      padding: 7px 16px; font-size: 18px; color: var(--body-2); font-weight: 500; }
+    .fe-body { padding: 19px 22px; }
+    .fe-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .fe-logo { width: 48px; height: 48px; border-radius: 14px; background: var(--grad-accent); flex: 0 0 auto; }
+    .fe-name { font-family: 'Bricolage Grotesque',sans-serif; font-weight: 700; font-size: 30px; color: var(--ink); }
     .fe-row { display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      border: 1px solid var(--line); border-radius: 18px; padding: 20px 24px; margin-bottom: 14px; }
+      border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; margin-bottom: 10px; }
     .fe-row.hot { border-color: var(--accent); background: var(--accent-soft); }
-    .fe-rtx { font-size: 31px; font-weight: 600; color: var(--ink); }
-    .fe-chip { flex: 0 0 auto; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+    .fe-rtx { font-size: 24px; font-weight: 650; color: var(--ink); }
+    .fe-chip { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center;
       color: var(--accent); background: #fff; border: 1px solid var(--line); }
     .fe-row.hot .fe-chip { color: #fff; background: var(--grad-accent); border: none; }
     .fe-btn { margin-top: 8px; background: var(--grad-accent); color: #fff; text-align: center;
-      font-family: 'Bricolage Grotesque',sans-serif; font-weight: 700; font-size: 34px;
-      border-radius: 18px; padding: 22px; box-shadow: 0 12px 26px var(--accent-soft); }
+      font-family: 'Bricolage Grotesque',sans-serif; font-weight: 700; font-size: 27px;
+      border-radius: 14px; padding: 15px; box-shadow: 0 10px 20px var(--accent-soft); }
   </style>
   <div class="fe">
     <div class="fe-card">
@@ -236,17 +235,17 @@ export function antes_despues(data) {
   const despues = (data.despues || []).slice(0, 4).map((t) => `
     <div class="cp-row"><span class="cp-ic good">${svg('check', 20)}</span><span>${esc(t)}</span></div>`).join('');
   return `<style>
-    .cp { display: flex; gap: 20px; }
-    .cp .col { flex: 1; border-radius: 26px; padding: 22px 20px; border: 1px solid; }
+    .cp { display: flex; gap: 16px; }
+    .cp .col { flex: 1; border-radius: 19px; padding: 18px 16px; border: 1px solid; }
     .cp .sin { background: #FBF1F1; border-color: #F4D6D6; }
     .cp .con { background: var(--accent-soft); border-color: var(--line); }
     .cp .hd { display: inline-flex; align-items: center; gap: 8px; font-family: 'Bricolage Grotesque',sans-serif;
-      font-weight: 700; font-size: 25px; padding: 8px 18px; border-radius: 999px; margin-bottom: 16px; color: #fff; }
+      font-weight: 700; font-size: 20px; padding: 7px 14px; border-radius: 999px; margin-bottom: 12px; color: #fff; }
     .cp .sin .hd { background: #B91C1C; }
     .cp .con .hd { background: var(--grad-accent); }
-    .cp-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 2px; font-size: 28px;
+    .cp-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 2px; font-size: 22px;
       font-weight: 500; color: var(--ink); line-height: 1.2; }
-    .cp-ic { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: #fff; margin-top: 1px; }
+    .cp-ic { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: #fff; margin-top: 1px; }
     .cp-ic.bad { background: #DC2626; }
     .cp-ic.good { background: var(--accent); }
   </style>

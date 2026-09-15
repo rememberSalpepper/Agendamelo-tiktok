@@ -1,165 +1,121 @@
-# Línea editorial y publicitaria — Agendamelo TikTok
+# Línea editorial — Agendamelo
 
-Guía maestra de contenido. La obedece el generador (`src/prompt.js`) y sirve de referencia para el
-usuario y para futuros agentes. **Objetivo único de negocio: conseguir USUARIOS DE PAGO** (dueños de
-negocio que activan su suscripción), no vistas vanidosas. Cada pieza debe acercar a un profesional a
-"armar y publicar su sitio en Agendamelo". Cadencia objetivo: **3 publicaciones al día**.
+Guía vigente para el contenido orgánico de Facebook e Instagram. El generador la implementa en
+`src/prompt.js`; TikTok/Reels usa el flujo manual de `src/kit-prompt.js`.
 
-## Principio rector (no negociable)
-Cada post: **ataca un dolor real → entrega valor (enseña algo aplicable hoy) → recién ahí posiciona
-Agendamelo**. Regla de oro: si borras la marca y el post igual le sirve a un dueño de negocio, está
-bien hecho. Nada de publicidad pura.
+## Objetivo
 
-## Posicionamiento del producto (verdad canónica)
-Es la **"mini-web profesional + agenda online"** para profesionales en Chile. **NUNCA** "software de
-reservas" ni "plataforma de gestión". En una URL propia `agendamelo.cl/tu-nombre`:
-- Sitio web profesional: portada, servicios con precios (CLP), galería/portafolio, reseñas, FAQ,
-  promociones, horario, contacto, ubicación.
-- Agenda online 24/7 (los clientes reservan solos desde el link).
-- **Sesiones recurrentes** (diferenciador estrella): bloquea semanas/tratamiento completo en un paso, o
-  deja agendada la próxima mantención al terminar.
-- **Recordatorios automáticos POR CORREO** (confirmación, día antes, 1 h antes). No por WhatsApp/SMS.
-- Aparición en Google y en directorios por rubro y comuna.
-- Listo en 5 minutos, sin código.
+El objetivo primario no es vender una suscripción en el primer contacto. Es conseguir que una
+manicurista complete su **Perfil Gratis** y publique su página. El segundo paso es que pruebe la
+agenda completa durante 7 días y, cuando ya vio valor, elija un plan pagado.
 
-Precio: **$12.990/mes · plan anual $64.000**. Sin contrato, sin permanencia, cancela con un clic.
-**Cero comisión**. Modelo: CONFIGURAR el sitio es sin costo; PUBLICARLO es **gratis los primeros 7
-días, sin tarjeta** (un trial por negocio) y después se paga la suscripción.
-**No es:** ficha clínica, CRM avanzado, LMS; no procesa pagos del cliente final; no se integra con
-Isapres/Fonasa; no cobra comisión.
+```text
+contenido útil → visita → Perfil Gratis publicado → prueba de agenda → plan pagado
+```
 
-## Audiencia y nichos (4 activos)
-Spine que los une: **"agenda lo que se repite — clientes que vuelven"**. Cada nicho tiene color, ícono
-y voz/jerga propios (`src/niches.js`); se habla con su jerga VERBATIM.
+Una vista o un “me gusta” solo importa si ayuda a mover ese embudo.
 
-| Nicho (clave) | Acento | Voz | Doble dolor / ángulo |
-|---|---|---|---|
-| **manicuristas** | rosado | la más jugada y chilena (po, cachái), emojis 💅✨ | Instagram poco profesional + perder clientas por WhatsApp; "deja agendada la próxima mantención". |
-| **psicopedagogas** | ámbar | cálida y sobria, slang mínimo | contestar a apoderados a cualquier hora + coordinar de cero; "bloquea la hora 3 meses". |
-| **profesores-paes** | azul | cercano y motivador | horario en libreta + alumnos que preguntan otras materias; usa el peak PAES como urgencia. |
-| **fonoaudiologas** | verde/teal | cálida y profesional | apoderados que se confunden + WhatsApps de noche; "una hora cada lunes" + derivaciones desde Google. |
+## Audiencia del sprint
 
-**Un nicho por tanda** (`/nicho <slug>`): concentra el SEO y respeta "un solo nicho por tanda". El
-reparto entre rubros se logra cambiando el nicho activo entre tandas. Peso histórico de referencia:
-~30% manicuristas, ~25% psicopedagogas, ~25% profesores-paes, ~20% fonoaudiologas (manicure aporta
-reach; las otras tres, conversión de alto LTV). **Sprint actual: 100% manicuristas.**
+Durante 30 días, el contenido habla exclusivamente a **manicuristas independientes en Chile**. No se
+mezclan psicopedagogas, profesores ni fonoaudiólogas en esta etapa. La misma arquitectura permite
+reactivarlos después, pero cada sprint debe tener una sola promesa y un solo lenguaje.
 
-## Orientaciones de contenido (campo `orientacion`, mezcla 40/30/30)
-- **educativo (~40%)**: ayuda al profesional sin vender directo (cuánto cobrar, organizar, evitar
-  inasistencias). Construye autoridad y guardados. CTA suave.
-- **plataforma (~30%)**: muestra una capacidad concreta (mini-web, reserva 24/7, sesiones recurrentes,
-  recordatorios por correo, aparecer en Google). Demuestra, no solo afirma.
-- **venta (~30%)**: CTA directo, precio, objeción, diferenciación, oferta. Siempre CTA compliant.
+Dolores principales:
 
-## Plantillas (5) y a qué orientación sirven
-| Plantilla | Orientación | Qué hace |
-|---|---|---|
-| `stat` | educativo/venta | UN dato de MERCADO (precio o tiempo) grande, **con su `source`**. Nunca resultados de clientes. |
-| `mito_realidad` | educativo | "Mito: X. Realidad: Y." Rompe una creencia del rubro. |
-| `checklist` | educativo/plataforma | 3–5 ítems accionables y guardables. |
-| `antes_despues` | venta/plataforma | Caos (WhatsApp/libreta/Instagram) → orden (sitio + reserva). La más persuasiva. |
-| `feature` | plataforma/venta | Mock de una función real (agenda, mantención recurrente, recordatorio, galería). |
+- depender de Instagram como si fuera una página web;
+- responder precios, horarios y ubicación una y otra vez;
+- perder reservas mientras está atendiendo;
+- agenda desordenada en WhatsApp;
+- clientas que no vuelven a reservar su mantención;
+- poca presencia cuando alguien busca manicure en su comuna.
 
-## Formatos (campo `formato`)
-- **imagen (~60%)**: 1 lámina, una de las 5 plantillas. Idea concentrada, hook potente.
-- **carrusel (~40%)**: 3-4 láminas. **portada (gancho) → 1-2 punto (una idea por lámina) → cierre
-  (recap + CTA)**. Máx 4, ideal 3. Siempre termina en CTA.
+## Verdad del producto
 
-## Ritmo diario (3 posts) — comando `/dia` arma el set
-| Franja | Rol | Orientación | Formato sugerido |
-|---|---|---|---|
-| Mañana | Aporta valor, capta | educativo | imagen o carrusel |
-| Mediodía | Muestra el producto | plataforma | carrusel o feature |
-| Tarde/noche | Convierte | venta | imagen (antes_despues / mito_realidad) |
-Reglas: **nunca el mismo nicho ni la misma plantilla dos veces el mismo día**.
+Agendamelo es “tu sitio + agenda” para profesionales de servicios en Chile.
 
-## Rotación
-- **Nichos:** los 4 a lo largo de la semana, respetando el reparto 30/25/25/20.
-- **Plantillas:** las 5 (imagen) + carrusel; varía, no repitas seguido.
-- **Anti-repetición de temas:** cada post lleva un `tema` (kebab-case, ej. `no-shows`,
-  `aparecer-en-google`, `sesiones-recurrentes`). El generador NO repite temas.
-- **Anti-repetición de ángulos:** además del `tema`, cada hook tiene un `angulo`. No publiques dos
-  posts seguidos con el mismo ángulo; `/estado` muestra el reparto de ángulos en las pendientes.
+- Perfil Gratis: **$0**, público sin fecha de término, hasta 2 servicios y 2 fotos, botón de WhatsApp
+  y presencia en directorios/Google. No incluye la agenda activa.
+- Estándar: **$12.990/mes** o **$64.000/año**.
+- Web Pro: **$19.990/mes**.
+- Agenda completa: **7 días gratis, sin tarjeta**.
+- Recordatorios automáticos: correo y WhatsApp; WhatsApp limitado en Estándar e ilimitado en Web Pro.
+- Reservas 24/7, galería, servicios/precios, reseñas, preguntas frecuentes, horarios y ubicación.
 
-## Hooks (la regla más importante) — el humano elige, el bot propone
-El hook ES el titular de la imagen: queda en pantalla, así que carga la keyword en los primeros 2
-segundos. Reglas: **≤12 palabras** (ideal 6-10), un **dolor concreto o una curiosidad**, NUNCA un
-tema; la **keyword del nicho va dentro** del hook. Sobre el espectador (su plata/tiempo/clientes), no
-sobre la app. Auto-test: golpea en <1s, es específico, no es sobre Agendamelo, da curiosidad/urgencia.
-- ❌ "Mantención de uñas: gestión de agenda." (es un tema, no duele)
-- ✅ "3 clientas pidieron la misma hora. *Perdiste a 2*."
+No inventar testimonios, resultados, integraciones, descuentos ni precios. No decir que procesa pagos,
+que integra Fonasa/Isapre ni que es una ficha clínica o un CRM avanzado.
 
-**Variantes + ángulo (human-in-the-loop):** cada idea trae **3-5 hooks de ángulos distintos**; el LLM
-no decide cuál sale, lo elige el operador desde `/revisar` (botones). Ángulo = palanca del gancho:
-`plata` · `tiempo` · `no-show` · `repetir-info` (dejar de contestar lo mismo) · `comparacion-ig` ·
-`curiosidad`. **No repitas ángulo en posts seguidos** (TikTok entierra lo que parece clonado).
-Prohibidos: avisos, CTA disfrazado, genéricos sin tensión, cualquiera que empiece con "Agendamelo…".
+## Promesa editorial
 
-## Las 4 reglas TikTok-SEO en cada pieza
-1. **Keyword en pantalla** en los primeros 2 s (va dentro del hook/headline).
-2. **Keyword al inicio del caption** (la línea 1 es el hook con la keyword).
-3. **3-5 hashtags de nicho** (siempre `#agendamelo` + del rubro/tema).
-4. Un **gancho** que haga ver el video completo. Y **un solo nicho por tanda**.
+Cada pieza sigue esta secuencia:
 
-## Idioma (regla dura)
-Español neutro/chileno **sin voseo argentino** (nada de "tenés/hacé/mirá/dale"). El **voseo chileno**
-("tenís/podís/cachái") es aceptable SOLO en hooks informales (sobre todo manicure), con moderación.
-Acentos y signos siempre correctos. Descripciones de comunas: neutro estricto, sin juicios.
+1. escena reconocible del día a día de una manicurista;
+2. prueba, ejemplo o consejo aplicable;
+3. próximo paso pequeño y coherente.
 
-## Integridad de datos (no mentir)
-Agendamelo es nuevo: **NUNCA** presentes números como resultados reales de clientes. En `stat` el dato
-es (a) precio de mercado del nicho (con `source` = "precios de mercado en Chile") o (b) un cálculo de
-tiempo claramente hipotético. Beneficios futuros en condicional ("podrías", "deja de").
+El contenido se reparte así:
 
-## Estrategia de CTA (el trial es el gancho)
-CTA canónico: **"Publica gratis 7 días, sin tarjeta → agendamelo.cl"**.
-Variantes: "Tu sitio + agenda en 5 minutos → agendamelo.cl" · "Aparece en Google y recibe reservas
-solas → link en bio" · "Desde $12.990 al mes, sin comisión ni contrato → link en bio".
-- educativo → "Sígueme para más" / "Guarda este tip".
-- plataforma → "Míralo en agendamelo.cl · Link en bio".
-- venta → "Publica gratis 7 días" / "Arma tu agenda en 5 minutos · Sin tarjeta, después $12.990/mes".
+- 40% educativo: precios, agenda, no-shows, retorno y organización;
+- 30% demostración: página, reservas, galería, WhatsApp, Google y recordatorios;
+- 30% conversión: Perfil Gratis, objeciones y comparación con depender solo de Instagram.
 
-**La única forma de "gratis" es el trial de publicación de 7 días sin tarjeta**, y la palabra solo
-puede ir pegada a él. **PROHIBIDO:** "gratis" suelto, "mes gratis", "primer mes gratis", "prueba
-gratis", "trial" (anglicismo), "sin compromiso" como gancho de regalo, y cualquier descuento, oferta,
-promoción o cupón. Las únicas cifras de precio de Agendamelo son **$12.990** y **$64.000**; el plan
-fundador NO se nombra en contenido público (es outreach por DM). Los precios de **mercado del rubro**
-sí se citan como dato, con su fuente. Lo hace cumplir `src/kit-validate.js` (`findPriceIssues`).
+## Sistema visual
 
-## Caption (lo que va en TikTok) y hashtags
-- **Línea 1 = el hook con la keyword** (es lo que TikTok muestra colapsado e indexa más fuerte). Recién
-  DESPUÉS van los 👇 (empujan el texto para no tapar la imagen), la descripción y los 5 hashtags.
-- **A/B de largo** (`/estilo`): `largo` = descripción SEO (230-350 palabras, con valor + preguntas
-  reales de búsqueda); `corto` = un gancho de ≤150 caracteres. Sirve para medir retención sin asumir
-  cuál gana.
-- 5 hashtags exactos, **siempre `#agendamelo`** + 2-3 de rubro/tema (el sistema garantiza el del nicho).
+- Formato Meta: 1080×1350 (4:5), exportado a JPEG 2160×2700.
+- Una idea por lámina, titular corto y alineación editorial a la izquierda.
+- Base crema, tipografía Bricolage Grotesque/DM Sans y acento rosado del nicho.
+- Logo pequeño; el mensaje manda.
+- CTA negro con sombra rosada; no usar bloques enormes de marca.
+- Carrusel de 3–4 láminas: escena → explicación → solución → CTA.
 
-## Nicho activo y sprint
-Una tanda = **un solo nicho** (el activo). Se controla con `/nicho <slug>` (persistido fuera de git).
-**Sprint en curso: foco 100% en `manicuristas`** (volumen alto, hooks impecables) para conseguir
-usuarios de pago rápido. Flipear de nicho después es un comando.
+Plantillas: `stat`, `mito_realidad`, `checklist`, `antes_despues`, `feature` y `carrusel`.
 
-## Cómo publicar (operación diaria)
-TikTok no tiene API de subida en este stack → publicación **manual**. Flujo 100% desde Telegram:
-1. **Generar:** `/generar 21 manicuristas` (≈ una semana). Quedan `pendiente`, cada una con 3-5 hooks.
-2. **Curar el hook:** `/revisar` → toca el botón del ángulo que quieras en cada idea (o `🔁 Otros hooks`
-   para regenerar). Eso fija el `hook_elegido`.
-3. **Renderizar:** `/render` → solo las que ya tienen hook elegido pasan a `renderizado`.
-4. **Diario:** `/dia` → 3 posts variados + título y caption listos (o `/enviar [N]`).
-5. **Sube a TikTok**: foto única o carrusel (láminas en orden), pega el caption (la línea 1 ya trae la
-   keyword), **elige el sonido** (ver abajo) y publica. Reparte los 3 en el día.
+## Hooks
 
-Estados: `pendiente (con/ sin hook elegido) → renderizado → enviado`.
+El hook es el titular visible. Máximo 12 palabras, keyword del nicho incluida, una sola tensión y
+nada de lenguaje de gurú.
 
-## Sonido al subir (paso MANUAL del operador, no lo hace el bot)
-El sonido es señal de alcance en TikTok y el bot no lo controla. Al subir:
-- **Posts faceless del bot** (imagen/carrusel): elige un **sonido en tendencia** desde el buscador (el
-  del **ícono ↑**, el que está subiendo), de vibe **informativo** y a **volumen bajo**. NO te quedes
-  con el "recomendado" por defecto: suele estar saturado.
-- **Videos hablados por ti** (tu cara/voz): usa el **audio original**, no lo entierres bajo música; la
-  voz es el gancho. La música, si va, apenas de fondo.
-El gancho final y **responder los comentarios en la primera hora** tampoco se automatizan: son tuyos.
+- Débil: “Mejora la gestión de tu agenda”.
+- Fuerte: “Te escribieron por hora mientras hacías este set”.
+- Débil: “Conoce Agendamelo”.
+- Fuerte: “Tu Instagram muestra uñas. ¿Pero explica cómo reservar?”
 
-## KPIs a mirar
-Retención/watch time, **guardados** y **compartidos**, comentarios, visitas al perfil y **clics al
-link en bio**. Si un nicho/plantilla rinde, súbele el peso en el reparto.
+Cada idea propone 3–5 ángulos y una persona elige el hook antes de renderizar. Evita publicar el mismo
+ángulo dos días seguidos.
+
+## CTA freemium
+
+CTA principal: **“Crea tu Perfil Gratis en agendamelo.cl”**.
+
+- educativo: guardar el consejo + mención ligera del Perfil Gratis;
+- demostración: crear el Perfil Gratis, sin tarjeta ni vencimiento;
+- conversión: Perfil Gratis primero; luego explicar la prueba de agenda de 7 días.
+
+Los planes pagados aparecen solo para responder “¿cuánto cuesta si quiero la agenda activa?”. No
+llenar cada pieza con precios. En Instagram, reforzar “link en la bio”; en Facebook puede usarse el
+enlace directo con UTM cuando esté configurado.
+
+## Cadencia y serie inicial
+
+Una publicación diaria durante 30 días. Mantener una cola mínima de siete piezas renderizadas.
+
+Secuencia semanal sugerida:
+
+1. dolor reconocible;
+2. consejo guardable;
+3. antes/después del flujo de reserva;
+4. función demostrada con contexto;
+5. mito/realidad;
+6. Perfil Gratis y objeción;
+7. checklist o mini auditoría de perfil.
+
+TikTok no reutiliza automáticamente estas láminas. Allí se convierte la misma idea en video corto con
+escena, voz o texto en movimiento, demostración y audio elegido manualmente.
+
+## Métricas
+
+Métrica principal: **Perfiles Gratis publicados desde tráfico orgánico de Meta**.
+
+Métricas de diagnóstico: alcance, guardados, compartidos, visitas al perfil, clics, registros iniciados,
+registros completados, pruebas de agenda activadas y conversión a plan pagado. Revisar semanalmente
+por tema, formato y hook; no cambiar de nicho antes de completar el sprint salvo evidencia clara.

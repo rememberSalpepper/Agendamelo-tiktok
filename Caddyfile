@@ -1,0 +1,23 @@
+{
+	email admin@agendamelo.cl
+}
+
+contenido.agendamelo.cl {
+	encode zstd gzip
+
+	@media path /media/*
+	handle @media {
+		reverse_proxy app:3000
+	}
+
+	handle {
+		respond "Not found" 404
+	}
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+	}
+
+	log
+}

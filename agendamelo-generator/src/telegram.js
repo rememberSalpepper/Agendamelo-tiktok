@@ -55,7 +55,8 @@ async function sendPost(row, idx, total) {
     form.append('chat_id', CHAT);
     const media = paths.map((p, i) => {
       const name = p.split('/').pop();
-      form.append(name, new Blob([readFileSync(join(ROOT, p))], { type: 'image/png' }), name);
+      const mime = /\.jpe?g$/i.test(name) ? 'image/jpeg' : 'image/png';
+      form.append(name, new Blob([readFileSync(join(ROOT, p))], { type: mime }), name);
       return { type: 'photo', media: `attach://${name}`, ...(i === 0 ? { caption: `📌 ${idx}/${total}` } : {}) };
     });
     form.append('media', JSON.stringify(media));
@@ -64,7 +65,9 @@ async function sendPost(row, idx, total) {
     const form = new FormData();
     form.append('chat_id', CHAT);
     form.append('caption', `📌 ${idx}/${total}`);                       // índice mínimo para mantener orden
-    form.append('photo', new Blob([readFileSync(join(ROOT, paths[0]))], { type: 'image/png' }), `${row.id}.png`);
+    const name = paths[0].split('/').pop();
+    const mime = /\.jpe?g$/i.test(name) ? 'image/jpeg' : 'image/png';
+    form.append('photo', new Blob([readFileSync(join(ROOT, paths[0]))], { type: mime }), name);
     await tg('sendPhoto', form, true);                                  // 1) imagen + número
   }
   await sleep(300);

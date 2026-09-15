@@ -1,4 +1,8 @@
-# Sistema de generación de contenido para TikTok — Documentación y guía de replicación
+# Sistema original para TikTok — referencia histórica
+
+> **Documento archivado.** Describe el sistema base 9:16 de PGAS y no es la guía operativa actual de
+> Agendamelo. Para la implementación vigente (Meta 4:5, Perfil Gratis y publicación diaria), usa
+> `agendamelo-generator/README.md`, `agendamelo-generator/docs/LINEA-EDITORIAL.md` y `DEPLOY.md`.
 
 Documento base para entender cómo funciona y cómo se construyó este sistema (caso **PGAS**),
 y para **replicarlo en otra cuenta de TikTok** con otra estética y temática.

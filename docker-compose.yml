@@ -8,10 +8,50 @@ services:
     env_file:
       - agendamelo-generator/.env
     ports:
-      - "3011:3000"          # salud: curl http://127.0.0.1:3011
+      - "127.0.0.1:3011:3000" # solo diagnóstico local; Caddy usa la red interna
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     volumes:
       # Datos persistentes (sobreviven a rebuilds del contenedor)
       - ./data/agendamelo_ideas.csv:/app/agendamelo_ideas.csv
+      - ./data/agendamelo_kits.csv:/app/agendamelo_kits.csv
+      - ./data/agendamelo_settings.json:/app/agendamelo_settings.json
       - ./data/dist:/app/agendamelo-generator/dist
       # Sesión de Codex montada desde el host (ya autenticada con `codex login`)
-      - /home/srv/.codex:/root/.codex
+      - /home/debian/.codex:/root/.codex
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  caddy:
+    image: caddy:2.10.2-alpine
+    container_name: agendamelo-caddy
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  caddy_data:
+  caddy_config:

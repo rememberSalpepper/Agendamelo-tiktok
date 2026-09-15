@@ -16,10 +16,9 @@ const KITS_CSV = process.env.AGENDAMELO_KITS_CSV || join(ROOT, '..', 'agendamelo
 const errors = [];
 
 // ---------- Imágenes (Facebook) ----------
-// Solo se valida lo que aún se va a publicar. Lo 'enviado' es historia inmutable (puede venir de
-// versiones viejas del esquema) y NO se revalida.
+// Solo se valida lo que aún se va a publicar. Lo enviado/publicado es historia inmutable.
 const rows = parse(readFileSync(CSV), { columns: true, skip_empty_lines: true, relax_quotes: true });
-const porPublicar = rows.filter((r) => r.estado !== 'enviado');
+const porPublicar = rows.filter((r) => !['enviado', 'publicado'].includes(r.estado));
 const enviadas = rows.length - porPublicar.length;
 for (const r of porPublicar) for (const issue of validateRow(r)) errors.push(`[img] ${r.id}: ${issue}`);
 

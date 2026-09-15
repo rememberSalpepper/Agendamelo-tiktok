@@ -1,7 +1,7 @@
 {
   "name": "agendamelo-generator",
   "version": "1.0.0",
-  "description": "Generador de contenido para TikTok de Agendamelo (mini-web + agenda online), con identidad por nicho.",
+  "description": "Generador y publicador de contenido para Facebook e Instagram de Agendamelo, con kits manuales para Reels/TikTok.",
   "main": "index.js",
   "scripts": {
     "test": "node --test",
@@ -11,6 +11,9 @@
     "render:all": "node src/pipeline.js all",
     "render:one": "node src/pipeline.js one",
     "preview": "node src/preview.js",
+    "meta:dry-run": "node src/meta.js dry-run",
+    "meta:check": "node src/meta.js check",
+    "meta:publish": "node src/meta.js next",
     "generate": "node src/generate.js",
     "kit": "node src/kit.js",
     "expand": "node src/expand-descriptions.js",

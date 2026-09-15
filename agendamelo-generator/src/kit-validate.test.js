@@ -1,9 +1,8 @@
 // Tests del cerebro de precios: la lista blanca de kit-validate.js y el contenido de los dos prompts
 // (modo KIT y modo IMAGEN). Runner nativo de Node, sin dependencias: `npm test`.
 //
-// Lo que protegen: que el bot solo pueda decir el precio vigente ($12.990/mes · $64.000 anual), que
-// "gratis" solo aparezca pegado al trial de 7 días sin tarjeta, y que los precios muertos ($4.990 /
-// $7.990) no vuelvan nunca.
+// Lo que protegen: que el bot solo pueda decir los precios públicos vigentes, que "gratis" aparezca
+// en los 7 días iniciales o en Perfil Gratis, y que los precios muertos no vuelvan nunca.
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
@@ -68,6 +67,17 @@ describe('lo que SÍ se puede decir', () => {
     assert.deepEqual(e, []);
   });
 
+  test('el plan Web Pro vigente', () => {
+    const e = erroresDe(kitBase({
+      captionSEO: 'Agenda para manicuristas en Chile 💅 Web Pro por $19.990/mes',
+    }));
+    assert.deepEqual(e, []);
+  });
+
+  test('Perfil Gratis es una oferta pública real', () => {
+    assert.deepEqual(findPriceIssues('Si no activas, quedas en Perfil Gratis sin agenda online.'), []);
+  });
+
   test('los precios de MERCADO del rubro siguen permitidos (son la materia prima de los hooks)', () => {
     // niches.js alimenta el prompt con estos rangos; prohibirlos rompería la línea editorial.
     assert.deepEqual(findPriceIssues('Cobras $8.000 la manicure. El mercado paga $12.000–$18.000.'), []);
@@ -99,7 +109,7 @@ describe('precios muertos y cifras inventadas', () => {
   });
 });
 
-describe('"gratis" solo pegado al trial', () => {
+describe('"gratis" solo en Perfil Gratis o en los 7 días', () => {
   test('"primer mes gratis" falla', () => {
     const e = erroresDe(kitBase({ hookText: 'Tu *agenda para manicuristas* con primer mes gratis' }));
     assert.ok(e.some((x) => x.includes('primer mes gratis')), JSON.stringify(e));
@@ -229,6 +239,7 @@ describe('contenido de los prompts', () => {
 
   test('la verdad canónica está armada con las cifras vigentes', () => {
     for (const precio of PRECIOS_AGENDAMELO) assert.ok(PRICING_CANONICO.includes(precio));
-    assert.ok(/gratis 7 días/i.test(PRICING_CANONICO));
+    assert.ok(/(?:gratis\s+7\s+días|7\s+días\s+gratis)/i.test(PRICING_CANONICO));
+    assert.ok(/Perfil Gratis/i.test(PRICING_CANONICO));
   });
 });

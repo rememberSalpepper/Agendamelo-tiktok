@@ -43,7 +43,8 @@ export function validateRow(r) {
     } catch { e.push('hook_variantes JSON inválido'); }
   }
 
-  if ((r.descripcion || '').length < 1200) e.push(`descripción corta (${(r.descripcion || '').length} car.)`);
+  if ((r.descripcion || '').length < 400) e.push(`descripción corta (${(r.descripcion || '').length} car.; mín 400)`);
+  if ((r.descripcion || '').length > 1200) e.push(`descripción demasiado larga (${r.descripcion.length} car.; máx 1200)`);
   if (r.descripcion_corta && r.descripcion_corta.length > 200) e.push(`descripcion_corta muy larga (${r.descripcion_corta.length} car., máx 200)`);
 
   // Idioma (regla dura de marca): cero voseo argentino en hook, descripción y variante corta.

@@ -1,77 +1,130 @@
-# Deploy en el VPS (Docker)
+# Deploy en un VPS nuevo
 
-Proyecto: bot de Telegram + generador de posts de **Agendamelo**. Corre como un contenedor
-(`docker compose`). El bot escucha comandos y expone un endpoint de salud en :3000
-(mapeado a **:3011** en el host).
+El contenedor ejecuta el bot de Telegram, genera los JPEG y publica una pieza diaria en Facebook e
+Instagram. Expone `/health` y `/media/<archivo>` en el puerto interno 3000; Docker lo mapea a 3011.
 
-## 0) Requisitos en el VPS
-- Docker + docker compose.
-- **Codex CLI instalado y autenticado** como el usuario `srv`:
-  ```bash
-  codex login          # deja la sesión en /home/srv/.codex
-  ls /home/srv/.codex  # debe existir (auth.json, etc.)
-  ```
-  El contenedor monta esa carpeta para usar tu sesión de Codex.
+## 1. Requisitos
 
-## 1) Subir el proyecto
-Ubicación: `/home/srv/apps/agendamelo`
+- VPS Linux con Docker y `docker compose`.
+- Dominio o subdominio con HTTPS, por ejemplo `contenido.agendamelo.cl`.
+- Codex CLI autenticado como el usuario que ejecuta Docker, si se generarán ideas en el VPS.
+- Página de Facebook y cuenta profesional de Instagram conectadas.
+- App de Meta con permisos aprobados para publicar en ambas cuentas.
+
+## 2. Instalar el proyecto
 
 ```bash
-cd /home/srv/apps
-git clone <tu-repo-de-agendamelo>.git agendamelo
+mkdir -p /home/debian/apps
+cd /home/debian/apps
+git clone <URL_DEL_REPO> agendamelo
 cd agendamelo
-```
-
-## 2) Crear el .env (token + chat, NO está en el repo)
-```bash
-cp agendamelo-generator/.env.example agendamelo-generator/.env
-nano agendamelo-generator/.env   # TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, AGENDAMELO_ALLOWED_CHATS
-```
-
-## 3) Datos iniciales (CSV vivo + carpeta de imágenes)
-```bash
 mkdir -p data/dist
-cp agendamelo_ideas.seed.csv data/agendamelo_ideas.csv   # arranca vacío (solo header)
+cp agendamelo_ideas.seed.csv data/agendamelo_ideas.csv
+cp agendamelo_kits.seed.csv data/agendamelo_kits.csv
+printf '{}\n' > data/agendamelo_settings.json
+cp agendamelo-generator/.env.example agendamelo-generator/.env
 ```
 
-## 4) (Si tu Codex no está en /home/srv/.codex)
-Ajusta esa ruta en `docker-compose.yml` (volumen `/home/srv/.codex:/root/.codex`).
+Si Codex se usará dentro del contenedor, autentícalo en el host y confirma que el volumen de
+`docker-compose.yml` apunte a la carpeta correcta:
 
-## 5) Levantar
 ```bash
+codex login
+ls /home/debian/.codex
+```
+
+## 3. Configurar secretos
+
+Edita `agendamelo-generator/.env` en el VPS. No lo copies a chats ni lo subas a git.
+
+```dotenv
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+AGENDAMELO_ALLOWED_CHATS=
+
+META_GRAPH_VERSION=v26.0
+META_PAGE_ID=
+META_IG_USER_ID=
+META_PAGE_ACCESS_TOKEN=
+PUBLIC_MEDIA_BASE_URL=https://contenido.agendamelo.cl/media
+META_TRACKING_URL=https://agendamelo.cl/?utm_source=facebook&utm_medium=organic&utm_campaign=perfil-gratis-manicuristas
+META_AUTO_PUBLISH=false
+META_PUBLISH_TIME=20:30
+META_TIMEZONE=America/Santiago
+```
+
+Mantén la publicación automática apagada hasta terminar la prueba manual.
+
+## 4. Levantar y exponer HTTPS
+
+```bash
+docker compose up -d --build
+docker ps
+docker logs --tail 100 agendamelo-tiktok
+curl http://127.0.0.1:3011/health
+```
+
+El servicio `caddy` incluido en `docker-compose.yml` publica únicamente `/media/*` y obtiene HTTPS
+automáticamente cuando el DNS de `contenido.agendamelo.cl` apunta al VPS. Verifica una imagen real
+antes de conectar Meta:
+
+```bash
+curl -I https://contenido.agendamelo.cl/media/<archivo.jpg>
+```
+
+Debe responder `200`, `Content-Type: image/jpeg` y ser accesible sin autenticación. Solo el directorio
+de imágenes queda público; los tokens permanecen en `.env`.
+
+## 5. Conectar Meta
+
+La app de Meta debe disponer, como mínimo, de:
+
+- Facebook Pages: `pages_show_list` para descubrir la página, `pages_manage_posts` para publicar y
+  `pages_read_engagement` para acceder a la página.
+- Instagram: `instagram_basic`, `instagram_content_publish` y `pages_read_engagement` para el flujo
+  de Facebook Login.
+
+Después de cargar IDs y token:
+
+```bash
+docker compose restart app
+docker compose exec app npm run meta:dry-run
+docker compose exec app npm run meta:check
+```
+
+Desde Telegram, renderiza una pieza y prueba `/publicar <id>`. Revisa que aparezca correctamente en
+Facebook e Instagram. Solo entonces cambia `META_AUTO_PUBLISH=true` y reinicia:
+
+```bash
+docker compose restart app
+docker logs --tail 100 agendamelo-tiktok
+```
+
+El scheduler publica una sola pieza por fecha local a la hora configurada, incluso si el contenedor se
+reinicia: recupera la última fecha desde el CSV. Si falla, conserva el error y reintenta 30 minutos
+después; si no hay cola, vuelve a mirar una hora después.
+
+## 6. Operación diaria
+
+1. `/generar 7 manicuristas` crea una semana de ideas.
+2. `/revisar 7` permite escoger los hooks.
+3. `/render` deja los JPEG en la cola.
+4. El scheduler publica uno al día.
+5. `/estado` muestra pendientes, renderizados, enviados y publicados.
+
+Mantén al menos siete piezas renderizadas. El audio y montaje de Reels/TikTok siguen siendo manuales
+con `/kit`, porque este publicador automático cubre Facebook e Instagram estático/carrusel.
+
+## 7. Actualizaciones y respaldo
+
+```bash
+cd /home/debian/apps/agendamelo
+git pull --ff-only
 docker compose up -d --build
 ```
 
-## 6) Verificar
-```bash
-docker ps
-docker logs --tail 100 agendamelo-tiktok   # "Salud en :3000" y "Bot Agendamelo escuchando"
-curl http://127.0.0.1:3011                  # {"ok":true,"servicio":"agendamelo-bot",...}
-```
-Y en Telegram, escríbele `/estado` al bot.
+Respalda periódicamente `data/agendamelo_ideas.csv`, `data/agendamelo_kits.csv` y `data/dist/`. Esos
+datos viven fuera de la imagen Docker y sobreviven a los rebuilds.
 
-## 7) Generar el primer lote
-Como el CSV arranca vacío, genera ideas desde Telegram con `/generar 14` (Codex las crea y
-renderiza). Luego `/textos` para revisar y `/enviar 5` para recibir los posts.
-
-## Uso diario (desde Telegram)
-- `/generar 14` → Codex crea 14 ideas nuevas (rotando nichos) y las renderiza.
-- `/enviar [N]` → te manda N posts listos (imagen + título + descripción).
-- `/estado`, `/textos`, `/siguiente`, `/borrar <id>`, `/ayuda`.
-
-## Actualizar el VPS cuando cambies algo en tu PC
-```bash
-# en tu PC:
-git push
-# en el VPS (o automático por GitHub Actions):
-cd /home/srv/apps/agendamelo && git pull && docker compose up -d --build
-```
-El CSV y las imágenes viven en `./data` y NO se tocan al actualizar.
-
-## Notas
-- El contenedor se reinicia solo (`restart: unless-stopped`).
-- Puerto host: **3011** (distinto al de PGAS, que usa 3010).
-- **Un solo bot por token**: no corras el bot a la vez en tu PC y en el VPS (conflicto de
-  getUpdates). En producción corre solo en el VPS.
-- Si `npm install -g @openai/codex` fallara en el build, el bot igual arranca; solo `/generar`
-  necesita Codex.
+Nunca ejecutes simultáneamente dos instancias con el mismo token de Telegram ni dos schedulers Meta
+sobre el mismo CSV.

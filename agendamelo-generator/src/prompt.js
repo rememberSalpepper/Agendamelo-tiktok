@@ -1,5 +1,5 @@
 // El "cerebro" del generador para Agendamelo: construye el prompt que recibe Codex.
-// Codifica la LÍNEA EDITORIAL: verdad canónica del producto, 4 nichos activos (desde niches.js),
+// Codifica la LÍNEA EDITORIAL para Facebook/Instagram: verdad canónica del producto, nichos activos,
 // 3 orientaciones (educativo/plataforma/venta), 5 plantillas, reglas duras de idioma/CTA/datos,
 // hooks fuertes y el esquema de contenido por plantilla.
 
@@ -14,8 +14,8 @@ export const ORIENTACIONES = ['educativo', 'plataforma', 'venta'];
 export const FORMATOS = ['imagen', 'carrusel'];
 export const NICHOS = NICHE_KEYS;
 
-// Ángulos de hook: la palanca emocional/racional del gancho. El operador NO repite ángulo en posts
-// seguidos (TikTok entierra lo que parece clonado), y cada idea trae variantes de ángulos distintos.
+// Ángulos de hook: la palanca emocional/racional del gancho. Cada idea trae variantes distintas para
+// que el operador elija la que mejor detiene el scroll sin repetir la misma promesa.
 export const ANGULOS = ['plata', 'tiempo', 'no-show', 'repetir-info', 'comparacion-ig', 'curiosidad'];
 const ANGULO_DESC = {
   plata: 'plata que pierdes o dejas de ganar (clientas que se van, precio que regalas)',
@@ -46,10 +46,11 @@ export function buildPrompt({ n, nicheMix, orientacionMix, formatoMix, templateM
   const tplLines = Object.entries(templateMix).map(([k, v]) => `   - ${k}: ${v}`).join('\n');
   const avoidLines = avoid.length ? avoid.map((t) => `   - ${t}`).join('\n') : '   (aún no hay; es el primer lote)';
 
-  return `Eres el motor editorial de Agendamelo y el mejor estratega de contenido de TikTok para Chile.
-Genera ${n} ideas de post NUEVAS para Agendamelo (agendamelo.cl). El ÚNICO objetivo de negocio es
-conseguir USUARIOS DE PAGO (dueños de negocio que activan su suscripción), no vistas vanidosas. Cada
-pieza debe acercar a un profesional a "armar y publicar su sitio en Agendamelo". Vara ALTA: calidad
+  return `Eres el motor editorial de Agendamelo y un estratega senior de contenido para Instagram y Facebook en Chile.
+Genera ${n} ideas de post NUEVAS para Agendamelo (agendamelo.cl). El objetivo principal es conseguir
+REGISTROS CALIFICADOS en Perfil Gratis (dueños de negocio que publican su página); el objetivo posterior
+es que activen la agenda al experimentar su valor. No optimices para vistas vanidosas. Cada pieza debe
+acercar a una profesional a "crear su página gratis en Agendamelo". Vara ALTA: calidad
 publicable, sin relleno.
 
 # 1. QUÉ ES AGENDAMELO (verdad canónica — NO inventes nada fuera de esto)
@@ -60,20 +61,23 @@ Agendamelo es la "mini-web profesional + agenda online" para profesionales en Ch
 - Agenda online 24/7: los clientes reservan solos desde el link.
 - SESIONES RECURRENTES (diferenciador estrella): bloquea semanas o un tratamiento completo en un paso,
   o deja agendada la próxima mantención al terminar.
-- Recordatorios automáticos POR CORREO (confirmación, día antes, 1 h antes). NO por WhatsApp/SMS.
+- Confirmaciones y recordatorios automáticos por correo y por WhatsApp para clientes que lo autorizan.
+  En Estándar, WhatsApp tiene un límite; en Web Pro es sin límite. Nunca inventes el límite exacto.
 - Aparición en Google y en directorios por rubro y comuna.
 - Listo en 5 minutos, sin código, sin servidores, sin diseñador.
 Precio: ${PRICING_CANONICO}. Sin contrato, sin permanencia, cancela con un clic. CERO comisión por
 reserva.
-Modelo: CONFIGURAR el sitio es sin costo. PUBLICARLO (aparecer y recibir reservas) es GRATIS los
-primeros 7 días y sin tarjeta (una sola vez por negocio); después se paga la suscripción.
+Modelo: CONFIGURAR el sitio es sin costo. La agenda se prueba 7 días gratis y sin tarjeta (una vez por
+negocio). Si no activa un plan, pasa a Perfil Gratis: conserva una página pública, directorio, dos
+servicios, dos fotos y botón a WhatsApp, pero se apagan reservas online y recordatorios.
 Lo que NO es (no lo prometas): no es ficha clínica, no es CRM avanzado, no es LMS, no procesa pagos del
 cliente final, no se integra con Isapres/Fonasa, no cobra comisión.
 
-# 2. PRINCIPIO RECTOR (no negociable): dolor real -> demostración/orden -> CTA claro
+# 2. PRINCIPIO RECTOR (no negociable): escena real -> prueba visual -> siguiente paso
 Cada post, sea cual sea su orientación, DEBE cumplir en este orden:
-1) ATACA UN DOLOR REAL del nicho (algo que de verdad le quita plata, tiempo o clientes).
-2) ENTREGA VALOR: el espectador se lleva algo útil aunque NUNCA compre. Nada de post que solo promocione.
+1) ABRE CON UNA ESCENA que la persona reconozca de inmediato (un DM repetido, una hora doble, una
+   mantención olvidada). Evita conceptos abstractos y frases de coach.
+2) ENTREGA UNA PRUEBA VISUAL o acción concreta: pantalla, ejemplo, comparación o checklist corto.
 3) POSICIONA Agendamelo como la consecuencia natural, no como protagonista. Si borras la marca y el
    post igual enseña, vas bien. Si sin la marca queda vacío, está MAL: reescríbelo.
 
@@ -87,14 +91,15 @@ ${nicLines}
   organizar alumnos/pacientes/clientas, evitar inasistencias, coordinar apoderados, mostrar
   diseños/precios). Construye autoridad y guardados. Cierra con marca + CTA suave.
 - plataforma: muestra UNA capacidad concreta de Agendamelo (mini-web, reserva 24/7, sesiones/mantención
-  recurrente, recordatorios por correo, aparecer en Google). Demuestra, no solo afirma.
-- venta: CTA directo, precio, manejo de objeción, diferenciación, oferta. Siempre con CTA compliant.
+  recurrente, recordatorios por correo/WhatsApp, aparecer en Google). Demuestra, no solo afirma.
+- venta: CTA directo a Perfil Gratis, manejo de objeción y diferenciación. El precio pagado se usa solo
+  cuando la objeción del post lo requiera; no lo pongas por defecto.
 Reparto de orientaciones para este lote:
 ${oriLines}
 
 # 5. FORMATO (campo "formato"): imagen | carrusel
-- imagen: un solo post. Usa una de las 5 plantillas (campo tipo_plantilla).
-- carrusel: 3 a 4 láminas para un tema más denso. tipo_plantilla = "carrusel". Estructura OBLIGATORIA
+- imagen: un post vertical 4:5 (1080×1350) para el feed. Usa una de las 5 plantillas.
+- carrusel: 3 a 4 láminas verticales 4:5 para un tema más denso. tipo_plantilla = "carrusel". Estructura OBLIGATORIA
   en imagen_json.slides (en orden): 1 "portada" (gancho) -> 1 o 2 "punto" (una idea por lámina, con
   valor) -> 1 "cierre" (recap + CTA). Ideal 3, máximo 4. Texto cortísimo por lámina.
 Reparto de formatos para este lote:
@@ -121,6 +126,8 @@ ${tplLines}
   · psicopedagogas / fonoaudiologas -> cálido y sobrio; slang mínimo; nada jugado en niños/salud.
   · profesores-paes -> cercano y motivador, slang con moderación.
 - Frase canónica del producto: "tu mini-web profesional + agenda online".
+- Prohibido el tono de gurú: "escala", "transforma", "lleva tu negocio al siguiente nivel",
+  "revoluciona", "potencia". Habla de reservas, horas, clientas y acciones observables.
 
 # 8. REGLAS DE IDIOMA (CRÍTICO)
 PROHIBIDO el español argentino. Si aparece cualquiera, REESCRIBE:
@@ -145,17 +152,20 @@ Agendamelo es nuevo y casi no tiene clientes. Por lo tanto:
 # 10. CTA Y OFERTA (usa estas, NO inventes ofertas)
 CTA canónico (preferido): "${CTA_CANONICO}".
 Variantes válidas:
+- "Crea tu página gratis -> agendamelo.cl"
+- "Tu Perfil Gratis queda visible y recibe consultas por WhatsApp"
 - "Tu sitio + agenda en 5 minutos -> agendamelo.cl"
 - "Aparece en Google y recibe reservas solas -> link en bio"
-- "Publica tu sitio gratis 7 días, sin tarjeta -> link en bio"
+- "Prueba la agenda 7 días gratis, sin tarjeta -> link en bio"
 - "Desde $12.990 al mes, sin comisión ni contrato -> link en bio"
-Precio (cuando aplique): "$12.990/mes o $64.000 el plan anual. Sin contrato, cancela cuando quieras.
-Cero comisión."
-REGLA DURA de "gratis": la ÚNICA forma de gratis que existe es el trial de publicación de 7 días sin
-tarjeta, y la palabra solo puede ir pegada a él ("publica gratis 7 días, sin tarjeta").
+- "Si aún no activas, tu página sigue como Perfil Gratis."
+Precio (cuando aplique): "Estándar $12.990/mes o $64.000/año. Web Pro $19.990/mes. Sin contrato,
+cancela cuando quieras. Cero comisión."
+REGLA DURA de "gratis": solo vale en "7 días gratis, sin tarjeta" o en el nombre "Perfil Gratis".
 PROHIBIDO: "gratis" suelto, "mes gratis", "primer mes gratis", "prueba gratis", "trial" (anglicismo),
 "sin compromiso" como gancho de regalo, y cualquier descuento, oferta, promoción, cupón o 2x1.
-PROHIBIDO inventar cifras: las únicas de Agendamelo son $12.990/mes y $64.000 anual. (Los precios de
+PROHIBIDO inventar cifras: las únicas de Agendamelo son $0 Perfil Gratis, $12.990/mes, $64.000/año y
+$19.990/mes Web Pro. (Los precios de
 MERCADO del rubro sí se citan, con su fuente — ver sección 9.)
 
 # 11. PROHIBICIONES DURAS (de marca y producto)
@@ -164,11 +174,10 @@ MERCADO del rubro sí se citan, con su fuente — ver sección 9.)
 - "Flow" (detalle técnico de la suscripción), "Isapres/Fonasa" (no se integra).
 - Claims imposibles: "te garantizo más clientes", "+X% asegurado", "reemplaza WhatsApp 100%".
 - Promesas clínicas/de salud o de resultados de aprendizaje.
-- Recordatorios por WhatsApp/SMS: NO. Son POR CORREO.
+- SMS: NO. WhatsApp sí existe para clientes que lo autorizan; es limitado en Estándar y sin límite en Pro.
 
-# 12. HOOKS — esto define si el video funciona o muere (máxima exigencia)
-El hook ES el titular de la imagen y lo que detiene el scroll en <1 segundo. Queda EN PANTALLA, así
-que carga la keyword en los primeros 2 segundos de video. Reglas de cada hook:
+# 12. HOOKS — esto define si la pieza detiene el scroll (máxima exigencia)
+El hook ES el titular de la imagen y debe entenderse en menos de un segundo. Reglas de cada hook:
 - Largo: MÁXIMO 12 palabras (ideal 6-10). Punchy. Envuelve UNA frase clave entre *asteriscos* (se resalta).
 - Es un DOLOR concreto o una CURIOSIDAD que incomoda. NUNCA un TEMA ni una categoría.
 - La KEYWORD del nicho va DENTRO del hook (uñas/semipermanente/clientas/manicure, etc.): así la
@@ -203,14 +212,13 @@ keyword del nicho. Varía la palanca de verdad (que no sean la misma frase reesc
 - hook_variantes: ver sección 12 y 12.1. ENTRE 3 Y 5 variantes {texto, angulo}, ángulos distintos,
   cada texto ≤12 palabras, con *énfasis* y la keyword del nicho, sin voseo argentino.
 - subtitle: refuerza el ángulo del post sin repetir un hook; agrega contexto o el "por qué importa".
-- descripcion_corta: 1 SOLA frase de ≤150 caracteres, estilo gancho, que ABRA con la keyword
-  principal (es la variante A/B corta del caption). Sin hashtags ni asteriscos.
-- descripcion: MUY LARGA (250 a 350 palabras, MÍNIMO 1200 caracteres — obligatorio), 2 o 3 párrafos,
+- descripcion_corta: 1 SOLA frase de 100 a 200 caracteres que ABRA con la keyword principal y entregue
+  la idea sin clickbait. Sin hashtags ni asteriscos.
+- descripcion: caption de 80 a 140 palabras (500 a 900 caracteres), en 2 párrafos breves y aireados,
   español con acentos. DEBE ENSEÑAR: al menos un consejo concreto y accionable que la persona aplique
   HOY aunque nunca use Agendamelo. Profundiza el dolor con la jerga del nicho y recién al final conecta
   con Agendamelo como la forma más simple de resolverlo. La 1ª frase engancha con la keyword principal.
-  Integra VARIAS preguntas reales que esa audiencia busca (ej. "cuánto cobra una manicure chile 2026",
-  "agenda online psicopedagoga", "cómo organizar alumnos paes", "página web para fonoaudióloga").
+  Integra UNA frase de búsqueda real de manera natural (no hagas una lista SEO).
   Cierra con CTA compliant acorde a la orientación. NO incluyas hashtags ni asteriscos. Regla de oro:
   si borras toda mención a Agendamelo y el texto igual le sirve, está bien hecho.
 - hashtags: 5 en minúscula, sin tildes ni espacios, con #. ENFÓCALOS AL NICHO y al tema del post.
@@ -228,27 +236,28 @@ keyword del nicho. Varía la palanca de verdad (que no sean la misma frase reesc
     * feature: screen_slug (slug corto, ej "unas-belen"), screen_title (nombre del negocio en el mock),
       rows (2-3 ítems cortos de la UI; el último simula la hora/acción elegida, ej "Hoy 16:30"), button
       (texto del botón, ej "Reservar hora"), note (qué funcionalidad muestra).
-    * carrusel: slides (3-4 láminas, en orden), BIEN CARGADAS de información. Cada slide es {tipo, ...}:
+    * carrusel: slides (3-4 láminas, en orden), una idea por lámina. Cada slide es {tipo, ...}:
         - {tipo:"portada", hook (gancho fuerte con *énfasis*), subtitle (1 frase potente)}  (lámina 1)
-        - {tipo:"punto", title (3-6 palabras), text (1-2 frases que explican la idea), bullets (4-5
+        - {tipo:"punto", title (3-6 palabras), text (1 frase que explica la idea), bullets (2-4
           frases CORTAS con datos/pasos/ejemplos concretos del rubro), highlight (1 frase de "dato
           clave"), icon}  (1 o 2 láminas). icon ∈ [${ICONS.join(', ')}].
         - {tipo:"cierre", title (frase de cierre, puede llevar *énfasis*), text (1 frase), bullets (2-3
           frases de recap), cta {title, sub}}  (última)
   Los campos que NO aplican van en null (incluido "slides" en las de formato imagen).
   cta educativo: {title: "Sígueme para más" o "Guarda este tip", sub: frase corta del rubro}.
-  cta plataforma: {title: "Míralo en agendamelo.cl", sub: "Link en bio"}.
-  cta venta: {title: "Publica gratis 7 días" / "Arma tu agenda en 5 minutos",
-              sub: "Sin tarjeta · después $12.990/mes · link en bio"}.
-              ("gratis" SOLO pegado a los 7 días; nunca "prueba gratis" ni "mes gratis".)
+  cta plataforma: {title: "Crea tu Perfil Gratis", sub: "Página visible · sin tarjeta · agendamelo.cl"}.
+  cta venta: {title: "Crea tu Perfil Gratis" / "Arma tu página en 5 minutos",
+              sub: "Sin tarjeta · sin fecha de término · agendamelo.cl"}.
+              ("gratis" SOLO en "Perfil Gratis" o pegado a los 7 días; nunca "prueba gratis" ni
+              "mes gratis".)
 
 # 14. Temas ya publicados (NO repetir, busca ángulos distintos)
 ${avoidLines}
 
 # 15. AUTO-CHEQUEO antes de emitir CADA idea (si algo falla, reescribe)
-1. ¿Voseo o slang argentino? -> corrige. 2. ¿Aparece "gratis" fuera de los 7 días sin tarjeta, o
+1. ¿Voseo o slang argentino? -> corrige. 2. ¿Aparece "gratis" fuera de los 7 días sin tarjeta o Perfil Gratis, o
 "prueba gratis/mes gratis/trial/descuento/oferta/seña/anticipo/software/comisión al cliente/Flow/
-Isapre/recordatorio por WhatsApp", o una cifra de precio de Agendamelo que no sea $12.990 o $64.000?
+Isapre/SMS", o una cifra de precio de Agendamelo que no sea $0, $12.990, $64.000 o $19.990?
 -> corrige. 3. ¿Algún número como resultado
 real de Agendamelo sin fuente? -> reescríbelo como dato de mercado o hipótesis condicional. 4. ¿3-5
 hook_variantes de ángulos distintos, cada una ≤12 palabras, con keyword y sin tema? 5. ¿Usa la jerga

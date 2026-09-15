@@ -13,6 +13,7 @@ agendamelo-generator/dist/*
 # CSV vivo: lo maneja el programa en cada máquina (el VPS tiene el suyo).
 # La semilla agendamelo_ideas.seed.csv SÍ se versiona.
 /agendamelo_ideas.csv
+/agendamelo_kits.csv
 
 # Ajustes de operación vivos (nicho activo + estilo de caption): por máquina, fuera de git.
 /agendamelo_settings.json

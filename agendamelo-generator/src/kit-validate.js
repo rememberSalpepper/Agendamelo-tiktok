@@ -29,9 +29,9 @@ const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-
 // decir. Así, prender el precio nuevo no deja al generador libre de inventar ofertas.
 // ---------------------------------------------------------------------------------------------
 
-// "gratis" SOLO vale pegado al trial de publicación de 7 días: es la única forma de gratis que
-// existe en el producto. Cualquier otro uso es un regalo inventado.
+// "gratis" vale en dos contextos reales: los 7 días iniciales y el nombre "Perfil Gratis".
 const TRIAL_OK = /(?:gratis\s+(?:por\s+|durante\s+)?7\s*d[ií]as|7\s*d[ií]as\s+(?:de\s+)?gratis)/gi;
+const PERFIL_GRATIS_OK = /perfil\s+gratis/gi;
 
 // Colocaciones que son un regalo inventado aunque nombren "7 días" en otra parte de la frase.
 const GRATIS_PROHIBIDO = [
@@ -66,9 +66,9 @@ export function findPriceIssues(txt) {
 
   for (const [re, motivo] of GRATIS_PROHIBIDO) if (re.test(raw)) problemas.push(motivo);
 
-  // Todo "gratis" que no sea el trial de 7 días sobra.
-  if (/gratis/i.test(raw.replace(TRIAL_OK, ''))) {
-    problemas.push('"gratis" suelto (solo vale pegado al trial: "publica gratis 7 días, sin tarjeta")');
+  // Todo "gratis" que no sea el trial o el Perfil Gratis sobra.
+  if (/gratis/i.test(raw.replace(TRIAL_OK, '').replace(PERFIL_GRATIS_OK, ''))) {
+    problemas.push('"gratis" suelto (solo vale en "7 días gratis" o "Perfil Gratis")');
   }
 
   for (const palabra of OFERTA_PROHIBIDA) {
@@ -87,7 +87,7 @@ export function findPriceIssues(txt) {
     if (PRECIOS_AGENDAMELO.includes(cifra)) continue;
 
     // Una cifra pegada a lenguaje de suscripción se lee como el precio de Agendamelo: solo valen
-    // los dos oficiales. Fuera de ese contexto, se acepta un precio de MERCADO del rubro.
+    // los oficiales. Fuera de ese contexto, se acepta un precio de MERCADO del rubro.
     const i = raw.indexOf(match);
     const ventana = raw.slice(Math.max(0, i - 30), i + match.length + 30);
     if (CONTEXTO_SUSCRIPCION.test(ventana)) {

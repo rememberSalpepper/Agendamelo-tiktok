@@ -1,4 +1,4 @@
-# Imagen del bot/generador Agendamelo para TikTok.
+# Imagen del bot/generador/publicador Meta de Agendamelo.
 FROM node:22-bookworm-slim
 
 # Fuentes (cobertura de glifos), git y utilidades del sistema.

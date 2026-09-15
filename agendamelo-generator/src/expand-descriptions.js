@@ -1,5 +1,4 @@
-// Reescribe las descripciones del CSV a versión LARGA y SEO (dentro y fuera de TikTok),
-// profundizando el tema de cada imagen y terminando con CTA. No toca imágenes ni otros campos.
+// Reescribe captions de Meta con valor, contexto y CTA freemium. No toca imágenes ni otros campos.
 //
 // Uso:  node src/expand-descriptions.js [all|short|<id> ...]   (por defecto: all)
 
@@ -51,28 +50,25 @@ function promptFor(batch) {
   }).join('\n\n---\n\n');
 
   return `Eres redactor SEO de Agendamelo (agendamelo.cl): "mini-web profesional + agenda online"
-para profesionales en Chile (manicuristas, psicopedagogas, profesores particulares/PAES,
-fonoaudiólogas), con sitio web propio, reservas 24/7, SESIONES RECURRENTES, recordatorios POR CORREO,
-galería/reseñas y aparición en Google. NUNCA lo llames "software de reservas" ni "plataforma de
-gestión". Reescribe la DESCRIPCIÓN de cada post para TikTok. Devuelve {id, descripcion}.
+para profesionales en Chile. Este sprint habla SOLO a manicuristas. Incluye sitio web propio,
+reservas 24/7, sesiones recurrentes, recordatorios por CORREO Y WHATSAPP, galería/reseñas y aparición
+en Google. NUNCA lo llames "software de reservas" ni "plataforma de gestión". Reescribe la
+DESCRIPCIÓN de cada post para Facebook e Instagram. Devuelve {id, descripcion}.
 
 Reglas de cada descripción:
-- MUY LARGA: entre 230 y 350 palabras, en 2 o 3 párrafos. Con mucho contenido de valor.
+- Entre 80 y 140 palabras, en 2 o 3 párrafos cortos. Útil y fácil de escanear.
 - Profundiza el tema de la imagen (usa lo que muestra) con la jerga y el dolor del rubro del post:
   explica qué pasa, por qué duele y cómo lo resuelve Agendamelo (mini-web, reservas 24/7, sesiones
   recurrentes, recordatorios por correo, aparecer en Google, galería/reseñas). Aporta más que la imagen.
 - Español neutro/chileno, acentos correctos, PROHIBIDO el voseo argentino ("hacés/mandame/mirá").
-- SEO dentro y fuera de TikTok: integra keywords y sinónimos de forma natural e incluye VARIAS
-  preguntas reales que la gente escribe (ej. "cuánto cobra una manicure chile 2026", "agenda online
-  psicopedagoga", "cómo organizar alumnos paes", "página web para fonoaudióloga en Chile").
+- Integra una keyword de intención de forma natural, sin rellenar ni acumular preguntas SEO.
 - Primera frase enganchadora con la keyword principal.
-- Termina SIEMPRE con un CTA al final: si es educativo invita a guardar/seguir; si es de venta invita
-  a configurar su sitio sin costo y publicarlo gratis 7 días sin tarjeta (después $12.990/mes o
-  $64.000 el plan anual) en agendamelo.cl (link en bio).
-- PROHIBIDO: "gratis" fuera de los 7 días sin tarjeta, "prueba gratis/mes gratis/trial", cualquier
-  descuento/oferta/promoción, cifras de precio de Agendamelo distintas a $12.990 y $64.000,
-  "seña/anticipo/cobro online", "comisión", "Flow", "Isapres/Fonasa", recordatorios por WhatsApp/SMS
-  (son por correo). NO incluyas hashtags ni asteriscos.
+- Termina con un próximo paso acorde: en educativo invita a guardar y menciona suavemente el Perfil
+  Gratis; en plataforma/venta invita a crear el Perfil Gratis en agendamelo.cl. Si explica la agenda,
+  puede decir que se prueba 7 días gratis, sin tarjeta.
+- Verdad de precios: Perfil Gratis $0; Estándar $12.990/mes o $64.000/año; Web Pro $19.990/mes.
+- PROHIBIDO: descuentos/ofertas inventados, otras cifras de precio, "seña/anticipo/cobro online",
+  "Flow", "Isapres/Fonasa" o SMS. NO incluyas hashtags ni asteriscos.
 
 Posts:
 
@@ -86,7 +82,7 @@ function main() {
 
   let targets;
   if (args.length === 0 || args[0] === 'all') targets = rows;
-  else if (args[0] === 'short') targets = rows.filter((r) => (r.descripcion || '').length < 1200);
+  else if (args[0] === 'short') targets = rows.filter((r) => (r.descripcion || '').length < 400);
   else targets = rows.filter((r) => args.includes(r.id));
 
   if (targets.length === 0) { console.log('Nada que reescribir.'); return; }

@@ -26,7 +26,7 @@ const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv
 const today = new Date().toISOString().slice(0, 10);
 const N = parseInt(process.argv[2], 10) || 7;
 // Nicho de la tanda: arg explícito (node src/generate.js N nicho) o el nicho activo de settings.
-// Una tanda = UN solo nicho (regla TikTok-SEO: un nicho por tanda).
+// Una tanda = UN solo nicho para que mensaje, ejemplos y atribución sean comparables.
 const ARG_NICHE = (process.argv[3] || '').trim();
 const ACTIVE_NICHE = NICHOS.includes(ARG_NICHE) ? ARG_NICHE : getSettings().nicho;
 
@@ -196,7 +196,8 @@ function fixHashtags(tags, niche) {
 // hook_variantes = JSON [{texto, angulo}]; hook_elegido = texto curado por el humano (vacío = sin curar).
 const HEADER = ['id', 'estado', 'niche', 'orientacion', 'formato', 'tipo_plantilla', 'titulo', 'tema',
   'angulo', 'hook', 'hook_variantes', 'hook_elegido', 'descripcion', 'descripcion_corta', 'hashtags',
-  'estilo_caption', 'fecha_creacion', 'fecha_realizado', 'imagen_url', 'imagen_json', 'notas_plantilla'];
+  'estilo_caption', 'fecha_creacion', 'fecha_realizado', 'imagen_url', 'imagen_json', 'notas_plantilla',
+  'facebook_post_id', 'instagram_media_id', 'meta_published_at', 'meta_error'];
 
 // Valida las variantes de hook (3-5, cada una con texto y ángulo conocido).
 function cleanVariants(variants) {
@@ -271,7 +272,7 @@ function main() {
   if (newRows.length === 0) { console.error('No se agregó ninguna idea válida.'); process.exit(1); }
   writeFileSync(CSV, stringify([...rows, ...newRows], { header: true, columns: header }));
   console.log(`\nOK: ${newRows.length} ideas nuevas agregadas como 'pendiente'.`);
-  console.log('Siguiente: npm run lint && npm run render');
+  console.log('Siguiente: npm run lint y elige hooks con /revisar antes de renderizar.');
 }
 
 main();
