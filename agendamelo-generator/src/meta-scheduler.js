@@ -12,13 +12,44 @@ export function localDateTime(date = new Date(), timeZone = 'America/Santiago') 
   return { date: `${pick('year')}-${pick('month')}-${pick('day')}`, time: `${pick('hour')}:${pick('minute')}` };
 }
 
-export function shouldPublishNow({ now = new Date(), publishTime = '20:30', timeZone = 'America/Santiago', lastSuccessDate = '' } = {}) {
-  const local = localDateTime(now, timeZone);
-  return local.date !== lastSuccessDate && local.time >= publishTime;
-}
-
 export function validPublishTime(value) {
   return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(String(value || ''));
+}
+
+export function parsePublishTimes(value = '20:30') {
+  const times = String(value || '').split(',').map((time) => time.trim()).filter(Boolean);
+  if (times.length === 0 || times.some((time) => !validPublishTime(time))) return [];
+  return [...new Set(times)].sort();
+}
+
+export function duePublishSlot({
+  now = new Date(), publishTimes = ['20:30'], timeZone = 'America/Santiago', lastSuccessSlot = '',
+} = {}) {
+  const local = localDateTime(now, timeZone);
+  // Si el proceso estuvo detenido, recupera solo la franja vencida más reciente. Así no publica
+  // tres piezas juntas al volver a arrancar por la noche.
+  const dueTime = publishTimes.filter((time) => time <= local.time).at(-1);
+  if (!dueTime) return '';
+  const slot = `${local.date}|${dueTime}`;
+  return slot === lastSuccessSlot ? '' : slot;
+}
+
+export function publicationSlotKey(publishedAt, publishTimes = ['20:30'], timeZone = 'America/Santiago') {
+  if (!publishedAt) return '';
+  const local = localDateTime(new Date(publishedAt), timeZone);
+  const slotTime = publishTimes.filter((time) => time <= local.time).at(-1);
+  return slotTime ? `${local.date}|${slotTime}` : '';
+}
+
+// Compatibilidad para integraciones y pruebas que aún usan una sola hora/fecha.
+export function shouldPublishNow({
+  now = new Date(), publishTime = '20:30', publishTimes,
+  timeZone = 'America/Santiago', lastSuccessDate = '', lastSuccessSlot = '',
+} = {}) {
+  const times = publishTimes || [publishTime];
+  const local = localDateTime(now, timeZone);
+  if (lastSuccessDate && lastSuccessDate === local.date) return false;
+  return Boolean(duePublishSlot({ now, publishTimes: times, timeZone, lastSuccessSlot }));
 }
 
 export function startMetaScheduler(env = process.env) {
@@ -33,10 +64,11 @@ export function startMetaScheduler(env = process.env) {
     return { stop() {} };
   }
 
-  const publishTime = env.META_PUBLISH_TIME || '20:30';
+  const rawPublishTimes = env.META_PUBLISH_TIMES || env.META_PUBLISH_TIME || '20:30';
+  const publishTimes = parsePublishTimes(rawPublishTimes);
   const timeZone = env.META_TIMEZONE || 'America/Santiago';
-  if (!validPublishTime(publishTime)) {
-    console.error(`Meta auto-publicación: META_PUBLISH_TIME inválida "${publishTime}" (usa HH:MM).`);
+  if (publishTimes.length === 0) {
+    console.error(`Meta auto-publicación: horario inválido "${rawPublishTimes}" (usa HH:MM separado por comas).`);
     return { stop() {} };
   }
   try { localDateTime(new Date(), timeZone); }
@@ -45,20 +77,21 @@ export function startMetaScheduler(env = process.env) {
     return { stop() {} };
   }
   const previousPublish = latestMetaPublishedAt();
-  let lastSuccessDate = previousPublish ? localDateTime(new Date(previousPublish), timeZone).date : '';
+  let lastSuccessSlot = publicationSlotKey(previousPublish, publishTimes, timeZone);
   let busy = false;
   let retryAfter = 0;
 
   const tick = async () => {
     const now = new Date();
-    if (busy || Date.now() < retryAfter || !shouldPublishNow({ now, publishTime, timeZone, lastSuccessDate })) return;
+    const dueSlot = duePublishSlot({ now, publishTimes, timeZone, lastSuccessSlot });
+    if (busy || Date.now() < retryAfter || !dueSlot) return;
     busy = true;
     try {
       const result = await publishNext({ config });
       const local = localDateTime(now, timeZone);
       if (result?.completed) {
-        lastSuccessDate = local.date;
-        console.log(`Meta auto-publicación: ${result.id} publicado (${local.date}).`);
+        lastSuccessSlot = dueSlot;
+        console.log(`Meta auto-publicación: ${result.id} publicado (${local.date}, franja ${dueSlot.split('|')[1]}).`);
       } else if (!result) {
         // No hay cola: no revises cada minuto; vuelve a mirar en una hora.
         retryAfter = Date.now() + 60 * 60 * 1000;
@@ -73,6 +106,6 @@ export function startMetaScheduler(env = process.env) {
   const timer = setInterval(tick, 60 * 1000);
   timer.unref?.();
   tick();
-  console.log(`Meta auto-publicación: activa a las ${publishTime} (${timeZone}) · ${summary.channels.join(' + ')}.`);
+  console.log(`Meta auto-publicación: activa a las ${publishTimes.join(', ')} (${timeZone}) · ${summary.channels.join(' + ')}.`);
   return { stop() { clearInterval(timer); } };
 }

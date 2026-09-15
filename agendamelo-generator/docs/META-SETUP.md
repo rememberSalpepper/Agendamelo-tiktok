@@ -66,7 +66,7 @@ META_PAGE_ACCESS_TOKEN=TOKEN_DE_PAGINA
 PUBLIC_MEDIA_BASE_URL=https://contenido.agendamelo.cl/media
 META_TRACKING_URL=https://agendamelo.cl/?utm_source=facebook&utm_medium=organic&utm_campaign=perfil-gratis-manicuristas
 META_AUTO_PUBLISH=false
-META_PUBLISH_TIME=20:30
+META_PUBLISH_TIMES=10:00,15:30,20:30
 META_TIMEZONE=America/Santiago
 ```
 

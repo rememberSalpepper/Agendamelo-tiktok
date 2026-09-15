@@ -5,7 +5,9 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import { checkMetaConnection, getMetaConfig, isMetaCandidate, latestMetaPublishedAt, metaConfigSummary, publicMediaUrls, publishFacebook, publishInstagram } from './meta.js';
-import { localDateTime, shouldPublishNow, validPublishTime } from './meta-scheduler.js';
+import {
+  duePublishSlot, localDateTime, parsePublishTimes, publicationSlotKey, shouldPublishNow, validPublishTime,
+} from './meta-scheduler.js';
 import { buildMetaCaption } from './caption.js';
 
 const config = {
@@ -115,6 +117,28 @@ describe('programación diaria', () => {
     assert.equal(validPublishTime('20:30'), true);
     assert.equal(validPublishTime('25:00'), false);
     assert.equal(validPublishTime('8:30'), false);
+  });
+
+  test('acepta tres franjas, elimina duplicados y las ordena', () => {
+    assert.deepEqual(parsePublishTimes('20:30, 10:00,15:30,10:00'), ['10:00', '15:30', '20:30']);
+    assert.deepEqual(parsePublishTimes('10:00,25:00'), []);
+  });
+
+  test('publica una vez por cada franja diaria', () => {
+    const publishTimes = ['10:00', '15:30', '20:30'];
+    const morning = new Date('2026-09-15T13:05:00Z'); // 10:05 en Santiago
+    assert.equal(duePublishSlot({ now: morning, publishTimes }), '2026-09-15|10:00');
+    assert.equal(duePublishSlot({ now: morning, publishTimes, lastSuccessSlot: '2026-09-15|10:00' }), '');
+
+    const afternoon = new Date('2026-09-15T18:35:00Z'); // 15:35 en Santiago
+    assert.equal(duePublishSlot({ now: afternoon, publishTimes, lastSuccessSlot: '2026-09-15|10:00' }), '2026-09-15|15:30');
+  });
+
+  test('al reiniciar tarde recupera solo la última franja vencida', () => {
+    const publishTimes = ['10:00', '15:30', '20:30'];
+    const night = new Date('2026-09-16T00:45:00Z'); // 21:45 en Santiago
+    assert.equal(duePublishSlot({ now: night, publishTimes }), '2026-09-15|20:30');
+    assert.equal(publicationSlotKey('2026-09-16T00:31:00Z', publishTimes), '2026-09-15|20:30');
   });
 
   test('recupera del CSV la última publicación después de reiniciar', () => {
