@@ -13,19 +13,12 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderToPng, renderCarousel, openBrowser } from './render.js';
+import { rowToData } from './pipeline-data.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
 const today = new Date().toISOString().slice(0, 10);
-
-function rowToData(row) {
-  const content = JSON.parse(row.imagen_json);
-  // Fondo: usa el del contenido si existe, si no rota 1-4 por número de idea.
-  const num = parseInt(String(row.id).replace(/\D/g, ''), 10) || 1;
-  const bg = content.bg || ((num - 1) % 4) + 1;
-  return { tipo: row.tipo_plantilla, niche: row.niche, hook: row.hook, ...content, bg };
-}
 
 // Renderiza una fila (imagen o carrusel) y devuelve imagen_url (ruta o lista separada por comas).
 async function renderRow(row, browser) {
