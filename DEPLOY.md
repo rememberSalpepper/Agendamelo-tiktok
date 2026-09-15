@@ -100,19 +100,21 @@ docker compose restart app
 docker logs --tail 100 agendamelo-tiktok
 ```
 
-El scheduler publica una sola pieza por fecha local a la hora configurada, incluso si el contenedor se
-reinicia: recupera la última fecha desde el CSV. Si falla, conserva el error y reintenta 30 minutos
-después; si no hay cola, vuelve a mirar una hora después.
+El scheduler publica una sola pieza por cada franja configurada en `META_PUBLISH_TIMES`, incluso si el
+contenedor se reinicia: recupera las franjas ya publicadas desde el CSV y no duplica contenido. Si se
+reinicia después de varias horas, recupera solo la franja vencida más reciente para no publicar varias
+piezas juntas. Si falla, conserva el error y reintenta 30 minutos después; si no hay cola, vuelve a mirar
+una hora después.
 
 ## 6. Operación diaria
 
-1. `/generar 7 manicuristas` crea una semana de ideas.
-2. `/revisar 7` permite escoger los hooks.
+1. `/generar 21 manicuristas` crea aproximadamente una semana de ideas a tres publicaciones diarias.
+2. `/revisar 21` permite escoger los hooks.
 3. `/render` deja los JPEG en la cola.
-4. El scheduler publica uno al día.
+4. El scheduler publica a las 10:00, 15:30 y 20:30 (zona `America/Santiago`).
 5. `/estado` muestra pendientes, renderizados, enviados y publicados.
 
-Mantén al menos siete piezas renderizadas. El audio y montaje de Reels/TikTok siguen siendo manuales
+Mantén al menos 21 piezas renderizadas. El audio y montaje de Reels/TikTok siguen siendo manuales
 con `/kit`, porque este publicador automático cubre Facebook e Instagram estático/carrusel.
 
 ## 7. Actualizaciones y respaldo
