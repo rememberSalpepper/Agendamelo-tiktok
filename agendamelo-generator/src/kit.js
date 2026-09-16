@@ -35,7 +35,9 @@ const WEIGHTS = { manicuristas: 30, psicopedagogas: 25, 'profesores-paes': 25, f
 
 // Columnas del CSV de kits (define el orden cuando el archivo está vacío).
 const HEADER = ['id', 'estado', 'niche', 'tanda', 'angulo', 'tema', 'keyword', 'hook', 'scenes_json',
-  'cta', 'caption_seo', 'hashtags', 'image_prompts_json', 'fecha_creacion', 'fecha_entregado'];
+  'cta', 'caption_seo', 'hashtags', 'image_prompts_json', 'fecha_creacion', 'fecha_entregado',
+  'youtube_video_path', 'youtube_video_id', 'youtube_status', 'youtube_published_at', 'youtube_error',
+  'youtube_music_title', 'youtube_music_artist', 'youtube_music_license', 'youtube_music_attribution'];
 
 // ---------- Schema de salida (structured outputs) ----------
 const schema = {
@@ -162,6 +164,7 @@ function main() {
       keyword: k.keyword, hook: k.hookText, scenes_json: JSON.stringify(k.scenes), cta: k.ctaText,
       caption_seo: k.captionSEO, hashtags: k.hashtags.join(' '),
       image_prompts_json: JSON.stringify(k.imagePrompts), fecha_creacion: today,
+      youtube_status: 'pendiente',
     });
     console.log(`  ✓ ${id}  [${k.angulo}]  ${k.hookText}`);
     return row;

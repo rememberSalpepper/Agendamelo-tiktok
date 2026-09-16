@@ -1,9 +1,9 @@
 # Imagen del bot/generador/publicador Meta de Agendamelo.
 FROM node:22-bookworm-slim
 
-# Fuentes (cobertura de glifos), git y utilidades del sistema.
+# Fuentes (cobertura de glifos), FFmpeg, git y utilidades del sistema.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      fonts-noto fonts-noto-color-emoji ca-certificates git curl \
+      fonts-noto fonts-noto-color-emoji ca-certificates ffmpeg git curl \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/agendamelo-generator
@@ -22,5 +22,6 @@ RUN npm install -g @openai/codex || echo "OJO: revisar instalacion de codex"
 COPY . /app
 
 ENV PORT=3000
+ENV FFMPEG_PATH=/usr/bin/ffmpeg
 EXPOSE 3000
 CMD ["node", "src/bot.js"]

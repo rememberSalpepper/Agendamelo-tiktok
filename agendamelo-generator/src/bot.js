@@ -18,6 +18,7 @@ import { NICHE_KEYS } from './niches.js';
 import { formatKit } from './kit-format.js';
 import { KIT_DEFAULT, KIT_MAX } from './kit-validate.js';
 import { startMetaScheduler } from './meta-scheduler.js';
+import { startYoutubeScheduler } from './youtube-scheduler.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = process.env.AGENDAMELO_CSV || join(ROOT, '..', 'agendamelo_ideas.csv');
@@ -58,6 +59,12 @@ const AYUDA = [
   '',
   '*Kit de video → TikTok/Reels* (texto para armar a mano)',
   '/kit [N] [nicho] — N kits de video listos para copiar (default 5, máx 7)',
+  '',
+  '*YouTube Shorts*',
+  '/short [nicho] — genera si hace falta y renderiza el próximo Short',
+  '/ver_short [id] — envía un Short renderizado para revisión',
+  '/publicar_short [id] — sube el próximo Short (privado durante pruebas)',
+  '/youtube — estado OAuth y próxima pieza de la cola',
   '',
   '*Ajustes*',
   '/nicho <slug> — fija el nicho activo (manicuristas, psicopedagogas…)',
@@ -233,6 +240,56 @@ async function handle(chat, text) {
         markKitsEntregado(nuevos.map((r) => r.id));
       } finally { busy = false; }
       return;
+    }
+    case '/short': {
+      if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera a que termine.');
+      const nicho = arg && NICHE_KEYS.includes(arg) ? arg : '';
+      if (arg && !nicho) return reply(chat, `Nicho inválido "${arg}". Opciones: ${NICHE_KEYS.join(', ')}.`);
+      busy = true;
+      try {
+        let target = readKitRows().find((row) => !String(row.youtube_video_id || '').trim()
+          && ['', 'pendiente'].includes(String(row.youtube_status || '').trim()));
+        if (!target) {
+          await reply(chat, `🎬 Generando un kit${nicho ? ` de *${nicho}*` : ''} para YouTube...`);
+          const before = new Set(readKitRows().map((row) => row.id));
+          const generated = await runScript(['src/kit.js', '1', ...(nicho ? [nicho] : [])]);
+          if (generated.code !== 0) return replyText(chat, `❌ Error al generar:\n${tail(generated.err || generated.out)}`);
+          target = readKitRows().find((row) => !before.has(row.id));
+        }
+        if (!target) return reply(chat, '⚠️ No quedó un kit válido para renderizar.');
+        await reply(chat, `🎞️ Renderizando ${target.id} con música...`);
+        const rendered = await runScript(['src/youtube-render.js', 'one', target.id]);
+        if (rendered.code !== 0) return replyText(chat, `❌ Error al renderizar:\n${tail(rendered.err || rendered.out, 1200)}`);
+        return reply(chat, `✅ ${target.id} listo. Revísalo con /ver_short ${target.id}.`);
+      } finally { busy = false; }
+    }
+    case '/ver_short': case '/ver-short': {
+      if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera.');
+      busy = true;
+      try {
+        const preview = await runScript(['src/youtube-telegram.js', ...(arg ? [arg] : [])], {
+          TELEGRAM_CHAT_ID: String(chat),
+        });
+        if (preview.code !== 0) return replyText(chat, `❌ Error al enviar el Short:\n${tail(preview.err || preview.out, 1200)}`);
+        return replyText(chat, preview.out.trim() || '✅ Short enviado.');
+      } finally { busy = false; }
+    }
+    case '/publicar_short': case '/publicar-short': {
+      if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera.');
+      busy = true;
+      await reply(chat, `📺 Subiendo ${arg || 'el próximo Short'} a YouTube...`);
+      try {
+        const upload = await runScript(arg
+          ? ['src/youtube.js', 'one', arg]
+          : ['src/youtube.js', 'next']);
+        if (upload.code !== 0) return replyText(chat, `❌ Error al subir:\n${tail(upload.err || upload.out, 1200)}`);
+        return replyText(chat, upload.out.trim() || '✅ Subida terminada.');
+      } finally { busy = false; }
+    }
+    case '/youtube': {
+      const check = await runScript(['src/youtube.js', 'dry-run']);
+      if (check.code !== 0) return replyText(chat, `❌ Estado YouTube:\n${tail(check.err || check.out, 1600)}`);
+      return replyText(chat, (check.out || 'Sin salida.').slice(-3600));
     }
     case '/render': {
       if (busy) return reply(chat, '⏳ Ya hay una tarea en curso, espera.');
@@ -431,6 +488,10 @@ async function main() {
     { command: 'publicar', description: 'Publica ahora la siguiente pieza en Meta' },
     { command: 'meta', description: 'Estado de conexión y próxima pieza Meta' },
     { command: 'kit', description: 'N kits de video TikTok/Reels (texto, default 5, max 7)' },
+    { command: 'short', description: 'Genera y renderiza el próximo YouTube Short' },
+    { command: 'ver_short', description: 'Envía un Short renderizado para revisión' },
+    { command: 'publicar_short', description: 'Sube el próximo Short a YouTube' },
+    { command: 'youtube', description: 'Estado OAuth y cola de YouTube' },
     { command: 'nicho', description: 'Fija el nicho activo' },
     { command: 'estilo', description: 'Variante A/B del caption (corto|largo)' },
     { command: 'estado', description: 'Nicho activo, conteos y posts listos' },
@@ -472,6 +533,7 @@ async function main() {
   }).listen(PORT, () => {
     console.log(`Salud y media en :${PORT}`);
     startMetaScheduler();
+    startYoutubeScheduler();
   });
 
   // Descarta mensajes viejos: arranca desde el último update.

@@ -1,7 +1,7 @@
 {
   "name": "agendamelo-generator",
   "version": "1.0.0",
-  "description": "Generador y publicador de contenido para Facebook e Instagram de Agendamelo, con kits manuales para Reels/TikTok.",
+  "description": "Generador y publicador de contenido para Meta y YouTube Shorts de Agendamelo.",
   "main": "index.js",
   "scripts": {
     "test": "node --test",
@@ -14,6 +14,11 @@
     "meta:dry-run": "node src/meta.js dry-run",
     "meta:check": "node src/meta.js check",
     "meta:publish": "node src/meta.js next",
+    "youtube:auth": "node src/youtube-auth.js",
+    "youtube:dry-run": "node src/youtube.js dry-run",
+    "youtube:check": "node src/youtube.js check",
+    "youtube:render": "node src/youtube-render.js pending",
+    "youtube:publish": "node src/youtube.js next",
     "generate": "node src/generate.js",
     "kit": "node src/kit.js",
     "expand": "node src/expand-descriptions.js",
@@ -25,8 +30,10 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "csv-parse": "^7.0.0",
+    "csv-parse": "^7.0.2",
     "csv-stringify": "^6.8.0",
+    "ffmpeg-static": "^5.3.0",
+    "googleapis": "^181.0.0",
     "playwright": "^1.61.0"
   }
 }

@@ -1,7 +1,7 @@
 # Deploy en un VPS nuevo
 
-El contenedor ejecuta el bot de Telegram, genera los JPEG y publica una pieza diaria en Facebook e
-Instagram. Expone `/health` y `/media/<archivo>` en el puerto interno 3000; Docker lo mapea a 3011.
+El contenedor ejecuta el bot de Telegram, genera los JPEG y publica en Facebook, Instagram y YouTube
+Shorts. Expone `/health` y `/media/<archivo>` en el puerto interno 3000; Docker lo mapea a 3011.
 
 ## 1. Requisitos
 
@@ -51,6 +51,17 @@ META_TRACKING_URL=https://agendamelo.cl/?utm_source=facebook&utm_medium=organic&
 META_AUTO_PUBLISH=false
 META_PUBLISH_TIMES=10:00,15:30,20:30
 META_TIMEZONE=America/Santiago
+
+YOUTUBE_OAUTH_CLIENT_FILE=/app/secrets/youtube-oauth-client.json
+YOUTUBE_TOKEN_FILE=/app/secrets/youtube-token.json
+YOUTUBE_PRIVACY_STATUS=public
+YOUTUBE_NOTIFY_SUBSCRIBERS=false
+YOUTUBE_AUTO_PUBLISH=false
+YOUTUBE_AUTO_RENDER=true
+YOUTUBE_PUBLISH_TIME=20:30
+YOUTUBE_TIMEZONE=America/Santiago
+YOUTUBE_MUSIC_FILE=/app/music/vibe-check-blue-deer-studio.mp3
+YOUTUBE_MUSIC_LICENSE=YouTube Audio Library
 ```
 
 Mantén la publicación automática apagada hasta terminar la prueba manual.
@@ -128,5 +139,19 @@ docker compose up -d --build
 Respalda periódicamente `data/agendamelo_ideas.csv`, `data/agendamelo_kits.csv` y `data/dist/`. Esos
 datos viven fuera de la imagen Docker y sobreviven a los rebuilds.
 
+## 8. Activar un YouTube Short diario
+
+Guarda `youtube-oauth-client.json` y `youtube-token.json` con permisos `0600` en `./secrets/`, y la
+pista autorizada en `./data/music/`. Después ejecuta el despliegue seguro:
+
+```bash
+./scripts/deploy-vps.sh --enable-youtube
+```
+
+El script apaga primero la autopublicación, reconstruye el contenedor, comprueba OAuth, música y el
+dry-run, y solo entonces recrea la app con `YOUTUBE_AUTO_PUBLISH=true`. El horario inicial es 20:30
+en `America/Santiago`, una pieza por día. Si una comprobación falla, el contenedor queda operativo
+pero el scheduler de YouTube permanece apagado.
+
 Nunca ejecutes simultáneamente dos instancias con el mismo token de Telegram ni dos schedulers Meta
-sobre el mismo CSV.
+o YouTube sobre el mismo CSV.

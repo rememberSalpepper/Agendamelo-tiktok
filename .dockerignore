@@ -7,6 +7,8 @@ agendamelo-generator/dist
 # Secretos y datos (van por env_file y volúmenes, no dentro de la imagen)
 .env
 agendamelo-generator/.env
+secrets/
+agendamelo-generator/.secrets/
 agendamelo_ideas.csv
 *.backup*.csv
 data/

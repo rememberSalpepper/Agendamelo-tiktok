@@ -1,12 +1,13 @@
-# Agendamelo — contenido orgánico para Meta
+# Agendamelo — contenido orgánico para Meta y YouTube
 
 Genera piezas 4:5 para Facebook e Instagram, permite curarlas desde Telegram y puede publicar una
 por día mediante Meta Graph API. La estrategia actual concentra el contenido en **manicuristas** y
 usa el **Perfil Gratis** como entrada: página pública a $0, sin tarjeta ni vencimiento; la agenda
 completa se prueba gratis durante 7 días.
 
-TikTok y Reels quedan como un flujo separado de kits de video faceless. El sistema genera el guion y
-el caption, pero el montaje, audio y publicación se hacen manualmente.
+TikTok, Reels y YouTube Shorts parten de un flujo separado de kits faceless. Para YouTube, el sistema
+genera el guion, renderiza el MP4 y dispone de un publicador diario idempotente. TikTok y Reels se
+mantienen manuales.
 
 ## Propuesta y precios canónicos
 
@@ -50,6 +51,10 @@ npm run meta:dry-run     # valida configuración sin publicar
 npm run meta:check       # comprueba token y cuentas; no publica
 npm run meta:publish     # publica la próxima pieza renderizada
 npm run kit -- 5 manicuristas
+npm run youtube:dry-run  # valida credenciales y muestra el próximo Short; no llama a Google
+npm run youtube:check    # comprueba que Google puede renovar OAuth; no sube videos
+npm run youtube:render   # renderiza kits pendientes a MP4 verticales
+# npm run youtube:publish  # sube el próximo MP4 renderizado; usar solo tras revisar el dry run
 npm run bot
 ```
 
@@ -94,6 +99,50 @@ META_TIMEZONE=America/Santiago
 
 Instagram requiere una cuenta profesional conectada a la página y el token debe tener los permisos
 de publicación de Instagram y administración de posts de página. Nunca guardes el token en git.
+
+## YouTube Shorts
+
+Las credenciales OAuth y el refresh token viven en `.secrets/`, con permisos `0600` y fuera de Git.
+El publicador usa únicamente el scope `youtube.upload`, parte en privacidad `private` y no notifica a
+suscriptores. `npm run youtube:dry-run` no llama a Google ni modifica el CSV.
+
+Cada fila de `agendamelo_kits.csv` incorpora:
+
+- `youtube_video_path`: ruta del MP4 vertical.
+- `youtube_video_id`: identificador remoto; si existe, la fila nunca vuelve a subirse.
+- `youtube_status`: `pendiente`, `renderizado`, `subiendo`, `publicado` o `error`.
+- `youtube_published_at` y `youtube_error`: trazabilidad del intento.
+
+Antes de una carga real, la fila debe tener `youtube_status=renderizado` y una ruta `.mp4` existente.
+El estado cambia a `subiendo` antes de contactar a YouTube, para impedir duplicados automáticos tras
+una interrupción. El render genera 1080×1920 a 30 fps en H.264 High + AAC 48 kHz/160 kbps y conserva
+un poster y un manifiesto junto al MP4 en `dist/shorts/`. Las escenas permanecen estáticas y cambian
+con un velo crema de 0,22 segundos: 0,10 s de salida, 0,02 s de pausa limpia y 0,10 s de entrada.
+Durante el velo hay un desplazamiento con easing de solo 18 px; nunca se superponen textos ni existe
+movimiento durante la lectura.
+
+Si `YOUTUBE_MUSIC_FILE` apunta a una pista autorizada, FFmpeg la mezcla con fades de entrada/salida,
+ducking al 65% durante los acentos, 50% en la firma inicial y master a −16 LUFS/−1,5 dBTP. El título,
+artista, licencia y
+atribución se guardan en el manifiesto y en el CSV. La licencia es obligatoria; si es Creative
+Commons, también se exige la atribución. En Docker, las pistas del host `./data/music/` se montan en
+modo lectura en `/app/music/`.
+
+Los efectos no dependen de archivos: Lavfi genera una firma estéreo cálida de 0,62 s con impacto
+grave suave en la introducción, whooshes de ruido rosa filtrado de 0,20 s centrados en cada
+transición y un chime de
+quinta abierta de 0,72 s al entrar el CTA. `YOUTUBE_SFX_ENABLED=false` los desactiva; sus duraciones,
+volúmenes, ducking y metas
+de loudness se pueden ajustar con las variables `YOUTUBE_*_SFX_*`, `YOUTUBE_DUCKING_LEVEL`,
+`YOUTUBE_LOUDNESS_TARGET` y `YOUTUBE_TRUE_PEAK` documentadas en `.env.example`.
+En el VPS, `./secrets/` también se monta en modo lectura como `/app/secrets/`; ahí viven el cliente
+OAuth y el refresh token, siempre fuera de Git.
+
+El bot incorpora un reloj independiente para YouTube. Con `YOUTUBE_AUTO_PUBLISH=true`, a las
+`YOUTUBE_PUBLISH_TIME` (20:30 por defecto, `America/Santiago`) renderiza como máximo un kit pendiente
+y sube exactamente un Short. El despliegue inicial se mantiene en `false` hasta completar el check,
+el dry-run y una carga privada manual. Los comandos de Telegram son `/short`, `/ver_short`,
+`/publicar_short` y `/youtube`.
 
 ## Archivos principales
 

@@ -1,6 +1,8 @@
 # Secretos (token de Telegram, etc.) — NUNCA subir al repo
 .env
 agendamelo-generator/.env
+agendamelo-generator/.secrets/
+/secrets/
 
 # Dependencias
 node_modules/
@@ -17,6 +19,9 @@ agendamelo-generator/dist/*
 
 # Ajustes de operación vivos (nicho activo + estilo de caption): por máquina, fuera de git.
 /agendamelo_settings.json
+
+# Pistas de audio locales/licenciadas (se montan en Docker y no se versionan).
+/data/music/
 
 # Respaldos del CSV
 *.backup*.csv

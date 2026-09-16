@@ -21,6 +21,8 @@ services:
       - ./data/agendamelo_kits.csv:/app/agendamelo_kits.csv
       - ./data/agendamelo_settings.json:/app/agendamelo_settings.json
       - ./data/dist:/app/agendamelo-generator/dist
+      - ./data/music:/app/music:ro
+      - ./secrets:/app/secrets:ro
       # Sesión de Codex montada desde el host (ya autenticada con `codex login`)
       - /home/debian/.codex:/root/.codex
     security_opt:
