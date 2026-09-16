@@ -57,6 +57,14 @@ function assertRange(value, name, minimum, maximum) {
   }
 }
 
+export function validateTransitionTiming(transitionSeconds, transitionHoldSeconds) {
+  const visualFadeSeconds = (transitionSeconds - transitionHoldSeconds) / 2;
+  if (transitionSeconds > 0 && visualFadeSeconds + Number.EPSILON < 0.08) {
+    throw new Error('YOUTUBE_TRANSITION_HOLD_SECONDS deja menos de 0.08 s para cada fundido.');
+  }
+  return visualFadeSeconds;
+}
+
 function seconds(value) {
   return Number(value).toFixed(3);
 }
@@ -426,9 +434,7 @@ export async function renderShortVideo(row, outPath, options = {}) {
     DEFAULT_TRANSITION_HOLD_SECONDS,
   );
   assertRange(transitionHoldSeconds, 'YOUTUBE_TRANSITION_HOLD_SECONDS', 0, 0.08);
-  if (transitionSeconds > 0 && transitionHoldSeconds > transitionSeconds - 0.16) {
-    throw new Error('YOUTUBE_TRANSITION_HOLD_SECONDS deja menos de 0.08 s para cada fundido.');
-  }
+  validateTransitionTiming(transitionSeconds, transitionHoldSeconds);
   const transitionShiftPixels = numberOption(
     options.transitionShiftPixels ?? process.env.YOUTUBE_TRANSITION_SHIFT_PIXELS,
     DEFAULT_TRANSITION_SHIFT_PIXELS,

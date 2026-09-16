@@ -12,7 +12,7 @@ import { stringify } from 'csv-stringify/sync';
 import ffmpegStatic from 'ffmpeg-static';
 import {
   buildShortFfmpegArgs, buildShortScenes, isShortRenderCandidate, renderShortHtml, renderShortQueue,
-  renderShortVideo,
+  renderShortVideo, validateTransitionTiming,
 } from './youtube-render.js';
 
 function row(extra = {}) {
@@ -112,6 +112,14 @@ describe('render de YouTube Shorts', () => {
     assert.equal(audioTiming.visualFadeSeconds, 0.115);
     assert.equal(audioTiming.creamHoldSeconds, 0.02);
     assert.match(filters, /adelay=3300\|3300\[transition_sfx_1\]/);
+  });
+
+  test('acepta el límite inferior de 0,18 s con dos fundidos de 0,08 s', () => {
+    assert.equal(validateTransitionTiming(0.18, 0.02), 0.08);
+    assert.throws(
+      () => validateTransitionTiming(0.18, 0.021),
+      /deja menos de 0.08 s para cada fundido/,
+    );
   });
 
   test('permite desactivar todos los efectos sin quitar normalización ni música', () => {
