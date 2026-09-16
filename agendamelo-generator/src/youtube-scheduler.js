@@ -16,6 +16,15 @@ import {
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
+export function dueYoutubePublishSlot({
+  now = new Date(), publishTime = '20:30', timeZone = 'America/Santiago',
+  lastSuccessDate = '', lastSuccessSlot = '',
+} = {}) {
+  const local = localDateTime(now, timeZone);
+  if (lastSuccessDate === local.date) return '';
+  return duePublishSlot({ now, publishTimes: [publishTime], timeZone, lastSuccessSlot });
+}
+
 export function generateYoutubeKit({ niche = 'manicuristas' } = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ['src/kit.js', '1', niche], {
@@ -111,13 +120,16 @@ export function startYoutubeScheduler(env = process.env, dependencies = {}) {
 
   const previousPublish = latestYoutubePublishedAt(config.kitsCsv);
   let lastSuccessSlot = publicationSlotKey(previousPublish, [publishTime], timeZone);
+  let lastSuccessDate = previousPublish
+    ? localDateTime(new Date(previousPublish), timeZone).date
+    : '';
   let busy = false;
   let retryAfter = 0;
 
   const tick = async () => {
     const now = new Date();
-    const dueSlot = duePublishSlot({
-      now, publishTimes: [publishTime], timeZone, lastSuccessSlot,
+    const dueSlot = dueYoutubePublishSlot({
+      now, publishTime, timeZone, lastSuccessDate, lastSuccessSlot,
     });
     if (busy || Date.now() < retryAfter || !dueSlot) return;
     busy = true;
@@ -135,6 +147,7 @@ export function startYoutubeScheduler(env = process.env, dependencies = {}) {
       const local = localDateTime(now, timeZone);
       if (result) {
         lastSuccessSlot = dueSlot;
+        lastSuccessDate = local.date;
         console.log(
           `YouTube auto-publicación: ${result.id} subido como ${result.privacyStatus} `
           + `(${local.date}, ${publishTime}).`,

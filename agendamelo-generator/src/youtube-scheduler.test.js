@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runYoutubePublicationCycle } from './youtube-scheduler.js';
+import { dueYoutubePublishSlot, runYoutubePublicationCycle } from './youtube-scheduler.js';
 
 const ready = {
   id: 'SHORT-READY', youtube_status: 'renderizado', youtube_video_path: 'dist/short.mp4',
@@ -11,6 +11,21 @@ const pending = {
 };
 
 describe('programador de YouTube Shorts', () => {
+  test('bloquea una segunda publicación en la misma fecha local', () => {
+    assert.equal(dueYoutubePublishSlot({
+      now: new Date('2026-09-16T23:30:00.000Z'),
+      publishTime: '20:30',
+      timeZone: 'America/Santiago',
+      lastSuccessDate: '2026-09-16',
+    }), '');
+    assert.equal(dueYoutubePublishSlot({
+      now: new Date('2026-09-17T23:30:00.000Z'),
+      publishTime: '20:30',
+      timeZone: 'America/Santiago',
+      lastSuccessDate: '2026-09-16',
+    }), '2026-09-17|20:30');
+  });
+
   test('publica un Short ya renderizado sin volver a renderizar', async () => {
     let renders = 0;
     let publishes = 0;
