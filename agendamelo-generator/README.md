@@ -140,9 +140,10 @@ OAuth y el refresh token, siempre fuera de Git.
 
 El bot incorpora un reloj independiente para YouTube. Con `YOUTUBE_AUTO_PUBLISH=true`, a las
 `YOUTUBE_PUBLISH_TIME` (20:30 por defecto, `America/Santiago`) renderiza como máximo un kit pendiente
-y sube exactamente un Short. El despliegue inicial se mantiene en `false` hasta completar el check,
-el dry-run y una carga privada manual. Los comandos de Telegram son `/short`, `/ver_short`,
-`/publicar_short` y `/youtube`.
+y sube exactamente un Short. Si la cola está vacía y `YOUTUBE_AUTO_GENERATE=true`, primero genera un
+único kit del nicho `YOUTUBE_AUTO_GENERATE_NICHE`; un fallo no publica contenido parcial y se reintenta
+30 minutos después. El despliegue inicial se mantiene en `false` hasta completar el check y el
+dry-run. Los comandos de Telegram son `/short`, `/ver_short`, `/publicar_short` y `/youtube`.
 
 ## Archivos principales
 

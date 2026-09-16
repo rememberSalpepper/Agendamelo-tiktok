@@ -58,6 +58,8 @@ YOUTUBE_PRIVACY_STATUS=public
 YOUTUBE_NOTIFY_SUBSCRIBERS=false
 YOUTUBE_AUTO_PUBLISH=false
 YOUTUBE_AUTO_RENDER=true
+YOUTUBE_AUTO_GENERATE=true
+YOUTUBE_AUTO_GENERATE_NICHE=manicuristas
 YOUTUBE_PUBLISH_TIME=20:30
 YOUTUBE_TIMEZONE=America/Santiago
 YOUTUBE_MUSIC_FILE=/app/music/vibe-check-blue-deer-studio.mp3
@@ -150,8 +152,9 @@ pista autorizada en `./data/music/`. Después ejecuta el despliegue seguro:
 
 El script apaga primero la autopublicación, reconstruye el contenedor, comprueba OAuth, música y el
 dry-run, y solo entonces recrea la app con `YOUTUBE_AUTO_PUBLISH=true`. El horario inicial es 20:30
-en `America/Santiago`, una pieza por día. Si una comprobación falla, el contenedor queda operativo
-pero el scheduler de YouTube permanece apagado.
+en `America/Santiago`, una pieza por día. Si no hay cola, genera un único kit de manicuristas antes
+de renderizarlo. Si una comprobación falla, el contenedor queda operativo pero el scheduler de
+YouTube permanece apagado.
 
 Nunca ejecutes simultáneamente dos instancias con el mismo token de Telegram ni dos schedulers Meta
 o YouTube sobre el mismo CSV.

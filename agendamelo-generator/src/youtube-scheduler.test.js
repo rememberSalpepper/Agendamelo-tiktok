@@ -25,6 +25,7 @@ describe('programador de YouTube Shorts', () => {
     });
     assert.equal(renders, 0);
     assert.equal(publishes, 1);
+    assert.equal(result.generatedNow, false);
     assert.equal(result.renderedNow, false);
   });
 
@@ -42,13 +43,41 @@ describe('programador de YouTube Shorts', () => {
       publish: async () => ({ id: pending.id, videoId: 'yt-2', privacyStatus: 'private' }),
     });
     assert.deepEqual(renderedIds, [pending.id]);
+    assert.equal(result.generatedNow, false);
     assert.equal(result.renderedNow, true);
   });
 
-  test('no hace nada cuando no existe cola', async () => {
+  test('genera un kit cuando la cola está vacía, luego lo renderiza y publica', async () => {
+    let rows = [];
+    const calls = [];
+    const result = await runYoutubePublicationCycle({
+      config: { kitsCsv: 'kits.csv' },
+      generateNiche: 'manicuristas',
+      readRows: () => rows,
+      generate: async ({ niche }) => {
+        calls.push(`generate:${niche}`);
+        rows = [pending];
+      },
+      renderQueue: async ({ id }) => {
+        calls.push(`render:${id}`);
+        rows = [{ ...pending, youtube_status: 'renderizado', youtube_video_path: 'dist/short.mp4' }];
+        return [{ id }];
+      },
+      publish: async () => {
+        calls.push('publish');
+        return { id: pending.id, videoId: 'yt-3', privacyStatus: 'public' };
+      },
+    });
+    assert.deepEqual(calls, ['generate:manicuristas', 'render:SHORT-PENDING', 'publish']);
+    assert.equal(result.generatedNow, true);
+    assert.equal(result.renderedNow, true);
+  });
+
+  test('no hace nada sin cola cuando la generación automática está desactivada', async () => {
     let publishes = 0;
     const result = await runYoutubePublicationCycle({
       config: { kitsCsv: 'kits.csv' },
+      autoGenerate: false,
       readRows: () => [],
       publish: async () => { publishes++; return null; },
     });

@@ -41,6 +41,8 @@ if [ "$ENABLE_YOUTUBE" = true ]; then
   # El primer arranque siempre queda seguro aunque falle cualquier preflight posterior.
   set_env YOUTUBE_AUTO_PUBLISH false
   set_env YOUTUBE_AUTO_RENDER true
+  set_env YOUTUBE_AUTO_GENERATE true
+  set_env YOUTUBE_AUTO_GENERATE_NICHE manicuristas
   set_env YOUTUBE_PUBLISH_TIME 20:30
   set_env YOUTUBE_TIMEZONE America/Santiago
   set_env YOUTUBE_PRIVACY_STATUS public
@@ -66,6 +68,6 @@ if [ "$ENABLE_YOUTUBE" = true ]; then
   docker compose up -d --force-recreate --no-deps app
 fi
 
-curl --fail --silent --show-error --retry 15 --retry-connrefused --retry-delay 2 \
+curl --fail --silent --show-error --retry 15 --retry-all-errors --retry-delay 2 \
   http://127.0.0.1:3011/health >/dev/null
 docker compose ps
